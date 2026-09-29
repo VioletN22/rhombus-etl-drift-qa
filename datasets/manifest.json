@@ -1,0 +1,84 @@
+{
+  "seed": 20260929,
+  "rows_generated": 400,
+  "files": {
+    "baseline": {
+      "file": "baseline.csv",
+      "sha256": "f77c92ce8cc32195c150b055ab2dc3a27e1fea42793aebaae156b2b758a8a364",
+      "rows": 425,
+      "note": "Known-good input the pipeline is built against."
+    },
+    "schema-drop-column": {
+      "file": "schema-drop-column.csv",
+      "sha256": "293fe0fcf797edde8002ccee291d03df6891debee52a86b98181de11c68a86fd",
+      "rows": 425,
+      "note": "country column removed."
+    },
+    "schema-rename-column": {
+      "file": "schema-rename-column.csv",
+      "sha256": "17fccfcc6ff14e27ff79384d92bb4bac6265bab84bff55525c13b1f5ffd46668",
+      "rows": 425,
+      "note": "amount_usd renamed to total_amount; values identical."
+    },
+    "schema-type-change": {
+      "file": "schema-type-change.csv",
+      "sha256": "86a6ce6936670eacccefd13ed35d1d73aff894d08f38d019142ff60153f5b9b0",
+      "rows": 425,
+      "note": "quantity int -> text ('3 units')."
+    },
+    "schema-add-column": {
+      "file": "schema-add-column.csv",
+      "sha256": "dcc2d0239db4bc77df26e2ea0f48c315a27906ba1a98bd6bbe0373b78fd983cb",
+      "rows": 425,
+      "note": "New discount_code column appended."
+    },
+    "schema-all-combined": {
+      "file": "schema-all-combined.csv",
+      "sha256": "20faddeac36a6b5dbb90508f2bc6bc449d485ff8fcb9cc77c6a6c089bb44de56",
+      "rows": 425,
+      "note": "All four schema changes at once."
+    },
+    "semantic-dollars-to-cents": {
+      "file": "semantic-dollars-to-cents.csv",
+      "sha256": "99fa118d4f3d8ac676e64250cca1d294044a984b5e4dae933dc3b7947da3d684",
+      "rows": 425,
+      "note": "amount_usd values x100 (cents), header unchanged."
+    },
+    "semantic-date-mmdd-to-ddmm": {
+      "file": "semantic-date-mmdd-to-ddmm.csv",
+      "sha256": "0d5232f4778f554f9edc15a992b6fe1a6682f1e74f5499b4e5f2d94cea04e593",
+      "rows": 425,
+      "note": "Slash dates switched from MM/DD/YYYY to DD/MM/YYYY."
+    },
+    "semantic-country-code-swap": {
+      "file": "semantic-country-code-swap.csv",
+      "sha256": "25f67f0623a74e9eecfd17bee4db40da1b63506e926599693e9427acb7afb18e",
+      "rows": 425,
+      "note": "Bonus: Australia rows relabelled as Austria (AT)."
+    },
+    "edge-dotted-header": {
+      "file": "edge-dotted-header.csv",
+      "sha256": "226fdb3260c145d91638d326ee78a73fa14f0c94459c9db2950c3496ccb1df93",
+      "rows": 425,
+      "note": "Docs: Data Input converts '.' in headers to spaces."
+    },
+    "edge-header-only": {
+      "file": "edge-header-only.csv",
+      "sha256": "ae9e3195b04e3c61c140be017045b1e2b9dff362f19ae4ac7e98c74ed1a5d395",
+      "rows": 0,
+      "note": "Header row, zero data rows."
+    },
+    "edge-bom-utf8": {
+      "file": "edge-bom-utf8.csv",
+      "sha256": "b7225e62b7ae4835be1fec3c69717e039e1340cf52ead2366182f233a71cbdfd",
+      "rows": 425,
+      "note": "UTF-8 BOM prefix."
+    },
+    "edge-semicolon": {
+      "file": "edge-semicolon.csv",
+      "sha256": "bbea0ca83cdd88899742dcd109800a36b22d641f83b16e0913634e8e3e7f705b",
+      "rows": 425,
+      "note": "Delimiter switched to ';'."
+    }
+  }
+}

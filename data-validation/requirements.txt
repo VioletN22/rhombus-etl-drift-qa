@@ -1,0 +1,8 @@
+pandas>=2.2
+pyyaml>=6.0
+python-dotenv>=1.0
+pytest>=8.0
+rich>=13.0
+# Only needed for s3:// and gs:// URIs (imported lazily).
+boto3>=1.34
+google-cloud-storage>=2.16

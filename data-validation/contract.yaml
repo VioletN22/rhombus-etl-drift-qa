@@ -1,0 +1,51 @@
+# Data contract for the cleaned orders output.
+#
+# This file is the single source of truth for "what correct looks like".
+# The AI prompt in prompts/pipeline-prompt.md is written from these rules, the
+# reference cleaner implements them, and validate.py checks the Rhombus output
+# against them. Every drift case is judged against this same contract.
+
+dataset: orders
+key: order_id
+
+columns:
+  order_id:      { type: int,    required: true,  unique: true }
+  customer_name: { type: string, required: false, rule: trimmed_title_case }
+  email:         { type: string, required: false, rule: lowercase_valid_email_or_blank }
+  order_date:    { type: date,   required: false, format: "%Y-%m-%d" }
+  amount_usd:    { type: float,  required: true,  min: 0 }
+  quantity:      { type: int,    required: false, min: 1 }
+  country:       { type: string, required: false, allowed: [AU, NZ, US, GB] }
+  status:        { type: string, required: false, rule: lowercase,
+                   allowed: [shipped, pending, delivered, cancelled] }
+
+# Rules the pipeline is asked to apply (mirrors the prompt, in order).
+cleaning_rules:
+  - remove exact duplicate rows
+  - keep the first row per order_id
+  - drop rows with missing order_id or missing amount_usd
+  - trim whitespace and title-case customer_name
+  - lowercase email; blank out invalid emails
+  - parse order_date as MM/DD/YYYY (also accept ISO and "Mon D YYYY") into YYYY-MM-DD; impossible dates become blank
+  - strip "$" and "," from amount_usd and convert to a number
+  - standardise country to ISO-2 (AU, NZ, US, GB)
+  - lowercase status
+
+# Things the prompt deliberately does NOT ask for. The validator reports these
+# as warnings (data quality) rather than failures (rule not applied).
+warnings_only:
+  - amount_usd < 0          # refunds / bad sign are passed through by design
+  - quantity not a positive integer
+  - status outside the allowed set (planted typo "shipd")
+
+# Row reconciliation: input - exact dups - dup ids - missing key/amount = output.
+reconciliation:
+  tolerance_rows: 0
+
+# Semantic drift detectors compare against the baseline run's report.
+semantic:
+  amount_scale_ratio_alert: 20          # median ratio vs baseline above this => unit change
+  amount_max_plausible: 10000           # any order above this is suspicious
+  date_day_gt_12_share_alert: 0.30      # share of raw slash dates with first field > 12
+  month_distribution_tvd_alert: 0.25    # total variation distance vs baseline months
+  category_distribution_tvd_alert: 0.20 # country mix shift vs baseline

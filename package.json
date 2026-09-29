@@ -1,0 +1,28 @@
+{
+  "name": "rhombus-etl-drift-qa",
+  "version": "0.1.0",
+  "private": true,
+  "description": "UI + API test suites for the Rhombus AI ETL take-home (S3 -> AI cleaning -> GCS, scheduled).",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test:ui": "playwright test --project=ui",
+    "test:api": "playwright test --project=api",
+    "test:slow": "SLOW=1 playwright test --project=ui --grep @slow",
+    "lint:nosleep": "node scripts/check-no-sleep.mjs",
+    "typecheck": "tsc --noEmit",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.3",
+    "dotenv": "^18.0.4",
+    "typescript": "^7.0.2",
+    "zod": "^4.6.5"
+  },
+  "optionalDependencies": {
+    "@google-cloud/storage": "^8.2.0"
+  }
+}

@@ -1,0 +1,13 @@
+# secrets
+.env
+.auth/
+gcp-key*.json
+*.har
+# node / playwright
+node_modules/
+test-results/
+playwright-report/
+# python
+.venv/
+__pycache__/
+.pytest_cache/
