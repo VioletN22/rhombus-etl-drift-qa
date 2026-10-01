@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rhombus Drift QA</title>
+<meta name="description" content="Schema and semantic drift tests on a scheduled S3 to Rhombus AI to GCS pipeline: what the platform did, what the validator caught.">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 1l7 7-7 7-7-7z' fill='%2320a4b2'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="masthead">
+  <div class="wrap">
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l10 10-10 10L2 12z"/><path d="M12 7.5l4.5 4.5-4.5 4.5L7.5 12z"/></svg>
+      <h1>Rhombus Drift QA</h1>
+    </div>
+    <p class="lede">One scheduled S3 to Rhombus AI to GCS cleaning pipeline, fed four schema changes, three semantic changes and four malformed files, with every output checked by an independent validator.</p>
+    <p class="meta" id="meta">Loading data.json</p>
+  </div>
+</header>
+
+<div class="wrap">
+  <div id="banner" class="banner" hidden>
+    <strong>Demo data from offline practice runs, not Rhombus results.</strong>
+    The validator was pointed at its own reference output; Rhombus was not involved, and every platform column stays pending.
+  </div>
+
+  <nav class="toc" aria-label="Sections">
+    <a href="#capability">Capability</a>
+    <a href="#health">Pipeline health</a>
+    <a href="#timing">Time and credits</a>
+    <a href="#consistency">Output consistency</a>
+    <a href="#builder">AI builder</a>
+    <a href="#chatbot">Chatbot</a>
+    <a href="#runs">Run log</a>
+  </nav>
+
+  <main>
+    <section id="capability">
+      <div class="section-head">
+        <h2>What the platform did with each change</h2>
+        <p>One row per input file. The first column is the verdict on Rhombus; the rest are what I observed in the run history, the logs and the chatbot.</p>
+      </div>
+      <div id="legend" class="legend"></div>
+      <div id="heatmap" class="heatmap"></div>
+    </section>
+
+    <section id="health">
+      <div class="section-head">
+        <h2>Pipeline health by scenario</h2>
+        <p>A run counts as a success when the scheduled run wrote a new object to GCS. Whether that object was correct is the validator's job, shown above.</p>
+      </div>
+      <div id="health-chart" class="bars"></div>
+    </section>
+
+    <section id="timing">
+      <div class="section-head">
+        <h2>Execution time and credits</h2>
+        <p>Run duration from Rhombus run history, compared with the baseline run. Credits are read off the billing page after each case.</p>
+      </div>
+      <div id="timing-chart" class="bars"></div>
+    </section>
+
+    <section id="consistency">
+      <div class="section-head">
+        <h2>Output consistency</h2>
+        <p>Same input, same pipeline, three scheduled runs. Outputs are compared by canonical hash (rows sorted, values normalised), so row order and float formatting do not count as drift.</p>
+      </div>
+      <div id="consistency-body"></div>
+    </section>
+
+    <section id="builder">
+      <div class="section-head">
+        <h2>AI builder consistency</h2>
+        <p>The same <code>/pipeline</code> prompt sent three times in fresh projects. If the generated node lists differ, the pipeline under test depends on which attempt you got.</p>
+      </div>
+      <div id="builder-body"></div>
+    </section>
+
+    <section id="chatbot">
+      <div class="section-head">
+        <h2>Chatbot diagnosis</h2>
+        <p>After each failure or bad output I asked the in-app chatbot what went wrong, then applied its fix and re-ran.</p>
+      </div>
+      <div id="chatbot-body"></div>
+    </section>
+
+    <section id="runs">
+      <div class="section-head">
+        <h2>Run log</h2>
+        <p>Every upload from <code>observations/runs.csv</code> plus any validator report without a ledger line. Select a run to see its checks.</p>
+      </div>
+      <div id="runs-body"></div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p id="foot-sources"></p>
+    <p>Rebuild with <code>python scripts/build_dashboard.py</code>. Source on <a id="repo-link" href="#">GitHub</a>.</p>
+  </footer>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
