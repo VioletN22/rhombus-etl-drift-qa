@@ -1,0 +1,19 @@
+WEBVTT
+
+00:00.000 --> 00:07.000
+Case 4: the file gains a new column, discount_code. Everything else is the same. (Re-run recorded after the fact.)
+
+00:07.000 --> 00:15.000
+Step 1 done (uploaded). Step 2: run the same pipeline.
+
+00:15.000 --> 00:18.000
+"Pipeline completed successfully." This is the one case Rhombus handles well.
+
+00:18.000 --> 00:22.000
+The 8 known columns come out exactly as before.
+
+00:22.000 --> 00:25.000
+But the table ends at status. discount_code was quietly dropped, and nothing tells you.
+
+00:25.000 --> 00:28.000
+Step 3: the new file is in Google Cloud Storage. Fine, unless the business needed that column.
