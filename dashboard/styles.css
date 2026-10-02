@@ -637,3 +637,11 @@ section[id], .block[id], details.metrics, .report { scroll-margin-top: 56px; }
   .replay-open .replay { position: sticky; top: 64px; }
 }
 @media (prefers-reduced-motion: reduce) { .glance-row.has-replay { transition: none; } }
+
+/* Result outline on the "What happened" card */
+.tone { --tone: var(--line); box-shadow: inset 0 0 0 2px var(--tone); }
+.tone-ok { --tone: var(--ok); }
+.tone-warn { --tone: var(--warn); }
+.tone-bad { --tone: var(--bad); }
+.pair .half.tone { border-radius: 0 var(--radius) var(--radius) 0; }
+@media (max-width: 800px) { .pair .half.tone { border-radius: 0 0 var(--radius) var(--radius); } }

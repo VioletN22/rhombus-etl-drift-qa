@@ -671,6 +671,9 @@ function renderSections(c, sections) {
     return;
   }
   const cards = sections.map((s, i) => sectionCard(s, c, i));
+  // Outline "What happened" by result: green handled, amber safe stop or warning, red silent bad data.
+  const tone = { handled: "tone-ok", warned: "tone-warn", broke: "tone-warn", missed: "tone-bad" }[c.capability];
+  if (tone) cards.filter((x) => x.kind === "happened").forEach((x) => x.card.classList.add("tone", tone));
   for (let i = 0; i < cards.length; i += 1) {
     const a = cards[i];
     const b = cards[i + 1];
