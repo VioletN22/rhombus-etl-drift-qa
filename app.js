@@ -79,7 +79,7 @@ function renderMeta(d) {
     timeZone: TZ, day: "numeric", month: "short", year: "numeric", hour: "2-digit",
     minute: "2-digit", hour12: false, timeZoneName: "short",
   });
-  $("#meta").textContent = `${done} of ${d.cases.length} cases observed, ` +
+  if ($("#meta")) $("#meta").textContent = `${done} of ${d.cases.length} cases observed, ` +
     `${d.sources.report_count} validator report${d.sources.report_count === 1 ? "" : "s"}. ` +
     `Built ${built}.`;
   $("#banner").hidden = !d.demo;
@@ -421,8 +421,7 @@ function renderTabs(d, current) {
   }).join("");
   $("#tabs").innerHTML = `<div class="wrap"><div class="tab-row">
     <a class="tab" href="./"${cur("overview")}>Overview</a><span class="tab-sep" aria-hidden="true"></span>
-    ${caseTabs}<span class="tab-sep" aria-hidden="true"></span>
-    <a class="tab" href="./#metrics" data-metrics${cur("metrics")}>Metrics</a></div></div>`;
+    ${caseTabs}</div></div>`;
   showActiveTab();
 }
 
@@ -437,9 +436,8 @@ function showActiveTab() {
 }
 
 function setHomeTab() {
-  const metrics = location.hash === "#metrics" || ($("#metrics")?.contains(document.getElementById(location.hash.slice(1))) ?? false);
   document.querySelectorAll("#tabs .tab").forEach((a) => a.removeAttribute("aria-current"));
-  const a = metrics ? $("#tabs [data-metrics]") : $('#tabs a[href="./"]');
+  const a = $('#tabs a[href="./"]');
   a?.setAttribute("aria-current", "page");
   showActiveTab();
 }
@@ -837,7 +835,7 @@ async function main() {
     }
   } catch (err) {
     const msg = `Could not load data.json (${err.message}). Run python scripts/build_dashboard.py, then serve this folder over HTTP.`;
-    const el = $("#meta") || $("#case-title");
+    const el = $("#meta") || $("#verdict") || $("#case-title");
     if (el) el.textContent = msg;
     return;
   }
@@ -863,11 +861,6 @@ async function main() {
   $("#metrics").addEventListener("toggle", () => {
     if (!$("#metrics").open && location.hash) history.replaceState(null, "", location.pathname);
     setHomeTab();
-  });
-  $("#tabs [data-metrics]").addEventListener("click", (e) => {
-    if (location.hash !== "#metrics") return;
-    e.preventDefault(); // same hash: no hashchange, so open and jump by hand
-    openMetricsForHash();
   });
 }
 
