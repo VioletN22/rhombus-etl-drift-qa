@@ -1,0 +1,16 @@
+WEBVTT
+
+00:00.000 --> 00:04.000
+Case 6: same columns, but every amount is now in cents. 30.83 became 3083. (Re-run recorded after the fact.)
+
+00:04.000 --> 00:12.000
+Step 2: run the same pipeline. Nothing about the file's shape has changed.
+
+00:12.000 --> 00:16.000
+"Pipeline completed successfully." No warning at all.
+
+00:16.000 --> 00:23.000
+The cleaned amounts: 3083, 3239, 7325... every order is now 100 times too big. Total revenue went from about $41k to $4.1M.
+
+00:23.000 --> 00:27.000
+And it's delivered to Google Cloud Storage as a success. My validator caught it by comparing with the last good run.
