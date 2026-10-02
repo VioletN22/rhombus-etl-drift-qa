@@ -9,3 +9,4 @@ uploaded_at_aest,case,s3_version_id,size,run_started_aest,gcs_object,report,note
 2026-10-02T16:55:04,schema-all-combined,FwxOAybxjU7_Vb.sebyVXKw9SVr_0SBx,33.9 KB,16:54 (after 4 chatbot requests),orders_cleaned_1790924103326,all-combined-after-fix.json,green; country blank all rows; 10 columns
 2026-10-02T17:11:44,semantic-dollars-to-cents,rtOoGcJTbJXsCbBFcP7Hpa87D.4BJqaZ,31.7 KB,~17:11,orders_cleaned_1790925115589,,
 2026-10-02T17:15:09,semantic-date-mmdd-to-ddmm,NvqcIZ1m61AbLCY3ECiCp38IBDHz0bX2,32.2 KB,17:15:13,orders_cleaned_1790925315937,,
+2026-10-02T17:25:23,baseline (restore),SAIDP4mFrQunc8n0v3XafyUPGx4s_iOC,32.1 KB,not run,,,clean state after all cases
