@@ -1,0 +1,22 @@
+WEBVTT
+
+00:00.000 --> 00:04.000
+Case 3: quantity changes from a number to text, like "6 units". (Re-run recorded after the fact.)
+
+00:04.000 --> 00:09.000
+Step 1: upload the case 3 file to S3 as input/orders.csv.
+
+00:09.000 --> 00:16.000
+Step 2: run the same pipeline. (The red boxes are left over from the last case.)
+
+00:16.000 --> 00:22.000
+"Pipeline completed successfully." No error, no warning, so there's no Ask Chatbot button either.
+
+00:22.000 --> 00:27.000
+But look at the cleaned data: the quantity column is tagged Categorical (text), not Numeric.
+
+00:27.000 --> 00:32.000
+And the values still say "6 units", "3 units". Any total or average of quantity would break downstream.
+
+00:32.000 --> 00:39.000
+Step 3: Google Cloud Storage. The new file is there, delivered as a success with text in a number column.

@@ -165,7 +165,7 @@
   "2026-10-02_type-change-run-green.png",
   "s3-bucket-policy-generated-by-rhombus.json"
  ],
- "built_at": "2026-10-02T12:28:37+00:00",
+ "built_at": "2026-10-02T12:33:22+00:00",
  "sources": {
   "reports": "data-validation/reports",
   "ledger": "observations/runs.csv",
@@ -1241,7 +1241,10 @@
      "ext": "png"
     }
    ],
-   "video": null,
+   "video": {
+    "src": "videos/schema-type-change.mp4",
+    "captions": "videos/schema-type-change.vtt"
+   },
    "page_reports": [
     {
      "run": "type-change",
