@@ -789,19 +789,22 @@ function renderCase(d) {
   ALL_EVIDENCE = new Set(d.evidence_files || []);
   const title = caseTitle(c);
   document.title = `${c.case} · Rhombus Drift QA`;
-  $("#crumb-case").textContent = c.case;
-  $("#case-title").textContent = title;
-  $("#case-slug").textContent = title === c.case ? "" : c.case;
-  $("#case-change").innerHTML = `<span class="k">What changed</span> ${esc(c.change)}`;
+  // "Schema drift: drop a column" -> small kicker + short title.
+  const cut = title.indexOf(": ");
+  $("#case-kicker").textContent = cut > 0 ? title.slice(0, cut) : "";
+  $("#case-title").textContent = cut > 0 ? title.slice(cut + 2).replace(/^./, (ch) => ch.toUpperCase()) : title;
+  $("#case-change").textContent = c.change || "";
   renderPager(d, c);
   if (c.status !== "done") {
-    $("#case-chips").innerHTML = chip("s-none", "Not run yet", "big");
+    $("#case-chips").innerHTML = chip("s-none", "Not run yet");
+    $("#case-headline").textContent = "Not run against Rhombus yet.";
     $("#case-missing").hidden = false;
     $("#case-missing").innerHTML = `<strong>Not run yet.</strong> This case has not been run against Rhombus yet. Its write-up will appear here once <code>${esc(c.observation)}</code> exists and the case is marked <code>done</code> in <code>observations/matrix.yaml</code>.`;
     return;
   }
-  $("#case-chips").innerHTML = statusChip(c, "big") + sevChip(c.matrix.severity);
+  $("#case-chips").innerHTML = statusChip(c) + sevChip(c.matrix.severity);
   $("#case-headline").textContent = c.headline || "";
+  $("#case-outcome").classList.add((CAPABILITY[c.capability] || CAPABILITY.pending)[0]);
   $("#case-body").hidden = false;
   const obs = c.observation_md ? splitObservation(c.observation_md) : { facts: [], sections: [] };
   renderFacts(c, obs.facts);

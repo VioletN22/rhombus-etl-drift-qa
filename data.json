@@ -165,7 +165,7 @@
   "2026-10-02_type-change-run-green.png",
   "s3-bucket-policy-generated-by-rhombus.json"
  ],
- "built_at": "2026-10-02T11:52:33+00:00",
+ "built_at": "2026-10-02T11:54:03+00:00",
  "sources": {
   "reports": "data-validation/reports",
   "ledger": "observations/runs.csv",
@@ -1971,7 +1971,7 @@
     "rhombus_status": "Success",
     "platform_behaviour": "carried_on",
     "gcs_output": "yes",
-    "logs_clear": "no",
+    "logs_clear": "misleading",
     "chatbot_diagnosis": "na",
     "chatbot_fix_worked": "na",
     "schedule_after": "Not testable (scheduling not running)",
@@ -2184,7 +2184,7 @@
     "rhombus_status": "Success",
     "platform_behaviour": "carried_on",
     "gcs_output": "yes",
-    "logs_clear": "no",
+    "logs_clear": "misleading",
     "chatbot_diagnosis": "na",
     "chatbot_fix_worked": "na",
     "schedule_after": "Not testable (scheduling not running)",
