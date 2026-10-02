@@ -779,6 +779,16 @@ function renderReplay(c) {
     v.appendChild(t);
   }
   $("#replay").hidden = false;
+  const row = $("#glance-row");
+  row.classList.add("has-replay");
+  const set = (open) => {
+    row.classList.toggle("replay-open", open);
+    $("#replay-toggle").setAttribute("aria-expanded", String(open));
+    if (open) v.play().catch(() => {});
+    else v.pause();
+  };
+  $("#replay-toggle").addEventListener("click", () => set(true));
+  $("#replay-close").addEventListener("click", () => set(false));
 }
 
 function renderCase(d) {
