@@ -8,7 +8,7 @@
 | Run | Manual run (▶) 16:37:40 AEST |
 | Severity | **Critical** after the chatbot fix (first left unrunnable, then shipped a blank country column and 2 junk columns, all green). Before the fix: Medium (stopped safely; 1 of 4 problems reported; contradictory logs) |
 | Pipeline stopped? | **Yes**, at `orders_cleaned` |
-| Chatbot fix worked? | **No.** First it left the pipeline unrunnable; a 4th chatbot request rewired it, and the run went green with `country` blank on all 390 rows |
+| Chatbot fix worked? | **No.** First it left the pipeline unrunnable; a second chatbot request rewired it, and the run went green with `country` blank on all 390 rows |
 
 ## What I changed
 All four schema changes in one file: `country` removed, `amount_usd` renamed to `total_amount`, `quantity` values turned into text ("6 units"), and a new `discount_code` column. Marker row: "Marker schema-all-combined".
@@ -37,7 +37,7 @@ Clear? **Partially / misleading**: one of four problems reported, and a success 
 - Re-run attempt: **▶ refuses to run.** Toasts: "output_64e957de… : missing upstream dataframe input". The canvas now has `dedup_order_id → llm_node_2` but **no edge from `llm_node_2` to Data Output**; the old node's outgoing connection was lost when it was deleted.
 - **Fix worked? No. It broke the pipeline**, from a hallucinated cause, while telling the user it was fixed. Screenshot: `evidence/2026-10-02_all-combined-after-chatbot-cannot-run.png`.
 
-### 4th chatbot request: repair its own break
+### 2nd chatbot request in this case: repair its own break
 - Prompt (typed, 16:53): "The pipeline won't run now. I get "missing upstream dataframe input" on the Data Output node."
 - Reply (6s, 5 credits): correctly saw "the output node is still wired to the deleted llm_node_1" and reconnected it. Diagnosis of **its own** break: **correct**.
 - Re-run 16:54:12 → **"Pipeline completed successfully"** 16:55:04. New GCS object `orders_cleaned_1790924103326.csv` (33.3 KB, 390 rows). Saved as `runs/2026-10-02-drift/all-combined-after-chatbot-fix.csv`. Screenshots: `evidence/2026-10-02_all-combined-chatbot-rewire-fix.png`, `evidence/2026-10-02_all-combined-chatbot-fix-run-green.png`.
@@ -60,8 +60,8 @@ Clear? **Partially / misleading**: one of four problems reported, and a success 
 - Here: the chatbot deleted the node and re-added it with **instructions only** (its words: "the patch is only persisting mode and prompt"), so the writer had to generate fresh code while the case-5 file was loaded.
 - Limitation: in cases 1-2 the chatbot's patches may also have triggered a rewrite. I didn't open the Transcript then and those versions are overwritten, so this is unverified.
 
-### Score across 4 chatbot requests in this case
-3 wrong diagnoses ("cached code" x2 plus a fix built on it), 1 correct (rewiring its own break). Net result: from **safe stop** to **green run with silently wrong data**. 20 credits.
+### Score for the chatbot in this case
+2 requests: 1 wrong diagnosis (the "cached code" theory again, which led it to delete and re-add the step), 1 correct (rewiring its own break). Net result: from **safe stop** to **green run with silently wrong data**. 10 credits (5 per request). Across all cases: 4 chatbot requests, 3 wrong diagnoses.
 
 ## Reproduce
 1. Upload `datasets/schema-all-combined.csv` as `input/orders.csv`

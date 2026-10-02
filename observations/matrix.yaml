@@ -145,9 +145,9 @@ cases:
   schedule_after: Not testable (scheduling not running)
   severity: Critical
   execution_seconds: 5
-  credits_used: 20
+  credits_used: 10
   observation: observations/schema-all-combined.md
-  headline: Stopped naming 1 of 4 problems; four chatbot requests later the pipeline ran green with a
+  headline: Stopped naming 1 of 4 problems; two chatbot requests later the pipeline ran green with a
     blank country column.
   capability: broke
 - case: semantic-dollars-to-cents
@@ -324,8 +324,8 @@ summary:
   - schema-all-combined
   - semantic-dollars-to-cents
   - semantic-date-mmdd-to-ddmm
-  credits_used: 25
-  credits_note: of 5,050. 15 on two extra AI builds, 10 on two chatbot fixes; runs cost nothing visible.
+  credits_used: 35
+  credits_note: of 5,050. 15 on two extra AI builds, 20 on four chatbot requests (5 each); runs cost nothing visible.
   learnings:
   - title: Rhombus stops on missing columns, but the error only says 'country'
     line: Nothing bad reached GCS, but the error is a raw one-word KeyError.
