@@ -70,7 +70,7 @@
    "semantic-dollars-to-cents",
    "semantic-date-mmdd-to-ddmm"
   ],
-  "required_done": 3,
+  "required_done": 4,
   "critical": 2,
   "determinism": {
    "identical": 3,
@@ -125,7 +125,7 @@
   "2026-10-02_type-change-run-green.png",
   "s3-bucket-policy-generated-by-rhombus.json"
  ],
- "built_at": "2026-10-02T06:20:06+00:00",
+ "built_at": "2026-10-02T06:20:57+00:00",
  "sources": {
   "reports": "data-validation/reports",
   "ledger": "observations/runs.csv",
@@ -1322,8 +1322,8 @@
    "file": "schema-add-column.csv",
    "rows": 425,
    "change": "New discount_code column appended.",
-   "status": "pending",
-   "headline": "",
+   "status": "done",
+   "headline": "Handled: the 8 known columns came out unchanged; the new column was dropped without any notice.",
    "observation": "observations/schema-add-column.md",
    "observation_md": "# Schema drift: add a column (`discount_code`)\n\n| | |\n|---|---|\n| Case file | `datasets/schema-add-column.csv` (uploaded as `input/orders.csv`) |\n| S3 version | `CFDR3eDky80pHiylkxeAAUcSR_MPhZsm`, uploaded 2026-10-02 16:11:26 AEST, 34.2 KB |\n| Pipeline | Original AI-built code |\n| Run | Manual run (\u25b6) ~16:13 AEST |\n| Severity | Low (handled; the new column is dropped without notice) |\n| Pipeline stopped? | **No.** Green, output written |\n| Chatbot fix worked? | Not applicable (no error) |\n\n## What I changed\nAppended a 9th column, `discount_code` (SPRING10 / VIP / FREESHIP / blank). All 8 original columns and every row are unchanged. Marker row: \"Marker schema-add-column\".\n\n## Expected\nBest: carry on, clean the 8 known columns exactly as before, and either pass the new column through or tell the user it was ignored. Worst: crash on an unexpected column, or let the new column disturb the existing rules.\n\n## What happened\n- Run **green**; GCS received `orders_cleaned_1790921587660.csv` (29.9 KB, 390 rows).\n- Output is **identical to the baseline output** on every row except the marker row's name (byte-for-byte comparison). The new column had no side effects on the 8 known columns.\n- `discount_code` is **not in the output**: the AI-built step ends with \"return only these 8 columns\", so the new column is dropped. No warning, no log line saying a column was ignored.\n- Validator: same 3 known baseline bugs; `input_schema` warns \"extra ['discount_code']\". (The `determinism` fail is expected here: the marker row differs by design, so this input isn't the same as the baseline's.)\n\n## Logs\nNothing about the new column. Screenshot: `evidence/2026-10-02_add-column-run-green.png`.\n\n## Chatbot diagnosis\nNot applicable; there was no error.\n\n## Reproduce\n1. Upload `datasets/schema-add-column.csv` as `input/orders.csv`\n2. Run drift-qa with the original code\n3. Compare the GCS output with the baseline output (only the marker row differs; no `discount_code`)\n\n## Impact and suggestion\nThis is the behaviour most customers would want from a fixed-output pipeline, so I rate it handled. The gap is visibility: if a supplier starts sending a field the business needs, nobody is told it's being discarded. Suggest a one-line info log, \"Input has 1 new column (`discount_code`) not used by this pipeline\".\n",
    "extra_md": [],
@@ -1450,21 +1450,21 @@
      ],
      "output_rows": 390,
      "input_rows": 425,
-     "listed": false
+     "listed": true
     }
    ],
    "matrix": {
-    "run_ids": [],
-    "rhombus_status": null,
-    "platform_behaviour": null,
-    "gcs_output": null,
-    "logs_clear": null,
-    "chatbot_diagnosis": null,
-    "chatbot_fix_worked": null,
-    "schedule_after": "",
-    "severity": null,
+    "run_ids": "add-column",
+    "rhombus_status": "Success",
+    "platform_behaviour": "carried_on",
+    "gcs_output": "yes",
+    "logs_clear": "partial",
+    "chatbot_diagnosis": "na",
+    "chatbot_fix_worked": "na",
+    "schedule_after": "Not testable (scheduling not running)",
+    "severity": "Low",
     "execution_seconds": null,
-    "credits_used": null
+    "credits_used": 0
    },
    "runs_total": 1,
    "runs_with_output": 1,
@@ -1484,7 +1484,7 @@
      "determinism"
     ]
    },
-   "capability": "pending"
+   "capability": "handled"
   },
   {
    "case": "schema-all-combined",
