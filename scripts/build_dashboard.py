@@ -18,6 +18,7 @@ on the dashboard traces back to one of the files above.
 from __future__ import annotations
 
 import argparse
+import base64
 import csv
 import json
 import re
@@ -452,11 +453,12 @@ def _slug(text: str) -> str:
 def playwright_tests() -> dict[str, list[dict]]:
     """Latest Playwright results per project. Videos and screenshots are copied into
     reports/evidence so they survive test-results/ being cleared between runs."""
-    if not PW_JSON.exists():
+    files = sorted(PW_JSON.parent.glob("playwright*.json"))
+    if not files:
         return {}
-    report = json.loads(PW_JSON.read_text())
     SUITE_EVIDENCE.mkdir(parents=True, exist_ok=True)
     out: dict[str, list[dict]] = {}
+    newest: dict[str, str] = {}
 
     def walk(suite: dict, file: str) -> None:
         file = suite.get("file") or file
@@ -480,13 +482,25 @@ def playwright_tests() -> dict[str, list[dict]]:
                         shutil.copy2(a["path"], target)
                     if target.exists():
                         item[kind] = f"evidence/suites/{target.name}"
-                out.setdefault(t["projectName"], []).append(item)
+                item["responses"] = [
+                    {"label": a["name"][len("api: "):], "body": base64.b64decode(a["body"]).decode()}
+                    for a in r.get("attachments", []) if a["name"].startswith("api: ") and a.get("body")]
+                found.setdefault(t["projectName"], []).append(item)
         for child in suite.get("suites", []):
             walk(child, file)
 
-    for suite in report["suites"]:
-        walk(suite, suite.get("file", ""))
-    out["_meta"] = [{"run_at": report["stats"]["startTime"], "duration_ms": report["stats"]["duration"]}]
+    # Each suite can run on its own and write its own file; use the newest result per suite.
+    for path in files:
+        report = json.loads(path.read_text())
+        found: dict[str, list[dict]] = {}
+        for suite in report["suites"]:
+            walk(suite, suite.get("file", ""))
+        started = report["stats"]["startTime"]
+        for project, tests in found.items():
+            if started >= newest.get(project, ""):
+                newest[project] = started
+                out[project] = tests
+    out["_meta"] = [newest]
     return out
 
 
@@ -508,14 +522,14 @@ def build_suites() -> list[dict]:
     if not SUITES_DOC.exists():
         return []
     pw = playwright_tests()
-    meta = (pw.get("_meta") or [{}])[0]
+    started = (pw.get("_meta") or [{}])[0]
     out = []
     for doc in yaml.safe_load(SUITES_DOC.read_text()):
         explain = doc.get("tests") or {}
         if doc["id"] == "data":
             tests, run_at = pytest_tests(), (datetime.fromtimestamp(PYTEST_XML.stat().st_mtime, timezone.utc).isoformat(timespec="seconds") if PYTEST_XML.exists() else None)
         else:
-            tests, run_at = pw.get(doc["id"], []), meta.get("run_at")
+            tests, run_at = pw.get(doc["id"], []), started.get(doc["id"])
         for t in tests:
             t["explain"] = explain.get(t["title"], "")
         counts = {k: sum(t["status"] == k for t in tests) for k in ("pass", "expected-fail", "fail", "skip")}

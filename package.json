@@ -10,8 +10,8 @@
   "scripts": {
     "login": "playwright test --project=setup",
     "test": "playwright test",
-    "test:ui": "playwright test --project=ui",
-    "test:api": "playwright test --project=api",
+    "test:ui": "PW_JSON=reports/playwright-ui.json playwright test --project=ui",
+    "test:api": "PW_JSON=reports/playwright-api.json playwright test --project=api",
     "test:data": "cd data-validation && ../.venv/bin/python -m pytest -q --junitxml=../reports/pytest.xml",
     "lint:nosleep": "node scripts/check-no-sleep.mjs",
     "typecheck": "tsc --noEmit",

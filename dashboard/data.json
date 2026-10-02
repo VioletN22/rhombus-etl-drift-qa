@@ -128,60 +128,66 @@
      "title": "S3 source is connected to the input bucket",
      "file": "ui-tests/tests/pipeline-journey.spec.ts",
      "status": "pass",
-     "duration_ms": 4302,
+     "duration_ms": 7539,
      "video": "evidence/suites/ui-s3-source-is-connected-to-the-input-bucket.webm",
      "screenshot": "evidence/suites/ui-s3-source-is-connected-to-the-input-bucket.png",
      "error": null,
+     "responses": [],
      "explain": "Opens the Data Input's connections and checks the S3 connection is Connected and points at s3://violet-rhombus-drift-in/input/."
     },
     {
      "title": "AI-built graph runs from one input to one output through 3+ steps",
      "file": "ui-tests/tests/pipeline-journey.spec.ts",
      "status": "pass",
-     "duration_ms": 3089,
+     "duration_ms": 3220,
      "video": "evidence/suites/ui-ai-built-graph-runs-from-one-input-to-one-output-through-3-s.webm",
      "screenshot": "evidence/suites/ui-ai-built-graph-runs-from-one-input-to-one-output-through-3-s.png",
      "error": null,
+     "responses": [],
      "explain": "Reads every node and edge on the canvas and checks there is one input, one output, at least 3 cleaning steps, and that every node sits on the path from input to output. This is the check that would have caught the chatbot unwiring the output in case 5."
     },
     {
      "title": "Data Output writes CSV to the GCS bucket",
      "file": "ui-tests/tests/pipeline-journey.spec.ts",
      "status": "pass",
-     "duration_ms": 4331,
+     "duration_ms": 5332,
      "video": "evidence/suites/ui-data-output-writes-csv-to-the-gcs-bucket.webm",
      "screenshot": "evidence/suites/ui-data-output-writes-csv-to-the-gcs-bucket.png",
      "error": null,
+     "responses": [],
      "explain": "Opens the Data Output node and checks the GCS bucket is the selected destination and the export format is CSV."
     },
     {
      "title": "a manual run of the baseline file succeeds and is logged",
      "file": "ui-tests/tests/pipeline-journey.spec.ts",
      "status": "pass",
-     "duration_ms": 16044,
+     "duration_ms": 14430,
      "video": "evidence/suites/ui-a-manual-run-of-the-baseline-file-succeeds-and-is-logged.webm",
      "screenshot": "evidence/suites/ui-a-manual-run-of-the-baseline-file-succeeds-and-is-logged.png",
      "error": null,
+     "responses": [],
      "explain": "Clicks Run, waits for \"Pipeline completed successfully\", and checks the logs gained exactly one new run."
     },
     {
      "title": "a schedule exists and is switched on",
      "file": "ui-tests/tests/pipeline-journey.spec.ts",
      "status": "pass",
-     "duration_ms": 3335,
+     "duration_ms": 4932,
      "video": "evidence/suites/ui-a-schedule-exists-and-is-switched-on.webm",
      "screenshot": "evidence/suites/ui-a-schedule-exists-and-is-switched-on.png",
      "error": null,
+     "responses": [],
      "explain": "Opens the Schedule tab and checks a schedule exists, says Active and has its switch on."
     },
     {
      "title": "the active schedule shows when it will run next",
      "file": "ui-tests/tests/pipeline-journey.spec.ts",
      "status": "expected-fail",
-     "duration_ms": 3303,
+     "duration_ms": 3340,
      "video": "evidence/suites/ui-the-active-schedule-shows-when-it-will-run-next.webm",
      "screenshot": "evidence/suites/ui-the-active-schedule-shows-when-it-will-run-next.png",
      "error": "Error: expect(received).toMatch(expected)",
+     "responses": [],
      "explain": "Checks \"Next run\" shows a time. Expected to fail while the scheduling bug exists."
     }
    ],
@@ -192,7 +198,7 @@
     "skip": 0
    },
    "total": 6,
-   "run_at": "2026-10-02T13:25:47.347Z",
+   "run_at": "2026-10-02T13:38:38.304Z",
    "ok": true
   },
   {
@@ -218,110 +224,134 @@
      "title": "no token: /api/dataset/projects/all returns 401",
      "file": "api-tests/tests/auth.negative.spec.ts",
      "status": "pass",
-     "duration_ms": 58,
+     "duration_ms": 2939,
      "video": null,
      "screenshot": null,
      "error": null,
+     "responses": [],
      "explain": "Without a token, the project list is refused with 401 and only says Unauthorized."
     },
     {
      "title": "no token: /api/dataset/analyzer/v2/pipeline/executions/all returns 401",
      "file": "api-tests/tests/auth.negative.spec.ts",
      "status": "pass",
-     "duration_ms": 30,
+     "duration_ms": 36,
      "video": null,
      "screenshot": null,
      "error": null,
+     "responses": [],
      "explain": "Without a token, the run history is refused with 401."
     },
     {
      "title": "no token: /api/dataset/analyzer/v2/pipeline/schedules/all returns 401",
      "file": "api-tests/tests/auth.negative.spec.ts",
      "status": "pass",
-     "duration_ms": 32,
+     "duration_ms": 40,
      "video": null,
      "screenshot": null,
      "error": null,
+     "responses": [],
      "explain": "Without a token, the schedules are refused with 401."
     },
     {
      "title": "a made-up token is rejected",
      "file": "api-tests/tests/auth.negative.spec.ts",
      "status": "pass",
-     "duration_ms": 32,
+     "duration_ms": 51,
      "video": null,
      "screenshot": null,
      "error": null,
+     "responses": [],
      "explain": "A fake bearer token gets 401, not data."
     },
     {
      "title": "no token: project nodes return 401, not the pipeline",
      "file": "api-tests/tests/auth.negative.spec.ts",
      "status": "pass",
-     "duration_ms": 200,
+     "duration_ms": 420,
      "video": null,
      "screenshot": null,
      "error": null,
+     "responses": [],
      "explain": "Without a token, the pipeline graph is refused and the response contains no node data."
     },
     {
      "title": "signed in: a project id that does not exist returns 404",
      "file": "api-tests/tests/auth.negative.spec.ts",
      "status": "pass",
-     "duration_ms": 133,
+     "duration_ms": 151,
      "video": null,
      "screenshot": null,
      "error": null,
+     "responses": [],
      "explain": "Signed in, asking for a project that doesn't exist returns 404 Not Found."
     },
     {
      "title": "project list includes the test project",
      "file": "api-tests/tests/pipeline.spec.ts",
      "status": "pass",
-     "duration_ms": 181,
+     "duration_ms": 164,
      "video": null,
      "screenshot": null,
      "error": null,
+     "responses": [],
      "explain": "The project list returns 200, matches the schema, and includes drift-qa."
     },
     {
      "title": "pipeline nodes form one path from input to output",
      "file": "api-tests/tests/pipeline.spec.ts",
      "status": "pass",
-     "duration_ms": 298,
+     "duration_ms": 306,
      "video": null,
      "screenshot": null,
      "error": null,
+     "responses": [],
      "explain": "The same graph check as the UI test, done on the API data, so the two can be compared."
     },
     {
      "title": "every failed run records the failing node and an error",
      "file": "api-tests/tests/pipeline.spec.ts",
      "status": "pass",
-     "duration_ms": 354,
+     "duration_ms": 288,
      "video": null,
      "screenshot": null,
      "error": null,
+     "responses": [],
      "explain": "Every failed run in the history names the node that failed and has an error message."
     },
     {
      "title": "the project has an enabled schedule with a cron expression",
      "file": "api-tests/tests/schedule.spec.ts",
      "status": "pass",
-     "duration_ms": 279,
+     "duration_ms": 270,
      "video": null,
      "screenshot": null,
      "error": null,
+     "responses": [],
      "explain": "The project has exactly one schedule, it's enabled, and its cron expression is valid."
     },
     {
      "title": "scheduled runs actually happen",
      "file": "api-tests/tests/schedule.spec.ts",
      "status": "expected-fail",
-     "duration_ms": 538,
+     "duration_ms": 1230,
      "video": null,
      "screenshot": null,
      "error": "Error: next_run_at is in the future",
+     "responses": [
+      {
+       "label": "GET /pipeline/schedules/all (this project)",
+       "body": "{\n  \"project_id\": 4167,\n  \"cron_expression\": \"20 * * * *\",\n  \"enabled\": true,\n  \"next_run_at\": \"2026-10-02T11:20:00Z\",\n  \"last_run_at\": null,\n  \"skipped_runs_count\": 0\n}"
+      },
+      {
+       "label": "GET /pipeline/executions/all (latest page, runs by trigger)",
+       "body": "{\n  \"total_runs\": 34,\n  \"latest_page\": {\n    \"manual\": 20\n  }\n}"
+      },
+      {
+       "label": "GET /accounts/users/schedule-limit",
+       "body": "{\n  \"limit\": null,\n  \"current_count\": 1\n}"
+      }
+     ],
      "explain": "Checks next_run_at is in the future, last_run_at is set, and at least one run wasn't started by hand. Expected to fail while the scheduling bug exists."
     }
    ],
@@ -332,7 +362,7 @@
     "skip": 0
    },
    "total": 11,
-   "run_at": "2026-10-02T13:25:47.347Z",
+   "run_at": "2026-10-02T13:38:38.304Z",
    "ok": true
   },
   {
@@ -952,7 +982,7 @@
   "2026-10-02_type-change-run-green.png",
   "s3-bucket-policy-generated-by-rhombus.json"
  ],
- "built_at": "2026-10-02T13:34:59+00:00",
+ "built_at": "2026-10-02T13:39:30+00:00",
  "sources": {
   "reports": "data-validation/reports",
   "ledger": "observations/runs.csv",

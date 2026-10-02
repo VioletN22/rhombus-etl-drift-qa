@@ -431,7 +431,19 @@ function renderSuitePage(d) {
   $("#suite-how").innerHTML = (t.how || []).map((h) => `<li>${mdInline(h)}</li>`).join("");
   $("#suite-limits").innerHTML = (t.limits || []).map((h) => `<li>${mdInline(h)}</li>`).join("");
   renderSuiteVideos(t);
+  renderResponses(t);
   $("#suite-body").hidden = false;
+}
+
+function renderResponses(t) {
+  const withBodies = t.tests.filter((x) => x.responses?.length);
+  if (!withBodies.length) return;
+  $("#suite-responses").innerHTML = withBodies.map((x) => `<div class="resp-test">
+      <h3>${esc(x.title)} ${chip(...TEST_STATUS[x.status])}</h3>
+      ${x.explain ? `<p class="card-sub">${esc(x.explain)}</p>` : ""}
+      ${x.responses.map((r) => `<figure class="resp"><figcaption><code>${esc(r.label)}</code></figcaption>
+        <pre><code>${esc(r.body)}</code></pre></figure>`).join("")}</div>`).join("");
+  $("#suite-responses-card").hidden = false;
 }
 
 function dataTests(t) {

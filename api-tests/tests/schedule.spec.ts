@@ -5,6 +5,7 @@
  */
 import { test, expect } from '../fixtures';
 import { Executions, Schedules } from '../schemas';
+import { attachJson } from '../evidence';
 
 test.describe('schedule', () => {
   test('the project has an enabled schedule with a cron expression', async ({ api, projectId }) => {
@@ -23,8 +24,15 @@ test.describe('schedule', () => {
 
     const schedules = Schedules.parse(await (await api.get('/api/dataset/analyzer/v2/pipeline/schedules/all')).json());
     const schedule = schedules.schedules.find((s) => s.project_id === projectId)!;
-    const runs = Executions.parse(await (await api.get('/api/dataset/analyzer/v2/pipeline/executions/all')).json())
-      .executions.filter((r) => r.project_id === projectId);
+    const history = Executions.parse(await (await api.get('/api/dataset/analyzer/v2/pipeline/executions/all')).json());
+    const runs = history.executions.filter((r) => r.project_id === projectId);
+    const limit = await (await api.get('/api/accounts/users/schedule-limit')).json();
+
+    // Keep what the backend returned with the test result, as evidence for the report.
+    const byTrigger = runs.reduce<Record<string, number>>((n, r) => ({ ...n, [r.trigger]: (n[r.trigger] ?? 0) + 1 }), {});
+    await attachJson('GET /pipeline/schedules/all (this project)', schedule);
+    await attachJson('GET /pipeline/executions/all (latest page, runs by trigger)', { total_runs: history.total, latest_page: byTrigger });
+    await attachJson('GET /accounts/users/schedule-limit', limit);
 
     expect(new Date(schedule.next_run_at!).getTime(), 'next_run_at is in the future').toBeGreaterThan(Date.now());
     expect(schedule.last_run_at, 'last_run_at is set').not.toBeNull();

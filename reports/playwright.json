@@ -124,12 +124,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 2403,
+                  "duration": 4517,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-02T13:25:47.563Z",
+                  "startTime": "2026-10-02T13:38:38.498Z",
                   "annotations": [],
                   "attachments": [
                     {
@@ -189,12 +189,12 @@
                       "workerIndex": 1,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 4302,
+                      "duration": 7539,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-02T13:25:50.654Z",
+                      "startTime": "2026-10-02T13:38:43.636Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -239,12 +239,12 @@
                       "workerIndex": 1,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 3089,
+                      "duration": 3220,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-02T13:25:55.323Z",
+                      "startTime": "2026-10-02T13:38:51.561Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -289,12 +289,12 @@
                       "workerIndex": 1,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 4331,
+                      "duration": 5332,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-02T13:25:58.568Z",
+                      "startTime": "2026-10-02T13:38:54.942Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -339,12 +339,12 @@
                       "workerIndex": 1,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 16044,
+                      "duration": 14430,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-02T13:26:03.076Z",
+                      "startTime": "2026-10-02T13:39:00.451Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -389,12 +389,12 @@
                       "workerIndex": 1,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 3335,
+                      "duration": 4932,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-02T13:26:19.622Z",
+                      "startTime": "2026-10-02T13:39:15.369Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -449,7 +449,7 @@
                       "workerIndex": 1,
                       "parallelIndex": 0,
                       "status": "failed",
-                      "duration": 3303,
+                      "duration": 3340,
                       "error": {
                         "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoMatch\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected pattern: \u001b[32m/Next run:[ \\t]*\\S/\u001b[39m\nReceived string:  \u001b[31m\"Schedules\u001b[39m\n\u001b[31mManage schedules within this project\u001b[39m\n\u001b[31mAdd Schedule\u001b[39m\n\u001b[31mSchedule for drift-qa\u001b[39m\n\u001b[31mActive\u001b[39m\n\u001b[31mHourly\u001b[39m\n\u001b[31mAt minute 20\u001b[39m\n\u001b[31mNext run:\"\u001b[39m",
                         "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoMatch\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected pattern: \u001b[32m/Next run:[ \\t]*\\S/\u001b[39m\nReceived string:  \u001b[31m\"Schedules\u001b[39m\n\u001b[31mManage schedules within this project\u001b[39m\n\u001b[31mAdd Schedule\u001b[39m\n\u001b[31mSchedule for drift-qa\u001b[39m\n\u001b[31mActive\u001b[39m\n\u001b[31mHourly\u001b[39m\n\u001b[31mAt minute 20\u001b[39m\n\u001b[31mNext run:\"\u001b[39m\n    at /Users/macbook01/personal/rhombus-etl-drift-qa/ui-tests/tests/pipeline-journey.spec.ts:67:27",
@@ -473,7 +473,7 @@
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-02T13:26:23.129Z",
+                      "startTime": "2026-10-02T13:39:20.471Z",
                       "annotations": [
                         {
                           "type": "fail",
@@ -555,12 +555,12 @@
                       "workerIndex": 2,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 58,
+                      "duration": 2939,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-02T13:26:26.861Z",
+                      "startTime": "2026-10-02T13:39:24.263Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -595,12 +595,12 @@
                       "workerIndex": 2,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 30,
+                      "duration": 36,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-02T13:26:26.941Z",
+                      "startTime": "2026-10-02T13:39:27.222Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -635,12 +635,12 @@
                       "workerIndex": 2,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 32,
+                      "duration": 40,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-02T13:26:26.976Z",
+                      "startTime": "2026-10-02T13:39:27.267Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -675,12 +675,12 @@
                       "workerIndex": 2,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 32,
+                      "duration": 51,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-02T13:26:27.014Z",
+                      "startTime": "2026-10-02T13:39:27.319Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -715,12 +715,12 @@
                       "workerIndex": 2,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 200,
+                      "duration": 420,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-02T13:26:27.051Z",
+                      "startTime": "2026-10-02T13:39:27.376Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -755,12 +755,12 @@
                       "workerIndex": 2,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 133,
+                      "duration": 151,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-02T13:26:27.262Z",
+                      "startTime": "2026-10-02T13:39:27.808Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -812,12 +812,12 @@
                       "workerIndex": 2,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 181,
+                      "duration": 164,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-02T13:26:27.414Z",
+                      "startTime": "2026-10-02T13:39:27.975Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -852,12 +852,12 @@
                       "workerIndex": 2,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 298,
+                      "duration": 306,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-02T13:26:27.606Z",
+                      "startTime": "2026-10-02T13:39:28.158Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -892,12 +892,12 @@
                       "workerIndex": 2,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 354,
+                      "duration": 288,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-02T13:26:27.918Z",
+                      "startTime": "2026-10-02T13:39:28.477Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -930,7 +930,7 @@
         {
           "title": "schedule",
           "file": "api-tests/tests/schedule.spec.ts",
-          "line": 9,
+          "line": 10,
           "column": 6,
           "specs": [
             {
@@ -949,12 +949,12 @@
                       "workerIndex": 2,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 279,
+                      "duration": 270,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-02T13:26:28.289Z",
+                      "startTime": "2026-10-02T13:39:28.781Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -970,7 +970,7 @@
               ],
               "id": "0c763654641d7f9e8f11-ca07c10fd934a1f5cb80",
               "file": "api-tests/tests/schedule.spec.ts",
-              "line": 10,
+              "line": 11,
               "column": 7
             },
             {
@@ -986,7 +986,7 @@
                       "description": "Scheduled runs never fire on this account; see observations/FINDINGS.md",
                       "location": {
                         "file": "/Users/macbook01/personal/rhombus-etl-drift-qa/api-tests/tests/schedule.spec.ts",
-                        "line": 22,
+                        "line": 23,
                         "column": 10
                       }
                     }
@@ -999,43 +999,58 @@
                       "workerIndex": 2,
                       "parallelIndex": 0,
                       "status": "failed",
-                      "duration": 538,
+                      "duration": 1230,
                       "error": {
-                        "message": "Error: next_run_at is in the future\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m1790947589113\u001b[39m\nReceived:   \u001b[31m1790940000000\u001b[39m",
-                        "stack": "Error: next_run_at is in the future\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m1790947589113\u001b[39m\nReceived:   \u001b[31m1790940000000\u001b[39m\n    at /Users/macbook01/personal/rhombus-etl-drift-qa/api-tests/tests/schedule.spec.ts:29:87",
+                        "message": "Error: next_run_at is in the future\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m1790948370285\u001b[39m\nReceived:   \u001b[31m1790940000000\u001b[39m",
+                        "stack": "Error: next_run_at is in the future\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m1790948370285\u001b[39m\nReceived:   \u001b[31m1790940000000\u001b[39m\n    at /Users/macbook01/personal/rhombus-etl-drift-qa/api-tests/tests/schedule.spec.ts:37:87",
                         "location": {
                           "file": "/Users/macbook01/personal/rhombus-etl-drift-qa/api-tests/tests/schedule.spec.ts",
                           "column": 87,
-                          "line": 29
+                          "line": 37
                         },
-                        "snippet": "  27 |       .executions.filter((r) => r.project_id === projectId);\n  28 |\n> 29 |     expect(new Date(schedule.next_run_at!).getTime(), 'next_run_at is in the future').toBeGreaterThan(Date.now());\n     |                                                                                       ^\n  30 |     expect(schedule.last_run_at, 'last_run_at is set').not.toBeNull();\n  31 |     expect(runs.some((r) => r.trigger !== 'manual'), 'at least one run not started by hand').toBe(true);\n  32 |   });"
+                        "snippet": "  35 |     await attachJson('GET /accounts/users/schedule-limit', limit);\n  36 |\n> 37 |     expect(new Date(schedule.next_run_at!).getTime(), 'next_run_at is in the future').toBeGreaterThan(Date.now());\n     |                                                                                       ^\n  38 |     expect(schedule.last_run_at, 'last_run_at is set').not.toBeNull();\n  39 |     expect(runs.some((r) => r.trigger !== 'manual'), 'at least one run not started by hand').toBe(true);\n  40 |   });"
                       },
                       "errors": [
                         {
                           "location": {
                             "file": "/Users/macbook01/personal/rhombus-etl-drift-qa/api-tests/tests/schedule.spec.ts",
                             "column": 87,
-                            "line": 29
+                            "line": 37
                           },
-                          "message": "Error: next_run_at is in the future\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m1790947589113\u001b[39m\nReceived:   \u001b[31m1790940000000\u001b[39m\n\n  27 |       .executions.filter((r) => r.project_id === projectId);\n  28 |\n> 29 |     expect(new Date(schedule.next_run_at!).getTime(), 'next_run_at is in the future').toBeGreaterThan(Date.now());\n     |                                                                                       ^\n  30 |     expect(schedule.last_run_at, 'last_run_at is set').not.toBeNull();\n  31 |     expect(runs.some((r) => r.trigger !== 'manual'), 'at least one run not started by hand').toBe(true);\n  32 |   });\n    at /Users/macbook01/personal/rhombus-etl-drift-qa/api-tests/tests/schedule.spec.ts:29:87"
+                          "message": "Error: next_run_at is in the future\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m1790948370285\u001b[39m\nReceived:   \u001b[31m1790940000000\u001b[39m\n\n  35 |     await attachJson('GET /accounts/users/schedule-limit', limit);\n  36 |\n> 37 |     expect(new Date(schedule.next_run_at!).getTime(), 'next_run_at is in the future').toBeGreaterThan(Date.now());\n     |                                                                                       ^\n  38 |     expect(schedule.last_run_at, 'last_run_at is set').not.toBeNull();\n  39 |     expect(runs.some((r) => r.trigger !== 'manual'), 'at least one run not started by hand').toBe(true);\n  40 |   });\n    at /Users/macbook01/personal/rhombus-etl-drift-qa/api-tests/tests/schedule.spec.ts:37:87"
                         }
                       ],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-02T13:26:28.583Z",
+                      "startTime": "2026-10-02T13:39:29.064Z",
                       "annotations": [
                         {
                           "type": "fail",
                           "description": "Scheduled runs never fire on this account; see observations/FINDINGS.md",
                           "location": {
                             "file": "/Users/macbook01/personal/rhombus-etl-drift-qa/api-tests/tests/schedule.spec.ts",
-                            "line": 22,
+                            "line": 23,
                             "column": 10
                           }
                         }
                       ],
                       "attachments": [
+                        {
+                          "name": "api: GET /pipeline/schedules/all (this project)",
+                          "contentType": "application/json",
+                          "body": "ewogICJwcm9qZWN0X2lkIjogNDE2NywKICAiY3Jvbl9leHByZXNzaW9uIjogIjIwICogKiAqICoiLAogICJlbmFibGVkIjogdHJ1ZSwKICAibmV4dF9ydW5fYXQiOiAiMjAyNi0xMC0wMlQxMToyMDowMFoiLAogICJsYXN0X3J1bl9hdCI6IG51bGwsCiAgInNraXBwZWRfcnVuc19jb3VudCI6IDAKfQ=="
+                        },
+                        {
+                          "name": "api: GET /pipeline/executions/all (latest page, runs by trigger)",
+                          "contentType": "application/json",
+                          "body": "ewogICJ0b3RhbF9ydW5zIjogMzQsCiAgImxhdGVzdF9wYWdlIjogewogICAgIm1hbnVhbCI6IDIwCiAgfQp9"
+                        },
+                        {
+                          "name": "api: GET /accounts/users/schedule-limit",
+                          "contentType": "application/json",
+                          "body": "ewogICJsaW1pdCI6IG51bGwsCiAgImN1cnJlbnRfY291bnQiOiAxCn0="
+                        },
                         {
                           "name": "error-context",
                           "contentType": "text/markdown",
@@ -1050,7 +1065,7 @@
                       "errorLocation": {
                         "file": "/Users/macbook01/personal/rhombus-etl-drift-qa/api-tests/tests/schedule.spec.ts",
                         "column": 87,
-                        "line": 29
+                        "line": 37
                       }
                     }
                   ],
@@ -1059,7 +1074,7 @@
               ],
               "id": "0c763654641d7f9e8f11-0684be94fff95020de07",
               "file": "api-tests/tests/schedule.spec.ts",
-              "line": 19,
+              "line": 20,
               "column": 7
             }
           ]
@@ -1069,8 +1084,8 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-10-02T13:25:47.347Z",
-    "duration": 41808.713,
+    "startTime": "2026-10-02T13:38:38.304Z",
+    "duration": 52024.06,
     "expected": 18,
     "skipped": 0,
     "unexpected": 0,

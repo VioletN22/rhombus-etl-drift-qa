@@ -10,7 +10,7 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   forbidOnly: !!process.env.CI,
-  reporter: [['list'], ['html', { open: 'never' }], ['json', { outputFile: 'reports/playwright.json' }]],
+  reporter: [['list'], ['html', { open: 'never' }], ['json', { outputFile: process.env.PW_JSON ?? 'reports/playwright.json' }]],
   use: {
     baseURL: process.env.RHOMBUS_BASE_URL || 'https://rhombusai.com',
     // Bundled Chromium, never the installed Chrome (real Chrome leaves temp copies on macOS).
