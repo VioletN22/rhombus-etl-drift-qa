@@ -156,7 +156,7 @@ cases:
   rhombus_status: Success
   platform_behaviour: carried_on
   gcs_output: 'yes'
-  logs_clear: 'no'
+  logs_clear: misleading
   chatbot_diagnosis: na
   chatbot_fix_worked: na
   schedule_after: Not testable (scheduling not running)
@@ -174,7 +174,7 @@ cases:
   rhombus_status: Success
   platform_behaviour: carried_on
   gcs_output: 'yes'
-  logs_clear: 'no'
+  logs_clear: misleading
   chatbot_diagnosis: na
   chatbot_fix_worked: na
   schedule_after: Not testable (scheduling not running)

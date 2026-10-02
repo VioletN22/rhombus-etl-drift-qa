@@ -370,20 +370,22 @@ details.metrics > summary:hover { border-color: var(--accent); }
 
 /* ==== case page ============================================================= */
 .case-head .wrap { padding-top: 22px; padding-bottom: 24px; }
-.crumbs { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; font-size: 14px; color: var(--muted); margin-bottom: 18px; }
-.crumbs a { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; font-weight: 500; }
-.crumbs a:hover { text-decoration: underline; }
-.crumbs #crumb-case { font-family: var(--mono); font-size: 13px; overflow-wrap: anywhere; }
-.mark.small { width: 16px; height: 16px; }
-.case-head h1 { font-size: 26px; overflow-wrap: anywhere; }
-.case-slug { margin: 6px 0 0; color: var(--muted); }
-.case-slug:empty { display: none; }
-.change { margin: 12px 0 0; font-size: 15px; }
-.change .k { color: var(--muted); font-size: 13px; margin-right: 6px; }
-.case-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.case-head .kicker { margin: 0 0 4px; color: var(--muted); font-size: 13px; font-weight: 500; letter-spacing: .02em; text-transform: uppercase; }
+.case-head .kicker:empty { display: none; }
+.case-head h1 { font-size: 26px; overflow-wrap: anywhere; margin: 0; }
+.case-sum { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 12px; margin-top: 18px; }
+.sum-box { border-radius: var(--radius); padding: 14px 16px; min-width: 0; }
+.sum-box .k { display: block; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.sum-box p { margin: 6px 0 0; font-size: 15px; line-height: 1.5; }
+.sum-box.changed { background: var(--panel-2); border: 1px solid var(--line); }
+.sum-box.changed .k { color: var(--muted); }
+.sum-box.outcome { background: var(--cb, var(--none-bg)); border: 1px solid var(--line); border-left: 4px solid var(--c, var(--none)); }
+.sum-box.outcome .k { color: var(--c, var(--muted)); }
+.sum-box.outcome p { color: var(--text); font-weight: 500; }
+.sum-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px; }
+.case-chips { display: inline-flex; flex-wrap: wrap; gap: 6px; }
 .case-chips:empty { display: none; }
-#case-headline { margin-top: 14px; color: var(--text); font-size: 16px; }
-#case-headline:empty { display: none; }
+@media (max-width: 640px) { .case-sum { grid-template-columns: 1fr; } }
 #case-missing { margin-top: 24px; }
 
 .source-link { margin: 20px 0 0; font-size: 13px; color: var(--muted); }
