@@ -72,6 +72,7 @@ def run_checks(raw_input, output, contract, args) -> tuple[list[Check], dict, di
         checks.check_input_schema(raw_input, contract),
         checks.check_schema(output, raw_input, contract),
         checks.check_row_reconciliation(output, expected, stats, contract),
+        checks.check_row_loss(output, raw_input, contract),
         *checks.check_rules(output, contract),
         checks.check_null_inflation(output, expected, contract),
         checks.check_empty_columns(output, contract),

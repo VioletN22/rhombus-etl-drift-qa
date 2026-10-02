@@ -183,7 +183,9 @@ def _rule(output: pd.DataFrame, contract: dict, check_id: str, col: str,
     if col not in output.columns:
         return _missing_column(check_id, col)
     values = output[col].astype(str)
-    mask = values.map(bad)
+    if values.empty:
+        return Check(check_id, "warn", "no rows to check", {"violations": 0, "rows": 0})
+    mask = values.map(bad).astype(bool)
     n = int(mask.sum())
     ev = {"violations": n, "rows": len(values),
           "examples": _examples(output, mask, col, contract["key"])}
@@ -289,6 +291,28 @@ def check_empty_columns(output: pd.DataFrame, contract: dict) -> Check:
         return Check("empty_columns", "fail",
                      f"{len(empty)} column(s) present but blank on every row: {empty}", ev)
     return Check("empty_columns", "pass", "every contract column has data", ev)
+
+
+def check_row_loss(output: pd.DataFrame, raw_input: pd.DataFrame, contract: dict,
+                   min_share: float = 0.9) -> Check:
+    """Did most of the input's orders make it through?
+
+    Independent of the oracle on purpose: when the input loses a required column
+    the oracle "expects" the same loss, so it can't see it. Here the yardstick is
+    the distinct, non-blank keys that came in.
+    """
+    key = contract["key"]
+    if key not in raw_input.columns:
+        return _missing_column("row_loss", key)
+    came_in = {canonical(v, "int") for v in raw_input[key] if not is_blank(v)}
+    went_out = {canonical(v, "int") for v in output[key]} if key in output.columns else set()
+    share = len(went_out & came_in) / len(came_in) if came_in else 1.0
+    ev = {"input_keys": len(came_in), "output_keys": len(went_out), "share_kept": round(share, 3)}
+    if share < min_share:
+        return Check("row_loss", "fail",
+                     f"only {len(went_out)} of {len(came_in)} input orders reached the output "
+                     f"({share:.0%}, threshold {min_share:.0%})", ev)
+    return Check("row_loss", "pass", f"{share:.0%} of input orders reached the output", ev)
 
 
 def check_oracle_diff(output: pd.DataFrame, expected: pd.DataFrame,

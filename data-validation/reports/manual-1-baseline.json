@@ -1,6 +1,6 @@
 {
   "run": "manual-1-baseline",
-  "timestamp": "2026-10-02T05:07:40+00:00",
+  "timestamp": "2026-10-02T05:35:41+00:00",
   "input": {
     "uri": "datasets/baseline.csv",
     "sha256": "f77c92ce8cc32195c150b055ab2dc3a27e1fea42793aebaae156b2b758a8a364",
@@ -133,6 +133,16 @@
         "unexpected_count": 0,
         "missing_ids": [],
         "unexpected_ids": []
+      }
+    },
+    {
+      "id": "row_loss",
+      "status": "pass",
+      "detail": "98% of input orders reached the output",
+      "evidence": {
+        "input_keys": 397,
+        "output_keys": 390,
+        "share_kept": 0.982
       }
     },
     {
@@ -470,7 +480,7 @@
     }
   ],
   "summary": {
-    "pass": 11,
+    "pass": 12,
     "fail": 3,
     "warn": 3
   },

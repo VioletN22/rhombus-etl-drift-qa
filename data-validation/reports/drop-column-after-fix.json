@@ -1,6 +1,6 @@
 {
   "run": "drop-column-after-fix",
-  "timestamp": "2026-10-02T05:07:39+00:00",
+  "timestamp": "2026-10-02T05:35:41+00:00",
   "input": {
     "uri": "datasets/schema-drop-column.csv",
     "sha256": "293fe0fcf797edde8002ccee291d03df6891debee52a86b98181de11c68a86fd",
@@ -129,6 +129,16 @@
         "unexpected_count": 0,
         "missing_ids": [],
         "unexpected_ids": []
+      }
+    },
+    {
+      "id": "row_loss",
+      "status": "pass",
+      "detail": "98% of input orders reached the output",
+      "evidence": {
+        "input_keys": 397,
+        "output_keys": 390,
+        "share_kept": 0.982
       }
     },
     {
@@ -468,7 +478,7 @@
     }
   ],
   "summary": {
-    "pass": 9,
+    "pass": 10,
     "fail": 4,
     "warn": 4
   },

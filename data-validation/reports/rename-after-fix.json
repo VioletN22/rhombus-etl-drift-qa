@@ -1,0 +1,332 @@
+{
+  "run": "rename-after-fix",
+  "timestamp": "2026-10-02T05:34:53+00:00",
+  "input": {
+    "uri": "datasets/schema-rename-column.csv",
+    "sha256": "17fccfcc6ff14e27ff79384d92bb4bac6265bab84bff55525c13b1f5ffd46668",
+    "rows": 425
+  },
+  "output": {
+    "uri": "runs/2026-10-02-drift/rename-after-chatbot-fix.csv",
+    "object": "runs/2026-10-02-drift/rename-after-chatbot-fix.csv",
+    "updated": null,
+    "rows": 0,
+    "sha256_canonical": "ae9e3195b04e3c61c140be017045b1e2b9dff362f19ae4ac7e98c74ed1a5d395"
+  },
+  "reference": {
+    "rows": 0,
+    "sha256_canonical": "ae9e3195b04e3c61c140be017045b1e2b9dff362f19ae4ac7e98c74ed1a5d395",
+    "breakdown": {
+      "input_rows": 425,
+      "exact_duplicates": 20,
+      "duplicate_ids": 7,
+      "missing_key_or_amount": 398,
+      "output_rows": 0
+    }
+  },
+  "profile": {
+    "amount_median": null,
+    "amount_max": null,
+    "amount_over_max_plausible": 0,
+    "month_distribution": {},
+    "country_distribution": {},
+    "input_slash_dates": {
+      "slash_dates": 363,
+      "first_gt12": 0,
+      "share": 0.0
+    },
+    "max_order_date": null
+  },
+  "checks": [
+    {
+      "id": "input_schema",
+      "status": "warn",
+      "detail": "input drifted from contract: missing ['amount_usd']; extra ['total_amount']; likely renamed amount_usd->total_amount",
+      "evidence": {
+        "expected": [
+          "order_id",
+          "customer_name",
+          "email",
+          "order_date",
+          "amount_usd",
+          "quantity",
+          "country",
+          "status"
+        ],
+        "actual": [
+          "order_id",
+          "customer_name",
+          "email",
+          "order_date",
+          "total_amount",
+          "quantity",
+          "country",
+          "status"
+        ],
+        "missing": [
+          "amount_usd"
+        ],
+        "extra": [
+          "total_amount"
+        ],
+        "order_ok": true,
+        "likely_renamed": [
+          {
+            "expected": "amount_usd",
+            "found": "total_amount",
+            "name_ratio": 0.5455,
+            "value_match_share": 0.9903,
+            "score": 0.9903
+          }
+        ]
+      }
+    },
+    {
+      "id": "schema",
+      "status": "pass",
+      "detail": "columns and order match the contract",
+      "evidence": {
+        "expected": [
+          "order_id",
+          "customer_name",
+          "email",
+          "order_date",
+          "amount_usd",
+          "quantity",
+          "country",
+          "status"
+        ],
+        "actual": [
+          "order_id",
+          "customer_name",
+          "email",
+          "order_date",
+          "amount_usd",
+          "quantity",
+          "country",
+          "status"
+        ],
+        "missing": [],
+        "extra": [],
+        "order_ok": true,
+        "likely_renamed": []
+      }
+    },
+    {
+      "id": "row_reconciliation",
+      "status": "pass",
+      "detail": "0 rows, same order_ids as the oracle",
+      "evidence": {
+        "expected_rows": 0,
+        "actual_rows": 0,
+        "breakdown": {
+          "input_rows": 425,
+          "exact_duplicates": 20,
+          "duplicate_ids": 7,
+          "missing_key_or_amount": 398,
+          "output_rows": 0
+        },
+        "missing_count": 0,
+        "unexpected_count": 0,
+        "missing_ids": [],
+        "unexpected_ids": []
+      }
+    },
+    {
+      "id": "row_loss",
+      "status": "fail",
+      "detail": "only 0 of 397 input orders reached the output (0%, threshold 90%)",
+      "evidence": {
+        "input_keys": 397,
+        "output_keys": 0,
+        "share_kept": 0.0
+      }
+    },
+    {
+      "id": "rule_unique_order_id",
+      "status": "pass",
+      "detail": "order_id unique and present",
+      "evidence": {
+        "duplicate_ids": [],
+        "duplicate_count": 0,
+        "blank_ids": 0
+      }
+    },
+    {
+      "id": "rule_customer_name",
+      "status": "warn",
+      "detail": "no rows to check",
+      "evidence": {
+        "violations": 0,
+        "rows": 0
+      }
+    },
+    {
+      "id": "rule_email",
+      "status": "warn",
+      "detail": "no rows to check",
+      "evidence": {
+        "violations": 0,
+        "rows": 0
+      }
+    },
+    {
+      "id": "rule_order_date",
+      "status": "warn",
+      "detail": "no rows to check",
+      "evidence": {
+        "violations": 0,
+        "rows": 0
+      }
+    },
+    {
+      "id": "rule_amount_numeric",
+      "status": "warn",
+      "detail": "no rows to check",
+      "evidence": {
+        "violations": 0,
+        "rows": 0
+      }
+    },
+    {
+      "id": "rule_amount_non_negative",
+      "status": "warn",
+      "detail": "no rows to check",
+      "evidence": {
+        "violations": 0,
+        "rows": 0
+      }
+    },
+    {
+      "id": "rule_country",
+      "status": "warn",
+      "detail": "no rows to check",
+      "evidence": {
+        "violations": 0,
+        "rows": 0
+      }
+    },
+    {
+      "id": "rule_status_lowercase",
+      "status": "warn",
+      "detail": "no rows to check",
+      "evidence": {
+        "violations": 0,
+        "rows": 0
+      }
+    },
+    {
+      "id": "rule_status_allowed",
+      "status": "warn",
+      "detail": "no rows to check",
+      "evidence": {
+        "violations": 0,
+        "rows": 0
+      }
+    },
+    {
+      "id": "rule_quantity",
+      "status": "warn",
+      "detail": "no rows to check",
+      "evidence": {
+        "violations": 0,
+        "rows": 0
+      }
+    },
+    {
+      "id": "null_inflation",
+      "status": "pass",
+      "detail": "no unexpected blanks",
+      "evidence": {
+        "compared_rows": 0,
+        "columns": {
+          "customer_name": {
+            "output_blank": 0,
+            "expected_blank": 0,
+            "inflated": 0
+          },
+          "email": {
+            "output_blank": 0,
+            "expected_blank": 0,
+            "inflated": 0
+          },
+          "order_date": {
+            "output_blank": 0,
+            "expected_blank": 0,
+            "inflated": 0
+          },
+          "amount_usd": {
+            "output_blank": 0,
+            "expected_blank": 0,
+            "inflated": 0
+          },
+          "quantity": {
+            "output_blank": 0,
+            "expected_blank": 0,
+            "inflated": 0
+          },
+          "country": {
+            "output_blank": 0,
+            "expected_blank": 0,
+            "inflated": 0
+          },
+          "status": {
+            "output_blank": 0,
+            "expected_blank": 0,
+            "inflated": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "empty_columns",
+      "status": "pass",
+      "detail": "every contract column has data",
+      "evidence": {
+        "rows": 0,
+        "empty_columns": []
+      }
+    },
+    {
+      "id": "oracle_diff",
+      "status": "pass",
+      "detail": "0 rows x 7 columns identical to the oracle",
+      "evidence": {
+        "compared_rows": 0,
+        "compared_columns": [
+          "customer_name",
+          "email",
+          "order_date",
+          "amount_usd",
+          "quantity",
+          "country",
+          "status"
+        ],
+        "mismatches": {
+          "customer_name": 0,
+          "email": 0,
+          "order_date": 0,
+          "amount_usd": 0,
+          "quantity": 0,
+          "country": 0,
+          "status": 0
+        },
+        "examples": []
+      }
+    },
+    {
+      "id": "marker_row",
+      "status": "warn",
+      "detail": "marker order 99999 not in output",
+      "evidence": {
+        "expected_name": null
+      }
+    }
+  ],
+  "summary": {
+    "pass": 6,
+    "fail": 1,
+    "warn": 11
+  },
+  "verdict": "fail"
+}

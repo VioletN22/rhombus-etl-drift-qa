@@ -167,3 +167,19 @@ def test_empty_columns_flags_fully_blank_column():
     out["country"] = ""
     res = check_empty_columns(out, contract)
     assert res.status == "fail" and res.evidence["empty_columns"] == ["country"]
+
+
+def test_empty_output_reports_instead_of_crashing(tmp_path):
+    """Regression: header-only output (rename case after chatbot fix) crashed the validator."""
+    import subprocess, sys, json
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[2]
+    out = tmp_path / "empty.csv"
+    out.write_text("order_id,customer_name,email,order_date,amount_usd,quantity,country,status\n")
+    r = subprocess.run([sys.executable, str(root / "data-validation/validate.py"), "--run", "t-empty",
+                        "--input", str(root / "datasets/baseline.csv"), "--output", str(out),
+                        "--reports-dir", str(tmp_path)], capture_output=True, text=True)
+    assert r.returncode == 1, r.stderr
+    rep = json.loads((tmp_path / "t-empty.json").read_text())
+    rows = next(c for c in rep["checks"] if c["id"] == "row_reconciliation")
+    assert rows["status"] == "fail"

@@ -6,9 +6,9 @@
 | S3 version | `EfHU9zLaR5Ay1uqPvXotbtWFsiHolxaI`, uploaded 2026-10-02 15:22:07 AEST, 32.2 KB |
 | Pipeline | Original AI-built code (restored after case 1; same `code_sha=831d36d0703c` as before the chatbot patch) |
 | Run | Manual run (▶) 15:23 AEST (scheduled runs don't execute on this account) |
-| Severity | Medium (stopped correctly, error doesn't mention the rename) — draft |
+| Severity | **Critical** after the chatbot fix (empty file shipped as success). Before the fix: Medium (stopped, no rename hint) |
 | Pipeline stopped? | **Yes**, at `orders_cleaned` |
-| Chatbot fix worked? | _pending_ |
+| Chatbot fix worked? | **No.** Wrong theory ("cached execution"), guessed alias list missed `total_amount`, the blank fallback dropped every row and the run "completed successfully" with an empty file |
 
 ## What I changed
 Renamed the header `amount_usd` to `total_amount`. Values in that column and every other cell are identical to the baseline. Marker row: "Marker schema-rename-column".
@@ -28,7 +28,15 @@ Renamed the header `amount_usd` to `total_amount`. Values in that column and eve
 Clear? **Partially.** Names the failing step; doesn't say "missing column", doesn't notice the new column, and the "LLM execution failed" wording points at the AI rather than the data. Screenshot: `evidence/2026-10-02_rename-column-error-log-panel.png`.
 
 ## Chatbot diagnosis
-_pending_
+- Prompt: **Ask Chatbot** on the 15:23 error, no text added. Transcript: `evidence/2026-10-02_rename-column-chatbot-transcript.txt`.
+- Diagnosis: **wrong.** It claimed the identical `code_sha` meant "the runtime is still finding the old cached execution" (false: I restored the original code on purpose) and guessed the header was a casing variant like "Amount_USD". It never read the input header, which shows `total_amount`.
+- It edited the pipeline without asking (cost 5 credits): normalise headers, a fixed alias list ("amount, total, total_usd, price, etc."), and "fallback column creation ... added as blank".
+- Re-run (▶ 15:31:47): run status **"Pipeline completed successfully"** with a yellow warning, **"No results found after applying this LLM transformation"** (`empty_output_warning`). Custom step impact: "401 row(s) affected".
+- GCS received `orders_cleaned_1790919110808.csv`: **75 bytes, the header row only, zero orders.** The blank `amount_usd` made rule 1 ("drop rows where amount is missing") drop every row.
+- **Fix worked? No.** Worse than before: the platform reports success and the destination gets an empty file. A revenue report would read $0.
+- Validator: `row_loss` fails ("only 0 of 397 input orders reached the output"). My first version crashed on a header-only file and its oracle-based row check passed (the oracle, built from the drifted input, also expects 0 rows). Fixed both, with tests.
+
+Credit where due: Rhombus did raise a **warning** ("No results found") this time, which is better than case 1's silent green. But it's a warning on a run marked successful, and the empty file was still exported.
 
 ## Schedule afterwards
 Not testable on this account (scheduled runs don't execute; reported to Rhombus 14:39).
