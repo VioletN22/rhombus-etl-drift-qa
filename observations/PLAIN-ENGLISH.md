@@ -44,3 +44,11 @@ Testing Rhombus also found gaps in our checker. It missed an all-blank column an
 ## Case 4: a new column appears (discount_code)
 - **Handled well.** The 8 known columns came out exactly as before.
 - **The new column was quietly thrown away.** That's usually fine, but nobody is told, so if the business needed it, it's lost without anyone noticing.
+
+## Case 5: all four changes at once
+- **Rhombus stopped, which is good.** But the error named only 1 of the 4 problems (`amount_usd`), and the log said "failed" and "completed successfully" in the same second.
+- **I asked the chatbot to fix it, and it made things worse.** It blamed "cached code" (not true), deleted the cleaning step and re-added it, and forgot to reconnect it to the output. The pipeline couldn't run at all.
+- **I told it the pipeline wouldn't run.** It found its own wiring mistake in 6 seconds and fixed it. Fair point in its favour.
+- **Then the run went green, but the data was wrong:** country blank on all 390 orders, plus two extra columns nobody asked for. No warning.
+- **The code shown in the node can't explain the output.** It picks 8 columns; the file has 10.
+- **Bottom line:** we started with a safe stop and, after 4 chatbot "fixes" (20 credits), ended with bad data marked as success.

@@ -134,19 +134,21 @@ cases:
   headline: 'Handled: the 8 known columns came out unchanged; the new column was dropped without any notice.'
 - case: schema-all-combined
   change: All four schema changes at once.
-  status: pending
-  run_ids: []
-  rhombus_status: null
-  platform_behaviour: null
-  gcs_output: null
-  logs_clear: null
-  chatbot_diagnosis: null
-  chatbot_fix_worked: null
-  schedule_after: ''
-  severity: null
-  execution_seconds: null
-  credits_used: null
+  status: done
+  run_ids: all-combined-after-fix
+  rhombus_status: Failure
+  platform_behaviour: stopped
+  gcs_output: 'no'
+  logs_clear: partial
+  chatbot_diagnosis: wrong
+  chatbot_fix_worked: 'no'
+  schedule_after: Not testable (scheduling not running)
+  severity: Critical
+  execution_seconds: 5
+  credits_used: 20
   observation: observations/schema-all-combined.md
+  headline: Stopped naming 1 of 4 problems; four chatbot requests later the pipeline ran green with a
+    blank country column.
 - case: semantic-dollars-to-cents
   change: amount_usd values x100 (cents), header unchanged.
   status: pending

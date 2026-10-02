@@ -6,9 +6,9 @@
 | S3 version | `FwxOAybxjU7_Vb.sebyVXKw9SVr_0SBx`, uploaded 2026-10-02 16:36:53 AEST, 33.9 KB |
 | Pipeline | Original AI-built code |
 | Run | Manual run (▶) 16:37:40 AEST |
-| Severity | **Critical** after the chatbot fix (pipeline left unrunnable). Before the fix: Medium (stopped safely; 1 of 4 problems reported; contradictory logs) |
+| Severity | **Critical** after the chatbot fix (first left unrunnable, then shipped a blank country column and 2 junk columns, all green). Before the fix: Medium (stopped safely; 1 of 4 problems reported; contradictory logs) |
 | Pipeline stopped? | **Yes**, at `orders_cleaned` |
-| Chatbot fix worked? | **No.** It deleted and re-added the cleaning step on a made-up "cached code" theory and left the output disconnected: the pipeline can't run at all |
+| Chatbot fix worked? | **No.** First it left the pipeline unrunnable; a 4th chatbot request rewired it, and the run went green with `country` blank on all 390 rows |
 
 ## What I changed
 All four schema changes in one file: `country` removed, `amount_usd` renamed to `total_amount`, `quantity` values turned into text ("6 units"), and a new `discount_code` column. Marker row: "Marker schema-all-combined".
@@ -36,6 +36,26 @@ Clear? **Partially / misleading**: one of four problems reported, and a success 
 - Its closing message: "Run the pipeline again — it will now execute fresh code rather than the stale cached version."
 - Re-run attempt: **▶ refuses to run.** Toasts: "output_64e957de… : missing upstream dataframe input". The canvas now has `dedup_order_id → llm_node_2` but **no edge from `llm_node_2` to Data Output**; the old node's outgoing connection was lost when it was deleted.
 - **Fix worked? No. It broke the pipeline**, from a hallucinated cause, while telling the user it was fixed. Screenshot: `evidence/2026-10-02_all-combined-after-chatbot-cannot-run.png`.
+
+### 4th chatbot request: repair its own break
+- Prompt (typed, 16:53): "The pipeline won't run now. I get "missing upstream dataframe input" on the Data Output node."
+- Reply (6s, 5 credits): correctly saw "the output node is still wired to the deleted llm_node_1" and reconnected it. Diagnosis of **its own** break: **correct**.
+- Re-run 16:54:12 → **"Pipeline completed successfully"** 16:55:04. New GCS object `orders_cleaned_1790924103326.csv` (33.3 KB, 390 rows). Saved as `runs/2026-10-02-drift/all-combined-after-chatbot-fix.csv`. Screenshots: `evidence/2026-10-02_all-combined-chatbot-rewire-fix.png`, `evidence/2026-10-02_all-combined-chatbot-fix-run-green.png`.
+
+### What the "fixed" output contains (validator: 15 pass, 5 fail, 6 warn)
+| Problem in input | What shipped |
+|---|---|
+| `country` removed | `country` column present but **blank on all 390 rows** (validator `empty_columns` fail; country mix TVD 0.50) |
+| `amount_usd` renamed to `total_amount` | `amount_usd` filled correctly, **and** `total_amount` also shipped as an extra column |
+| `quantity` as text ("6 units") | parsed to numbers (6.0). Better than case 3, where text shipped |
+| new `discount_code` | **shipped** as an extra column (case 4's code dropped it) |
+
+- Output has **10 columns, not the contract's 8**. The code shown in the node ends with `output_df = _df[[...8 columns...]]`, and its alias list has no `total_amount`. So **what ran does not match the code the node shows**: either the displayed code isn't what executes, or another node or step changed the result. A user reading the node can't explain this output. (Observability gap.)
+- Green status, no warning. Downstream gets a blank country for every order and two columns nobody asked for.
+- Report: `data-validation/reports/all-combined-after-fix.json`.
+
+### Score across 4 chatbot requests in this case
+3 wrong diagnoses ("cached code" x2 plus a fix built on it), 1 correct (rewiring its own break). Net result: from **safe stop** to **green run with silently wrong data**. 20 credits.
 
 ## Reproduce
 1. Upload `datasets/schema-all-combined.csv` as `input/orders.csv`
