@@ -81,12 +81,56 @@
   "credits_used": 25,
   "credits_note": "of 5,050. 15 on two extra AI builds, 10 on two chatbot fixes; runs cost nothing visible."
  },
- "built_at": "2026-10-02T06:14:31+00:00",
+ "evidence_files": [
+  "2026-10-01_gcp-key-creation-blocked-by-org-policy.png",
+  "2026-10-01_gcp-key-policy-overridden-not-enforced.png",
+  "2026-10-01_gcs-connect-error-objects-list.png",
+  "2026-10-01_gcs-connect-form-permissions.png",
+  "2026-10-01_gcs-source-no-files-found.png",
+  "2026-10-01_s3-bucket-permissions-policy-saved.png",
+  "2026-10-01_s3-connected-browse-files.png",
+  "2026-10-02_account-plan-free-credits.png",
+  "2026-10-02_add-column-run-green.png",
+  "2026-10-02_ai-builder-attempt2-gcs-claim.png",
+  "2026-10-02_ai-builder-attempt2-reply.txt",
+  "2026-10-02_ai-builder-attempt3-custom-node-prompt.txt",
+  "2026-10-02_ai-builder-attempt3-custom-node.png",
+  "2026-10-02_ai-builder-summary-attempt1.png",
+  "2026-10-02_attempt1-code-after-drop-column-run.py",
+  "2026-10-02_attempt1-custom-node-generated-code.png",
+  "2026-10-02_attempt1-custom-node-prompt.txt",
+  "2026-10-02_attempt1-orders_cleaned-code-after-run2.py",
+  "2026-10-02_attempt1-orders_cleaned-generated-code.py",
+  "2026-10-02_drop-column-chatbot-diagnosis.png",
+  "2026-10-02_drop-column-chatbot-transcript.txt",
+  "2026-10-02_drop-column-error-log-panel.png",
+  "2026-10-02_drop-column-run-regenerating-code.png",
+  "2026-10-02_gcs-destination-created.png",
+  "2026-10-02_gcs-duplicate-exports-from-apply.png",
+  "2026-10-02_orders-attached-preview.png",
+  "2026-10-02_output-node-defaults-download-locally.png",
+  "2026-10-02_rename-after-fix-empty-output-warning.png",
+  "2026-10-02_rename-column-chatbot-diagnosis.png",
+  "2026-10-02_rename-column-chatbot-transcript.txt",
+  "2026-10-02_rename-column-error-log-panel.png",
+  "2026-10-02_restore2-apply-runs-and-fails.png",
+  "2026-10-02_s3-versions-drop-column-uploaded.png",
+  "2026-10-02_schedule-created-every-15-min.png",
+  "2026-10-02_schedule-hourly-control-minute-30.png",
+  "2026-10-02_schedule-no-executions-next-run-blank.png",
+  "2026-10-02_schema-drop-column-error-log.json",
+  "2026-10-02_schema-rename-column-error-log.json",
+  "2026-10-02_type-change-data-input-preview-quantity-categorical.png",
+  "2026-10-02_type-change-node-preview-quantity-categorical.png",
+  "2026-10-02_type-change-run-green.png",
+  "s3-bucket-policy-generated-by-rhombus.json"
+ ],
+ "built_at": "2026-10-02T06:20:06+00:00",
  "sources": {
   "reports": "data-validation/reports",
   "ledger": "observations/runs.csv",
   "matrix": "observations/matrix.yaml",
-  "report_count": 7,
+  "report_count": 8,
   "ledger_rows": 0
  },
  "health": [
@@ -104,9 +148,9 @@
    "group": "schema",
    "label": "Schema drift",
    "cases": 4,
-   "cases_run": 3,
-   "runs": 3,
-   "succeeded": 3,
+   "cases_run": 4,
+   "runs": 4,
+   "succeeded": 4,
    "failed": 0,
    "success_rate": 1.0
   },
@@ -1281,10 +1325,134 @@
    "status": "pending",
    "headline": "",
    "observation": "observations/schema-add-column.md",
-   "observation_md": null,
+   "observation_md": "# Schema drift: add a column (`discount_code`)\n\n| | |\n|---|---|\n| Case file | `datasets/schema-add-column.csv` (uploaded as `input/orders.csv`) |\n| S3 version | `CFDR3eDky80pHiylkxeAAUcSR_MPhZsm`, uploaded 2026-10-02 16:11:26 AEST, 34.2 KB |\n| Pipeline | Original AI-built code |\n| Run | Manual run (\u25b6) ~16:13 AEST |\n| Severity | Low (handled; the new column is dropped without notice) |\n| Pipeline stopped? | **No.** Green, output written |\n| Chatbot fix worked? | Not applicable (no error) |\n\n## What I changed\nAppended a 9th column, `discount_code` (SPRING10 / VIP / FREESHIP / blank). All 8 original columns and every row are unchanged. Marker row: \"Marker schema-add-column\".\n\n## Expected\nBest: carry on, clean the 8 known columns exactly as before, and either pass the new column through or tell the user it was ignored. Worst: crash on an unexpected column, or let the new column disturb the existing rules.\n\n## What happened\n- Run **green**; GCS received `orders_cleaned_1790921587660.csv` (29.9 KB, 390 rows).\n- Output is **identical to the baseline output** on every row except the marker row's name (byte-for-byte comparison). The new column had no side effects on the 8 known columns.\n- `discount_code` is **not in the output**: the AI-built step ends with \"return only these 8 columns\", so the new column is dropped. No warning, no log line saying a column was ignored.\n- Validator: same 3 known baseline bugs; `input_schema` warns \"extra ['discount_code']\". (The `determinism` fail is expected here: the marker row differs by design, so this input isn't the same as the baseline's.)\n\n## Logs\nNothing about the new column. Screenshot: `evidence/2026-10-02_add-column-run-green.png`.\n\n## Chatbot diagnosis\nNot applicable; there was no error.\n\n## Reproduce\n1. Upload `datasets/schema-add-column.csv` as `input/orders.csv`\n2. Run drift-qa with the original code\n3. Compare the GCS output with the baseline output (only the marker row differs; no `discount_code`)\n\n## Impact and suggestion\nThis is the behaviour most customers would want from a fixed-output pipeline, so I rate it handled. The gap is visibility: if a supplier starts sending a field the business needs, nobody is told it's being discarded. Suggest a one-line info log, \"Input has 1 new column (`discount_code`) not used by this pipeline\".\n",
    "extra_md": [],
-   "evidence": [],
-   "page_reports": [],
+   "evidence": [
+    {
+     "name": "2026-10-02_add-column-run-green.png",
+     "path": "evidence/2026-10-02_add-column-run-green.png",
+     "kind": "image",
+     "ext": "png"
+    }
+   ],
+   "page_reports": [
+    {
+     "run": "add-column",
+     "path": "data-validation/reports/add-column.json",
+     "timestamp": "2026-10-02T06:14:34+00:00",
+     "verdict": "fail",
+     "summary": {
+      "pass": 12,
+      "fail": 4,
+      "warn": 4
+     },
+     "checks": [
+      {
+       "id": "input_schema",
+       "status": "warn",
+       "detail": "input drifted from contract: extra ['discount_code']"
+      },
+      {
+       "id": "schema",
+       "status": "pass",
+       "detail": "columns and order match the contract"
+      },
+      {
+       "id": "row_reconciliation",
+       "status": "pass",
+       "detail": "390 rows, same order_ids as the oracle"
+      },
+      {
+       "id": "row_loss",
+       "status": "pass",
+       "detail": "98% of input orders reached the output"
+      },
+      {
+       "id": "rule_unique_order_id",
+       "status": "pass",
+       "detail": "order_id unique and present"
+      },
+      {
+       "id": "rule_customer_name",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_email",
+       "status": "fail",
+       "detail": "5 value(s) not lowercase valid-or-blank"
+      },
+      {
+       "id": "rule_order_date",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_amount_numeric",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_amount_non_negative",
+       "status": "warn",
+       "detail": "5 value(s) negative (passed through by design)"
+      },
+      {
+       "id": "rule_country",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_status_lowercase",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_status_allowed",
+       "status": "warn",
+       "detail": "7 value(s) outside ['cancelled', 'delivered', 'pending', 'shipped']"
+      },
+      {
+       "id": "rule_quantity",
+       "status": "warn",
+       "detail": "4 value(s) not a positive integer (not cleaned by design)"
+      },
+      {
+       "id": "null_inflation",
+       "status": "fail",
+       "detail": "5 cell(s) blank where the oracle has a value: {'quantity': 5}"
+      },
+      {
+       "id": "empty_columns",
+       "status": "pass",
+       "detail": "every contract column has data"
+      },
+      {
+       "id": "column_types",
+       "status": "pass",
+       "detail": "numeric columns are numeric"
+      },
+      {
+       "id": "oracle_diff",
+       "status": "fail",
+       "detail": "10 cell(s) differ from the oracle: {'email': 5, 'quantity': 5}"
+      },
+      {
+       "id": "marker_row",
+       "status": "pass",
+       "detail": "output was built from 'schema-add-column'"
+      },
+      {
+       "id": "determinism",
+       "status": "fail",
+       "detail": "canonical output differs from 1 earlier run(s): ['data-validation/reports/manual-1-baseline.json']"
+      }
+     ],
+     "output_rows": 390,
+     "input_rows": 425,
+     "listed": false
+    }
+   ],
    "matrix": {
     "run_ids": [],
     "rhombus_status": null,
@@ -1298,10 +1466,24 @@
     "execution_seconds": null,
     "credits_used": null
    },
-   "runs_total": 0,
-   "runs_with_output": 0,
+   "runs_total": 1,
+   "runs_with_output": 1,
    "runs_without_output": 0,
-   "validator": null,
+   "validator": {
+    "run": "add-column",
+    "verdict": "fail",
+    "summary": {
+     "pass": 12,
+     "fail": 4,
+     "warn": 4
+    },
+    "failed": [
+     "rule_email",
+     "null_inflation",
+     "oracle_diff",
+     "determinism"
+    ]
+   },
    "capability": "pending"
   },
   {
@@ -2089,6 +2271,18 @@
    "outcome": "output",
    "verdict": "fail",
    "report": "data-validation/reports/manual-1-baseline.json",
+   "notes": ""
+  },
+  {
+   "run": "add-column",
+   "case": "schema-add-column",
+   "source": "report",
+   "uploaded_at": null,
+   "output_object": "runs/2026-10-02-drift/add-column.csv",
+   "output_updated": "2026-10-02T06:14:34+00:00",
+   "outcome": "output",
+   "verdict": "fail",
+   "report": "data-validation/reports/add-column.json",
    "notes": ""
   }
  ],
@@ -3120,6 +3314,176 @@
      "id": "marker_row",
      "status": "pass",
      "detail": "output was built from 'baseline'"
+    }
+   ],
+   "oracle_mismatches": {
+    "customer_name": 0,
+    "email": 5,
+    "order_date": 0,
+    "amount_usd": 0,
+    "quantity": 5,
+    "country": 0,
+    "status": 0
+   },
+   "oracle_examples": [
+    {
+     "order_id": "10012",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10144",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10157",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10185",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10337",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10085",
+     "column": "quantity",
+     "expected": "three",
+     "actual": ""
+    }
+   ]
+  },
+  {
+   "run": "add-column",
+   "case": "schema-add-column",
+   "path": "data-validation/reports/add-column.json",
+   "timestamp": "2026-10-02T06:14:34+00:00",
+   "input_rows": 425,
+   "input_sha256": "dcc2d0239db4bc77df26e2ea0f48c315a27906ba1a98bd6bbe0373b78fd983cb",
+   "output_object": "runs/2026-10-02-drift/add-column.csv",
+   "output_updated": null,
+   "output_rows": 390,
+   "output_sha256": "2a8323df2a74b8d163810c2fbe6bc7c55520ced0c3125b2d872cf86cfe899f4f",
+   "reference_rows": 390,
+   "reference_sha256": "b43fd3ec88191db0af9ec0f964913a0bff30f1707d5371094a43aeee1a714160",
+   "matches_oracle": false,
+   "verdict": "fail",
+   "summary": {
+    "pass": 12,
+    "fail": 4,
+    "warn": 4
+   },
+   "checks": [
+    {
+     "id": "input_schema",
+     "status": "warn",
+     "detail": "input drifted from contract: extra ['discount_code']"
+    },
+    {
+     "id": "schema",
+     "status": "pass",
+     "detail": "columns and order match the contract"
+    },
+    {
+     "id": "row_reconciliation",
+     "status": "pass",
+     "detail": "390 rows, same order_ids as the oracle"
+    },
+    {
+     "id": "row_loss",
+     "status": "pass",
+     "detail": "98% of input orders reached the output"
+    },
+    {
+     "id": "rule_unique_order_id",
+     "status": "pass",
+     "detail": "order_id unique and present"
+    },
+    {
+     "id": "rule_customer_name",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_email",
+     "status": "fail",
+     "detail": "5 value(s) not lowercase valid-or-blank"
+    },
+    {
+     "id": "rule_order_date",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_amount_numeric",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_amount_non_negative",
+     "status": "warn",
+     "detail": "5 value(s) negative (passed through by design)"
+    },
+    {
+     "id": "rule_country",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_status_lowercase",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_status_allowed",
+     "status": "warn",
+     "detail": "7 value(s) outside ['cancelled', 'delivered', 'pending', 'shipped']"
+    },
+    {
+     "id": "rule_quantity",
+     "status": "warn",
+     "detail": "4 value(s) not a positive integer (not cleaned by design)"
+    },
+    {
+     "id": "null_inflation",
+     "status": "fail",
+     "detail": "5 cell(s) blank where the oracle has a value: {'quantity': 5}"
+    },
+    {
+     "id": "empty_columns",
+     "status": "pass",
+     "detail": "every contract column has data"
+    },
+    {
+     "id": "column_types",
+     "status": "pass",
+     "detail": "numeric columns are numeric"
+    },
+    {
+     "id": "oracle_diff",
+     "status": "fail",
+     "detail": "10 cell(s) differ from the oracle: {'email': 5, 'quantity': 5}"
+    },
+    {
+     "id": "marker_row",
+     "status": "pass",
+     "detail": "output was built from 'schema-add-column'"
+    },
+    {
+     "id": "determinism",
+     "status": "fail",
+     "detail": "canonical output differs from 1 earlier run(s): ['data-validation/reports/manual-1-baseline.json']"
     }
    ],
    "oracle_mismatches": {

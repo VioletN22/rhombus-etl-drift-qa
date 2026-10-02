@@ -12,14 +12,15 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 1l7 7-7 7-7-7z' fill='%2320a4b2'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body data-page="home">
 <header class="masthead">
   <div class="wrap">
     <div class="brand">
       <svg class="mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l10 10-10 10L2 12z"/><path d="M12 7.5l4.5 4.5-4.5 4.5L7.5 12z"/></svg>
       <h1>Rhombus Drift QA</h1>
     </div>
-    <p class="lede">One scheduled S3 to Rhombus AI to GCS cleaning pipeline, fed four schema changes, three semantic changes and four malformed files, with every output checked by an independent validator.</p>
+    <p class="verdict" id="verdict"></p>
+    <p class="lede">I fed one Rhombus AI cleaning pipeline (S3 in, GCS out) files with changed schemas and changed meanings, and checked every output with my own validator.</p>
     <p class="meta" id="meta">Loading data.json</p>
   </div>
 </header>
@@ -30,6 +31,23 @@
     The validator was pointed at its own reference output; Rhombus was not involved, and every platform column stays pending.
   </div>
 
+  <div class="stats" id="stats" aria-label="Key numbers"></div>
+
+  <div class="block" id="learned">
+    <h2>What we've learned</h2>
+    <div class="learnings" id="learnings"></div>
+  </div>
+
+  <div class="block" id="cases">
+    <h2>Cases</h2>
+    <p class="block-note">One input file per case, each a copy of the baseline with one change. Open a case for the full write-up, screenshots and validator checks.</p>
+    <div class="case-grid" id="case-grid"></div>
+    <h3 class="grid-sub" id="extra-head" hidden>Bonus and edge cases</h3>
+    <div class="case-grid compact" id="case-grid-extra"></div>
+  </div>
+
+  <details class="metrics" id="metrics">
+  <summary><span>Detailed metrics (brief's bonus panels)</span><span class="summary-sub">Capability heat map, pipeline health, time and credits, output consistency, AI builder, chatbot, run log</span></summary>
   <nav class="toc" aria-label="Sections">
     <a href="#capability">Capability</a>
     <a href="#health">Pipeline health</a>
@@ -53,7 +71,7 @@
     <section id="health">
       <div class="section-head">
         <h2>Pipeline health by scenario</h2>
-        <p>A run counts as a success when the scheduled run wrote a new object to GCS. Whether that object was correct is the validator's job, shown above.</p>
+        <p>A run counts as a success when the scheduled run wrote a new object to GCS. Whether that object was correct is the validator's job, shown in the heat map.</p>
       </div>
       <div id="health-chart" class="bars"></div>
     </section>
@@ -98,6 +116,7 @@
       <div id="runs-body"></div>
     </section>
   </main>
+  </details>
 
   <footer class="foot">
     <p id="foot-sources"></p>
