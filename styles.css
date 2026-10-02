@@ -645,3 +645,11 @@ section[id], .block[id], details.metrics, .report { scroll-margin-top: 56px; }
 .tone-bad { --tone: var(--bad); }
 .pair .half.tone { border-radius: 0 var(--radius) var(--radius) 0; }
 @media (max-width: 800px) { .pair .half.tone { border-radius: 0 0 var(--radius) var(--radius); } }
+
+/* Test suites on the home page */
+.suites { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.suite { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; min-width: 0; }
+.suite-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.suite h3 { margin: 0; font-size: 16px; }
+.suite p { margin: 8px 0 0; font-size: 14px; color: var(--muted); }
+.suite .suite-tool { font-size: 13px; }

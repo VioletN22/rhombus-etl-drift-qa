@@ -47,7 +47,7 @@
   {
    "title": "What runs isn't what the canvas shows",
    "line": "The chatbot's prompt asked for 8 columns; the code that ran kept 10.",
-   "detail": "In case 5 the code writer regenerated against the broken file, and Rhombus's own sandbox rule (\"don't drop input columns\") rejected the 8-column version twice. The only record is the node's Edit Code \u2192 Transcript; the canvas and run log show the prompt. Separately, a run log listed a column from the previous file (total_amount) that wasn't in the data.",
+   "detail": "In case 5 the code writer regenerated against the broken file, and Rhombus's own sandbox rule (\"don't drop input columns\") rejected the 8-column version twice. The only record is the node's Edit Code \u2192 Transcript; the canvas and run log show the prompt. Separately, a run log listed a column from the previous file (total_amount) that wasn't in the data. The record is also fragile: the Logs panel starts empty in a new session (\"No logs yet\" after dozens of runs), and the code Transcript is kept in the browser's local storage.",
    "severity": "Medium",
    "cases": [
     "schema-all-combined",
@@ -101,7 +101,33 @@
    "case": "baseline"
   },
   "credits_used": 35,
-  "credits_note": "of 5,050. 15 on two extra AI builds, 20 on four chatbot requests (5 each); runs cost nothing visible."
+  "credits_note": "of 5,050. 15 on two extra AI builds, 20 on four chatbot requests (5 each); runs cost nothing visible.",
+  "suites": [
+   {
+    "name": "UI tests",
+    "tool": "Playwright",
+    "path": "ui-tests/",
+    "result": "7 / 7 pass",
+    "note": "Pipeline journey on the live project: S3 source, graph shape, GCS destination, a real run, schedule. The schedule check is an expected failure that tracks the known scheduling bug.",
+    "state": "ok"
+   },
+   {
+    "name": "Data validation",
+    "tool": "Python, pytest",
+    "path": "data-validation/",
+    "result": "75 / 75 pass",
+    "note": "Unit tests for the validator itself. The validator then checks every Rhombus output against the contract and the baseline.",
+    "state": "ok"
+   },
+   {
+    "name": "API tests",
+    "tool": "Playwright request",
+    "path": "api-tests/",
+    "result": "In progress",
+    "note": "At least 2 backend tests from the network tab, one negative (no session).",
+    "state": "pending"
+   }
+  ]
  },
  "evidence_files": [
   "2026-10-01_gcp-key-creation-blocked-by-org-policy.png",
@@ -165,7 +191,7 @@
   "2026-10-02_type-change-run-green.png",
   "s3-bucket-policy-generated-by-rhombus.json"
  ],
- "built_at": "2026-10-02T13:00:08+00:00",
+ "built_at": "2026-10-02T13:17:53+00:00",
  "sources": {
   "reports": "data-validation/reports",
   "ledger": "observations/runs.csv",
