@@ -441,7 +441,7 @@ def bust_cache(out_dir: Path, stamp: str) -> None:
         f = out_dir / page
         if f.exists():
             html = f.read_text()
-            html = _re.sub(r'(app\.js|data\.js|styles\.css)(\?v=[0-9]+)?', lambda m: f"{m.group(1)}?v={stamp}", html)
+            html = _re.sub(r'(app\.js|data\.js|styles\.css)(?![\w.])(\?v=[0-9]+)?', lambda m: f"{m.group(1)}?v={stamp}", html)
             f.write_text(html)
 
 
