@@ -61,3 +61,11 @@ Testing Rhombus also found gaps in our checker. It missed an all-blank column an
 - **Why it slipped through:** the column name and type were fine, so to the pipeline it looked like normal numbers. Only the *meaning* changed.
 - **Our checker caught it in one line:** "median amount is 100× the baseline". It just compares with the last good run.
 - **Suggestion for Rhombus:** remember a few simple numbers from the last good run (like the typical amount) and warn when a new run is wildly different.
+
+## Case 7: dates switch from US style to Australian style (04/20 → 20/04)
+- **Rhombus didn't notice.** Green run, no warning.
+- **Most dates came out right, but 116 orders got the wrong date.** When the day was 12 or less, day and month were swapped (8 Feb became 2 Aug). Those look perfectly normal, which is what makes it dangerous.
+- **33 orders are now in the future** (October to December, and today is 2 October).
+- **Who did it:** the step that *loads* the file, not the AI. It turns the column into dates straight away, guessing the format one value at a time. Same thing we saw with quantity in case 3.
+- **Our checker caught it:** "most dates start with a day above 12, so this is probably day-first", plus "an order is dated in the future".
+- **Suggestion for Rhombus:** if some dates can only be day-first, read the whole column day-first (or stop and ask), and warn about future dates.

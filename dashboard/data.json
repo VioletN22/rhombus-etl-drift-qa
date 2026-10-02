@@ -70,7 +70,7 @@
    "semantic-dollars-to-cents",
    "semantic-date-mmdd-to-ddmm"
   ],
-  "required_done": 6,
+  "required_done": 7,
   "critical": 3,
   "determinism": {
    "identical": 3,
@@ -111,6 +111,9 @@
   "2026-10-02_attempt1-custom-node-prompt.txt",
   "2026-10-02_attempt1-orders_cleaned-code-after-run2.py",
   "2026-10-02_attempt1-orders_cleaned-generated-code.py",
+  "2026-10-02_date-ddmm-data-input-profile-datetime.webp",
+  "2026-10-02_date-ddmm-data-input-profile.png",
+  "2026-10-02_date-ddmm-run.png",
   "2026-10-02_dollars-to-cents-run-green.png",
   "2026-10-02_drop-column-chatbot-diagnosis.png",
   "2026-10-02_drop-column-chatbot-transcript.txt",
@@ -118,6 +121,7 @@
   "2026-10-02_drop-column-run-regenerating-code.png",
   "2026-10-02_gcs-destination-created.png",
   "2026-10-02_gcs-duplicate-exports-from-apply.png",
+  "2026-10-02_log-stale-dedup-columns-case6.png",
   "2026-10-02_orders-attached-preview.png",
   "2026-10-02_output-node-defaults-download-locally.png",
   "2026-10-02_rename-after-fix-empty-output-warning.png",
@@ -136,12 +140,12 @@
   "2026-10-02_type-change-run-green.png",
   "s3-bucket-policy-generated-by-rhombus.json"
  ],
- "built_at": "2026-10-02T07:13:41+00:00",
+ "built_at": "2026-10-02T07:24:35+00:00",
  "sources": {
   "reports": "data-validation/reports",
   "ledger": "observations/runs.csv",
   "matrix": "observations/matrix.yaml",
-  "report_count": 10,
+  "report_count": 11,
   "ledger_rows": 0
  },
  "health": [
@@ -179,9 +183,9 @@
    "group": "semantic",
    "label": "Semantic drift",
    "cases": 3,
-   "cases_run": 1,
-   "runs": 1,
-   "succeeded": 1,
+   "cases_run": 2,
+   "runs": 2,
+   "succeeded": 2,
    "failed": 0,
    "success_rate": 1.0
   },
@@ -1959,31 +1963,212 @@
    "file": "semantic-date-mmdd-to-ddmm.csv",
    "rows": 425,
    "change": "Slash dates switched from MM/DD/YYYY to DD/MM/YYYY.",
-   "status": "pending",
-   "headline": "",
+   "status": "done",
+   "headline": "Green run; the file loader swapped day and month on 116 orders (33 now in the future) with no warning.",
    "observation": "observations/semantic-date-mmdd-to-ddmm.md",
-   "observation_md": null,
+   "observation_md": "# Semantic drift: dates switch from MM/DD/YYYY to DD/MM/YYYY\n\n| | |\n|---|---|\n| Case file | `datasets/semantic-date-mmdd-to-ddmm.csv` (uploaded as `input/orders.csv`) |\n| S3 version | `NvqcIZ1m61AbLCY3ECiCp38IBDHz0bX2`, uploaded 2026-10-02 17:15:09 AEST, 32.2 KB |\n| Pipeline | Original AI-built code (`code_sha=831d36d0703c`) |\n| Run | Manual run (\u25b6) 17:15:13 AEST, done 17:15:17 |\n| Severity | **High** (green run; 116 of 390 orders get the wrong date with no warning; 33 orders dated in the future) |\n| Pipeline stopped? | **No.** Green, output written |\n| Chatbot fix worked? | Not applicable (no error) |\n\n## What I changed\nSlash dates rewritten day-first, as if the source moved to Australian format (`04/20/2026` \u2192 `20/04/2026`). ISO (`2026-04-20`) and text (`Aug 14 2026`) dates unchanged. Column name and everything else unchanged. Marker row: \"Marker semantic-date-mmdd-to-ddmm\".\n\nInput mix: 363 slash dates (215 with day > 12, so unambiguous; 128 ambiguous with day \u2264 12; 20 where day = month), 33 ISO, 29 text.\n\n## Expected\nMy prediction from the code: it only knows `%m/%d/%Y`, so day > 12 dates come out **blank**, and day \u2264 12 dates get **day and month swapped**. Best: notice the format changed and warn. Worst: silently swap.\n\n## What happened\n- Run **green**; GCS received `orders_cleaned_1790925315937.csv` (29.9 KB, 390 rows).\n- **My \"blank\" prediction was wrong**: 0 dates went blank. Dates like `20/04/2026` came out correctly as `2026-04-20`.\n- **My \"swap\" prediction was right**: **116 orders have day and month silently swapped** (e.g. order 10009: true date 8 Feb \u2192 shipped as 2 Aug; order 10014: 4 Aug \u2192 8 Apr). They look like perfectly valid dates.\n- Result: **274 dates right, 116 wrong, 0 blank.** Only `order_date` differs from the baseline output.\n- **33 orders are now dated in the future** (Oct\u2013Dec 2026; today is 2 Oct). The month mix changed: Oct/Nov/Dec went from 0 orders to 12/12/13.\n- Validator: same 3 known baseline bugs, plus **`drift_date_ddmm` fail: \"59% of input slash dates start with a day > 12: input is likely DD/MM/YYYY\"** and **`drift_future_dates` warn: \"order dated 2026-12-07 \u2026 day/month may be swapped\"**.\n\n### Why no blanks? Confirmed: the Data Input step converts dates on load\nThe code's own date function would blank `20/04/2026`, so something parsed those dates **before** the code ran. Checked in Data Input \u2192 Profile \u2192 `order_date`: **Type DateTime**, date range **January 1 2026 to December 7 2026**. So the swap has already happened when the file is loaded, before any cleaning step: the loader reads each value month-first and falls back to day-first only when month-first is impossible. Unambiguous dates come out right, ambiguous ones get swapped, and the future date (7 Dec) is already visible in the profile. Same silent, per-file type guessing as `quantity` in case 3. Screenshots: `evidence/2026-10-02_date-ddmm-data-input-profile-datetime.webp`, `evidence/2026-10-02_date-ddmm-data-input-profile.png`.\n\n## Logs\nNormal green run, nothing about dates. Screenshot: `evidence/2026-10-02_date-ddmm-run.png`.\n\n## Chatbot diagnosis\nNot applicable; no error, so no Ask Chatbot button.\n\n## Reproduce\n1. Upload `datasets/semantic-date-mmdd-to-ddmm.csv` as `input/orders.csv`\n2. Run drift-qa with the original code\n3. Compare `order_date` with the baseline output: 116 rows swapped, none blank\n\n## Impact and suggestion\nWorse than a crash: a mixed result where most dates look right builds false trust, and the wrong ones are indistinguishable without the source. Anything grouped by month (sales by month, delivery SLAs) is quietly wrong, and some orders are in the future. Suggest: when a date column has values that only parse day-first, treat the whole column as day-first (or stop and ask), instead of guessing per value; and flag future-dated orders.\n",
    "extra_md": [],
-   "evidence": [],
-   "page_reports": [],
+   "evidence": [
+    {
+     "name": "2026-10-02_date-ddmm-data-input-profile-datetime.webp",
+     "path": "evidence/2026-10-02_date-ddmm-data-input-profile-datetime.webp",
+     "kind": "image",
+     "ext": "webp"
+    },
+    {
+     "name": "2026-10-02_date-ddmm-data-input-profile.png",
+     "path": "evidence/2026-10-02_date-ddmm-data-input-profile.png",
+     "kind": "image",
+     "ext": "png"
+    },
+    {
+     "name": "2026-10-02_date-ddmm-run.png",
+     "path": "evidence/2026-10-02_date-ddmm-run.png",
+     "kind": "image",
+     "ext": "png"
+    }
+   ],
+   "page_reports": [
+    {
+     "run": "date-ddmm",
+     "path": "data-validation/reports/date-ddmm.json",
+     "timestamp": "2026-10-02T07:16:57+00:00",
+     "verdict": "fail",
+     "summary": {
+      "pass": 16,
+      "fail": 5,
+      "warn": 5
+     },
+     "checks": [
+      {
+       "id": "input_schema",
+       "status": "pass",
+       "detail": "columns and order match the contract"
+      },
+      {
+       "id": "schema",
+       "status": "pass",
+       "detail": "columns and order match the contract"
+      },
+      {
+       "id": "row_reconciliation",
+       "status": "pass",
+       "detail": "390 rows, same order_ids as the oracle"
+      },
+      {
+       "id": "row_loss",
+       "status": "pass",
+       "detail": "98% of input orders reached the output"
+      },
+      {
+       "id": "rule_unique_order_id",
+       "status": "pass",
+       "detail": "order_id unique and present"
+      },
+      {
+       "id": "rule_customer_name",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_email",
+       "status": "fail",
+       "detail": "5 value(s) not lowercase valid-or-blank"
+      },
+      {
+       "id": "rule_order_date",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_amount_numeric",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_amount_non_negative",
+       "status": "warn",
+       "detail": "5 value(s) negative (passed through by design)"
+      },
+      {
+       "id": "rule_country",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_status_lowercase",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_status_allowed",
+       "status": "warn",
+       "detail": "7 value(s) outside ['cancelled', 'delivered', 'pending', 'shipped']"
+      },
+      {
+       "id": "rule_quantity",
+       "status": "warn",
+       "detail": "4 value(s) not a positive integer (not cleaned by design)"
+      },
+      {
+       "id": "null_inflation",
+       "status": "fail",
+       "detail": "5 cell(s) blank where the oracle has a value: {'quantity': 5}"
+      },
+      {
+       "id": "empty_columns",
+       "status": "pass",
+       "detail": "every contract column has data"
+      },
+      {
+       "id": "column_types",
+       "status": "pass",
+       "detail": "numeric columns are numeric"
+      },
+      {
+       "id": "oracle_diff",
+       "status": "fail",
+       "detail": "202 cell(s) differ from the oracle: {'email': 5, 'order_date': 192, 'quantity': 5}"
+      },
+      {
+       "id": "marker_row",
+       "status": "pass",
+       "detail": "output was built from 'semantic-date-mmdd-to-ddmm'"
+      },
+      {
+       "id": "determinism",
+       "status": "fail",
+       "detail": "canonical output differs from 1 earlier run(s): ['data-validation/reports/manual-1-baseline.json']"
+      },
+      {
+       "id": "drift_amount_scale",
+       "status": "pass",
+       "detail": "median amount 1.00x baseline"
+      },
+      {
+       "id": "drift_amount_max",
+       "status": "warn",
+       "detail": "1 order(s) above 10,000"
+      },
+      {
+       "id": "drift_date_ddmm",
+       "status": "fail",
+       "detail": "59% of input slash dates start with a day > 12: input is likely DD/MM/YYYY"
+      },
+      {
+       "id": "drift_month_distribution",
+       "status": "pass",
+       "detail": "month mix TVD 0.109 vs baseline (alert > 0.25)"
+      },
+      {
+       "id": "drift_country_distribution",
+       "status": "pass",
+       "detail": "country mix TVD 0.000 vs baseline (alert > 0.2)"
+      },
+      {
+       "id": "drift_future_dates",
+       "status": "warn",
+       "detail": "order dated 2026-12-07, after 2026-10-02: day/month may be swapped"
+      }
+     ],
+     "output_rows": 390,
+     "input_rows": 425,
+     "listed": true
+    }
+   ],
    "matrix": {
-    "run_ids": [],
-    "rhombus_status": null,
-    "platform_behaviour": null,
-    "gcs_output": null,
-    "logs_clear": null,
-    "chatbot_diagnosis": null,
-    "chatbot_fix_worked": null,
-    "schedule_after": "",
-    "severity": null,
+    "run_ids": "date-ddmm",
+    "rhombus_status": "Success",
+    "platform_behaviour": "carried_on",
+    "gcs_output": "yes",
+    "logs_clear": "no",
+    "chatbot_diagnosis": "na",
+    "chatbot_fix_worked": "na",
+    "schedule_after": "Not testable (scheduling not running)",
+    "severity": "High",
     "execution_seconds": null,
-    "credits_used": null
+    "credits_used": 0
    },
-   "runs_total": 0,
-   "runs_with_output": 0,
+   "runs_total": 1,
+   "runs_with_output": 1,
    "runs_without_output": 0,
-   "validator": null,
-   "capability": "pending"
+   "validator": {
+    "run": "date-ddmm",
+    "verdict": "fail",
+    "summary": {
+     "pass": 16,
+     "fail": 5,
+     "warn": 5
+    },
+    "failed": [
+     "rule_email",
+     "null_inflation",
+     "oracle_diff",
+     "determinism",
+     "drift_date_ddmm"
+    ]
+   },
+   "capability": "missed"
   },
   {
    "case": "semantic-country-code-swap",
@@ -2710,6 +2895,18 @@
    "outcome": "output",
    "verdict": "fail",
    "report": "data-validation/reports/dollars-to-cents.json",
+   "notes": ""
+  },
+  {
+   "run": "date-ddmm",
+   "case": "semantic-date-mmdd-to-ddmm",
+   "source": "report",
+   "uploaded_at": null,
+   "output_object": "runs/2026-10-02-drift/date-ddmm.csv",
+   "output_updated": "2026-10-02T07:16:57+00:00",
+   "outcome": "output",
+   "verdict": "fail",
+   "report": "data-validation/reports/date-ddmm.json",
    "notes": ""
   }
  ],
@@ -4321,6 +4518,206 @@
      "column": "quantity",
      "expected": "three",
      "actual": ""
+    }
+   ]
+  },
+  {
+   "run": "date-ddmm",
+   "case": "semantic-date-mmdd-to-ddmm",
+   "path": "data-validation/reports/date-ddmm.json",
+   "timestamp": "2026-10-02T07:16:57+00:00",
+   "input_rows": 425,
+   "input_sha256": "0d5232f4778f554f9edc15a992b6fe1a6682f1e74f5499b4e5f2d94cea04e593",
+   "output_object": "runs/2026-10-02-drift/date-ddmm.csv",
+   "output_updated": null,
+   "output_rows": 390,
+   "output_sha256": "8b47c40cba0e0bef3823eaa6dbe60528d5abcc97b4ec07f3b603572f7cd0a738",
+   "reference_rows": 390,
+   "reference_sha256": "af819c4569219e5790f4ccb2b4cf035b9bc24fa2b26e4eef3f3fe9c17ccd9c94",
+   "matches_oracle": false,
+   "verdict": "fail",
+   "summary": {
+    "pass": 16,
+    "fail": 5,
+    "warn": 5
+   },
+   "checks": [
+    {
+     "id": "input_schema",
+     "status": "pass",
+     "detail": "columns and order match the contract"
+    },
+    {
+     "id": "schema",
+     "status": "pass",
+     "detail": "columns and order match the contract"
+    },
+    {
+     "id": "row_reconciliation",
+     "status": "pass",
+     "detail": "390 rows, same order_ids as the oracle"
+    },
+    {
+     "id": "row_loss",
+     "status": "pass",
+     "detail": "98% of input orders reached the output"
+    },
+    {
+     "id": "rule_unique_order_id",
+     "status": "pass",
+     "detail": "order_id unique and present"
+    },
+    {
+     "id": "rule_customer_name",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_email",
+     "status": "fail",
+     "detail": "5 value(s) not lowercase valid-or-blank"
+    },
+    {
+     "id": "rule_order_date",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_amount_numeric",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_amount_non_negative",
+     "status": "warn",
+     "detail": "5 value(s) negative (passed through by design)"
+    },
+    {
+     "id": "rule_country",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_status_lowercase",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_status_allowed",
+     "status": "warn",
+     "detail": "7 value(s) outside ['cancelled', 'delivered', 'pending', 'shipped']"
+    },
+    {
+     "id": "rule_quantity",
+     "status": "warn",
+     "detail": "4 value(s) not a positive integer (not cleaned by design)"
+    },
+    {
+     "id": "null_inflation",
+     "status": "fail",
+     "detail": "5 cell(s) blank where the oracle has a value: {'quantity': 5}"
+    },
+    {
+     "id": "empty_columns",
+     "status": "pass",
+     "detail": "every contract column has data"
+    },
+    {
+     "id": "column_types",
+     "status": "pass",
+     "detail": "numeric columns are numeric"
+    },
+    {
+     "id": "oracle_diff",
+     "status": "fail",
+     "detail": "202 cell(s) differ from the oracle: {'email': 5, 'order_date': 192, 'quantity': 5}"
+    },
+    {
+     "id": "marker_row",
+     "status": "pass",
+     "detail": "output was built from 'semantic-date-mmdd-to-ddmm'"
+    },
+    {
+     "id": "determinism",
+     "status": "fail",
+     "detail": "canonical output differs from 1 earlier run(s): ['data-validation/reports/manual-1-baseline.json']"
+    },
+    {
+     "id": "drift_amount_scale",
+     "status": "pass",
+     "detail": "median amount 1.00x baseline"
+    },
+    {
+     "id": "drift_amount_max",
+     "status": "warn",
+     "detail": "1 order(s) above 10,000"
+    },
+    {
+     "id": "drift_date_ddmm",
+     "status": "fail",
+     "detail": "59% of input slash dates start with a day > 12: input is likely DD/MM/YYYY"
+    },
+    {
+     "id": "drift_month_distribution",
+     "status": "pass",
+     "detail": "month mix TVD 0.109 vs baseline (alert > 0.25)"
+    },
+    {
+     "id": "drift_country_distribution",
+     "status": "pass",
+     "detail": "country mix TVD 0.000 vs baseline (alert > 0.2)"
+    },
+    {
+     "id": "drift_future_dates",
+     "status": "warn",
+     "detail": "order dated 2026-12-07, after 2026-10-02: day/month may be swapped"
+    }
+   ],
+   "oracle_mismatches": {
+    "customer_name": 0,
+    "email": 5,
+    "order_date": 192,
+    "amount_usd": 0,
+    "quantity": 5,
+    "country": 0,
+    "status": 0
+   },
+   "oracle_examples": [
+    {
+     "order_id": "10012",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10144",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10157",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10185",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10337",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10001",
+     "column": "order_date",
+     "expected": "",
+     "actual": "2026-04-20"
     }
    ]
   }

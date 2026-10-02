@@ -1,0 +1,593 @@
+{
+  "run": "date-ddmm",
+  "timestamp": "2026-10-02T07:16:57+00:00",
+  "input": {
+    "uri": "datasets/semantic-date-mmdd-to-ddmm.csv",
+    "sha256": "0d5232f4778f554f9edc15a992b6fe1a6682f1e74f5499b4e5f2d94cea04e593",
+    "rows": 425
+  },
+  "output": {
+    "uri": "runs/2026-10-02-drift/date-ddmm.csv",
+    "object": "runs/2026-10-02-drift/date-ddmm.csv",
+    "updated": null,
+    "rows": 390,
+    "sha256_canonical": "8b47c40cba0e0bef3823eaa6dbe60528d5abcc97b4ec07f3b603572f7cd0a738"
+  },
+  "reference": {
+    "rows": 390,
+    "sha256_canonical": "af819c4569219e5790f4ccb2b4cf035b9bc24fa2b26e4eef3f3fe9c17ccd9c94",
+    "breakdown": {
+      "input_rows": 425,
+      "exact_duplicates": 20,
+      "duplicate_ids": 7,
+      "missing_key_or_amount": 8,
+      "output_rows": 390
+    }
+  },
+  "profile": {
+    "amount_median": 36.935,
+    "amount_max": 15052.5,
+    "amount_over_max_plausible": 1,
+    "month_distribution": {
+      "01": 0.108808,
+      "02": 0.095855,
+      "03": 0.093264,
+      "04": 0.098446,
+      "05": 0.090674,
+      "06": 0.103627,
+      "07": 0.098446,
+      "08": 0.093264,
+      "09": 0.121762,
+      "10": 0.031088,
+      "11": 0.031088,
+      "12": 0.033679
+    },
+    "country_distribution": {
+      "AU": 0.289744,
+      "GB": 0.246154,
+      "NZ": 0.223077,
+      "US": 0.241026
+    },
+    "input_slash_dates": {
+      "slash_dates": 363,
+      "first_gt12": 215,
+      "share": 0.592287
+    },
+    "max_order_date": "2026-12-07"
+  },
+  "checks": [
+    {
+      "id": "input_schema",
+      "status": "pass",
+      "detail": "columns and order match the contract",
+      "evidence": {
+        "expected": [
+          "order_id",
+          "customer_name",
+          "email",
+          "order_date",
+          "amount_usd",
+          "quantity",
+          "country",
+          "status"
+        ],
+        "actual": [
+          "order_id",
+          "customer_name",
+          "email",
+          "order_date",
+          "amount_usd",
+          "quantity",
+          "country",
+          "status"
+        ],
+        "missing": [],
+        "extra": [],
+        "order_ok": true,
+        "likely_renamed": []
+      }
+    },
+    {
+      "id": "schema",
+      "status": "pass",
+      "detail": "columns and order match the contract",
+      "evidence": {
+        "expected": [
+          "order_id",
+          "customer_name",
+          "email",
+          "order_date",
+          "amount_usd",
+          "quantity",
+          "country",
+          "status"
+        ],
+        "actual": [
+          "order_id",
+          "customer_name",
+          "email",
+          "order_date",
+          "amount_usd",
+          "quantity",
+          "country",
+          "status"
+        ],
+        "missing": [],
+        "extra": [],
+        "order_ok": true,
+        "likely_renamed": []
+      }
+    },
+    {
+      "id": "row_reconciliation",
+      "status": "pass",
+      "detail": "390 rows, same order_ids as the oracle",
+      "evidence": {
+        "expected_rows": 390,
+        "actual_rows": 390,
+        "breakdown": {
+          "input_rows": 425,
+          "exact_duplicates": 20,
+          "duplicate_ids": 7,
+          "missing_key_or_amount": 8,
+          "output_rows": 390
+        },
+        "missing_count": 0,
+        "unexpected_count": 0,
+        "missing_ids": [],
+        "unexpected_ids": []
+      }
+    },
+    {
+      "id": "row_loss",
+      "status": "pass",
+      "detail": "98% of input orders reached the output",
+      "evidence": {
+        "input_keys": 397,
+        "output_keys": 390,
+        "share_kept": 0.982
+      }
+    },
+    {
+      "id": "rule_unique_order_id",
+      "status": "pass",
+      "detail": "order_id unique and present",
+      "evidence": {
+        "duplicate_ids": [],
+        "duplicate_count": 0,
+        "blank_ids": 0
+      }
+    },
+    {
+      "id": "rule_customer_name",
+      "status": "pass",
+      "detail": "all 390 values ok",
+      "evidence": {
+        "violations": 0,
+        "rows": 390,
+        "examples": []
+      }
+    },
+    {
+      "id": "rule_email",
+      "status": "fail",
+      "detail": "5 value(s) not lowercase valid-or-blank",
+      "evidence": {
+        "violations": 5,
+        "rows": 390,
+        "examples": [
+          {
+            "order_id": "10012.0",
+            "email": "@example.com"
+          },
+          {
+            "order_id": "10144.0",
+            "email": "@example.com"
+          },
+          {
+            "order_id": "10157.0",
+            "email": "@example.com"
+          },
+          {
+            "order_id": "10185.0",
+            "email": "@example.com"
+          },
+          {
+            "order_id": "10337.0",
+            "email": "@example.com"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule_order_date",
+      "status": "pass",
+      "detail": "all 390 values ok",
+      "evidence": {
+        "violations": 0,
+        "rows": 390,
+        "examples": []
+      }
+    },
+    {
+      "id": "rule_amount_numeric",
+      "status": "pass",
+      "detail": "all 390 values ok",
+      "evidence": {
+        "violations": 0,
+        "rows": 390,
+        "examples": []
+      }
+    },
+    {
+      "id": "rule_amount_non_negative",
+      "status": "warn",
+      "detail": "5 value(s) negative (passed through by design)",
+      "evidence": {
+        "violations": 5,
+        "rows": 390,
+        "examples": [
+          {
+            "order_id": "10047.0",
+            "amount_usd": "-45.08"
+          },
+          {
+            "order_id": "10187.0",
+            "amount_usd": "-84.83"
+          },
+          {
+            "order_id": "10289.0",
+            "amount_usd": "-26.62"
+          },
+          {
+            "order_id": "10361.0",
+            "amount_usd": "-57.29"
+          },
+          {
+            "order_id": "10380.0",
+            "amount_usd": "-49.84"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule_country",
+      "status": "pass",
+      "detail": "all 390 values ok",
+      "evidence": {
+        "violations": 0,
+        "rows": 390,
+        "examples": []
+      }
+    },
+    {
+      "id": "rule_status_lowercase",
+      "status": "pass",
+      "detail": "all 390 values ok",
+      "evidence": {
+        "violations": 0,
+        "rows": 390,
+        "examples": []
+      }
+    },
+    {
+      "id": "rule_status_allowed",
+      "status": "warn",
+      "detail": "7 value(s) outside ['cancelled', 'delivered', 'pending', 'shipped']",
+      "evidence": {
+        "violations": 7,
+        "rows": 390,
+        "examples": [
+          {
+            "order_id": "10051.0",
+            "status": "shipd"
+          },
+          {
+            "order_id": "10059.0",
+            "status": "shipd"
+          },
+          {
+            "order_id": "10209.0",
+            "status": "shipd"
+          },
+          {
+            "order_id": "10233.0",
+            "status": "shipd"
+          },
+          {
+            "order_id": "10251.0",
+            "status": "shipd"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule_quantity",
+      "status": "warn",
+      "detail": "4 value(s) not a positive integer (not cleaned by design)",
+      "evidence": {
+        "violations": 4,
+        "rows": 390,
+        "examples": [
+          {
+            "order_id": "10010.0",
+            "quantity": "0.0"
+          },
+          {
+            "order_id": "10194.0",
+            "quantity": "0.0"
+          },
+          {
+            "order_id": "10252.0",
+            "quantity": "0.0"
+          },
+          {
+            "order_id": "10283.0",
+            "quantity": "0.0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "null_inflation",
+      "status": "fail",
+      "detail": "5 cell(s) blank where the oracle has a value: {'quantity': 5}",
+      "evidence": {
+        "compared_rows": 390,
+        "columns": {
+          "customer_name": {
+            "output_blank": 17,
+            "expected_blank": 17,
+            "inflated": 0
+          },
+          "email": {
+            "output_blank": 26,
+            "expected_blank": 31,
+            "inflated": 0
+          },
+          "order_date": {
+            "output_blank": 4,
+            "expected_blank": 196,
+            "inflated": 0
+          },
+          "amount_usd": {
+            "output_blank": 0,
+            "expected_blank": 0,
+            "inflated": 0
+          },
+          "quantity": {
+            "output_blank": 11,
+            "expected_blank": 6,
+            "inflated": 5
+          },
+          "country": {
+            "output_blank": 0,
+            "expected_blank": 0,
+            "inflated": 0
+          },
+          "status": {
+            "output_blank": 0,
+            "expected_blank": 0,
+            "inflated": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "empty_columns",
+      "status": "pass",
+      "detail": "every contract column has data",
+      "evidence": {
+        "rows": 390,
+        "empty_columns": []
+      }
+    },
+    {
+      "id": "column_types",
+      "status": "pass",
+      "detail": "numeric columns are numeric",
+      "evidence": {}
+    },
+    {
+      "id": "oracle_diff",
+      "status": "fail",
+      "detail": "202 cell(s) differ from the oracle: {'email': 5, 'order_date': 192, 'quantity': 5}",
+      "evidence": {
+        "compared_rows": 390,
+        "compared_columns": [
+          "customer_name",
+          "email",
+          "order_date",
+          "amount_usd",
+          "quantity",
+          "country",
+          "status"
+        ],
+        "mismatches": {
+          "customer_name": 0,
+          "email": 5,
+          "order_date": 192,
+          "amount_usd": 0,
+          "quantity": 5,
+          "country": 0,
+          "status": 0
+        },
+        "examples": [
+          {
+            "order_id": "10012",
+            "column": "email",
+            "expected": "",
+            "actual": "@example.com"
+          },
+          {
+            "order_id": "10144",
+            "column": "email",
+            "expected": "",
+            "actual": "@example.com"
+          },
+          {
+            "order_id": "10157",
+            "column": "email",
+            "expected": "",
+            "actual": "@example.com"
+          },
+          {
+            "order_id": "10185",
+            "column": "email",
+            "expected": "",
+            "actual": "@example.com"
+          },
+          {
+            "order_id": "10337",
+            "column": "email",
+            "expected": "",
+            "actual": "@example.com"
+          },
+          {
+            "order_id": "10001",
+            "column": "order_date",
+            "expected": "",
+            "actual": "2026-04-20"
+          },
+          {
+            "order_id": "10003",
+            "column": "order_date",
+            "expected": "",
+            "actual": "2026-01-14"
+          },
+          {
+            "order_id": "10004",
+            "column": "order_date",
+            "expected": "",
+            "actual": "2026-02-20"
+          },
+          {
+            "order_id": "10007",
+            "column": "order_date",
+            "expected": "",
+            "actual": "2026-09-27"
+          },
+          {
+            "order_id": "10011",
+            "column": "order_date",
+            "expected": "",
+            "actual": "2026-04-16"
+          }
+        ]
+      }
+    },
+    {
+      "id": "marker_row",
+      "status": "pass",
+      "detail": "output was built from 'semantic-date-mmdd-to-ddmm'",
+      "evidence": {
+        "expected_name": "Marker Semantic-Date-Mmdd-To-Ddmm",
+        "actual_name": "Marker Semantic-Date-Mmdd-To-Ddmm",
+        "variant_read": "semantic-date-mmdd-to-ddmm",
+        "variant_expected": "semantic-date-mmdd-to-ddmm"
+      }
+    },
+    {
+      "id": "determinism",
+      "status": "fail",
+      "detail": "canonical output differs from 1 earlier run(s): ['data-validation/reports/manual-1-baseline.json']",
+      "evidence": {
+        "sha256_canonical": "8b47c40cba0e0bef3823eaa6dbe60528d5abcc97b4ec07f3b603572f7cd0a738",
+        "compared": [
+          {
+            "report": "data-validation/reports/manual-1-baseline.json",
+            "sha256_canonical": "cc359cbab7ed7feec74a7cc7fa8f81da171e02a64b4354fa32a8d6dbb25ed5fa",
+            "same": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "drift_amount_scale",
+      "status": "pass",
+      "detail": "median amount 1.00x baseline",
+      "evidence": {
+        "median": 36.935,
+        "baseline_median": 36.935,
+        "ratio": 1.0,
+        "alert_above": 20
+      }
+    },
+    {
+      "id": "drift_amount_max",
+      "status": "warn",
+      "detail": "1 order(s) above 10,000",
+      "evidence": {
+        "max": 15052.5,
+        "rows_over": 1,
+        "limit": 10000,
+        "baseline_rows_over": 1
+      }
+    },
+    {
+      "id": "drift_date_ddmm",
+      "status": "fail",
+      "detail": "59% of input slash dates start with a day > 12: input is likely DD/MM/YYYY",
+      "evidence": {
+        "slash_dates": 363,
+        "first_gt12": 215,
+        "share": 0.592287,
+        "baseline_share": 0.0,
+        "alert_above": 0.3
+      }
+    },
+    {
+      "id": "drift_month_distribution",
+      "status": "pass",
+      "detail": "month mix TVD 0.109 vs baseline (alert > 0.25)",
+      "evidence": {
+        "tvd": 0.108809,
+        "alert_above": 0.25,
+        "months": {
+          "01": 0.108808,
+          "02": 0.095855,
+          "03": 0.093264,
+          "04": 0.098446,
+          "05": 0.090674,
+          "06": 0.103627,
+          "07": 0.098446,
+          "08": 0.093264,
+          "09": 0.121762,
+          "10": 0.031088,
+          "11": 0.031088,
+          "12": 0.033679
+        }
+      }
+    },
+    {
+      "id": "drift_country_distribution",
+      "status": "pass",
+      "detail": "country mix TVD 0.000 vs baseline (alert > 0.2)",
+      "evidence": {
+        "tvd": 0.0,
+        "alert_above": 0.2,
+        "countries": {
+          "AU": 0.289744,
+          "GB": 0.246154,
+          "NZ": 0.223077,
+          "US": 0.241026
+        }
+      }
+    },
+    {
+      "id": "drift_future_dates",
+      "status": "warn",
+      "detail": "order dated 2026-12-07, after 2026-10-02: day/month may be swapped",
+      "evidence": {
+        "max_order_date": "2026-12-07",
+        "as_of": "2026-10-02"
+      }
+    }
+  ],
+  "summary": {
+    "pass": 16,
+    "fail": 5,
+    "warn": 5
+  },
+  "verdict": "fail"
+}

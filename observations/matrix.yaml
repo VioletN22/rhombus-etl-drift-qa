@@ -170,19 +170,22 @@ cases:
   capability: missed
 - case: semantic-date-mmdd-to-ddmm
   change: Slash dates switched from MM/DD/YYYY to DD/MM/YYYY.
-  status: pending
-  run_ids: []
-  rhombus_status: null
-  platform_behaviour: null
-  gcs_output: null
-  logs_clear: null
-  chatbot_diagnosis: null
-  chatbot_fix_worked: null
-  schedule_after: ''
-  severity: null
+  status: done
+  run_ids: date-ddmm
+  rhombus_status: Success
+  platform_behaviour: carried_on
+  gcs_output: 'yes'
+  logs_clear: 'no'
+  chatbot_diagnosis: na
+  chatbot_fix_worked: na
+  schedule_after: Not testable (scheduling not running)
+  severity: High
   execution_seconds: null
-  credits_used: null
+  credits_used: 0
   observation: observations/semantic-date-mmdd-to-ddmm.md
+  headline: Green run; the file loader swapped day and month on 116 orders (33 now in the future) with
+    no warning.
+  capability: missed
 - case: semantic-country-code-swap
   change: 'Bonus: Australia rows relabelled as Austria (AT).'
   status: pending
