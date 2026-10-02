@@ -23,7 +23,6 @@
 #
 # The summary section at the end of this file feeds the dashboard home page
 # (verdict, required cases, credits, learnings).
-
 cases:
 - case: baseline
   change: Known-good input the pipeline is built against.
@@ -147,8 +146,8 @@ cases:
   execution_seconds: 5
   credits_used: 10
   observation: observations/schema-all-combined.md
-  headline: Stopped naming 1 of 4 problems; two chatbot requests later the pipeline ran green with a
-    blank country column.
+  headline: Stopped naming 1 of 4 problems; two chatbot requests later the pipeline ran green with a blank
+    country column.
   capability: broke
 - case: semantic-dollars-to-cents
   change: amount_usd values x100 (cents), header unchanged.
@@ -325,7 +324,8 @@ summary:
   - semantic-dollars-to-cents
   - semantic-date-mmdd-to-ddmm
   credits_used: 35
-  credits_note: of 5,050. 15 on two extra AI builds, 20 on four chatbot requests (5 each); runs cost nothing visible.
+  credits_note: of 5,050. 15 on two extra AI builds, 20 on four chatbot requests (5 each); runs cost nothing
+    visible.
   learnings:
   - title: Rhombus stops on missing columns, but the error only says 'country'
     line: Nothing bad reached GCS, but the error is a raw one-word KeyError.
@@ -338,25 +338,51 @@ summary:
     - schema-rename-column
     severity: Medium
   - title: The chatbot's fixes turned safe failures into silent bad data
-    line: Both fixes made the run green by shipping a blank column or an empty file.
-    detail: Asked about each failure, the chatbot guessed a cause without reading the input header (casing,
-      then a "cached execution"), and edited the pipeline in the same turn without asking (5 credits each).
-      Its patches quietly make missing columns optional. The next runs reported success with country blank
-      on all 390 rows, then with a header-only file holding 0 of 397 orders.
+    line: All three chatbot fixes made the run green by shipping a blank column, an empty file, or extra
+      columns.
+    detail: 'Asked about each failure, the chatbot guessed a cause without reading the input header (casing,
+      then a "cached execution" twice), and edited the pipeline in the same turn without asking (5 credits
+      each). Its patches quietly make missing columns optional. Results: country blank on all 390 rows
+      (case 1); a header-only file with 0 of 397 orders (case 2); in case 5 it deleted and re-added the
+      cleaning step, left the output unwired so nothing could run, then after rewiring shipped 10 columns
+      with country blank on every row.'
     cases:
     - schema-drop-column
     - schema-rename-column
+    - schema-all-combined
     severity: Critical
   - title: A number column that turns into text ships silently
     line: quantity arrived as '6 units' on a green run with no warning.
     detail: 384 of 390 quantity values reached GCS as text. Nothing in the logs, and with no error there
       is no Ask Chatbot button. The type is decided when the file loads (Data Input labels quantity Numeric
       on the baseline, Categorical here), so the same value 'three' is blanked in one file and kept in
-      the other.
+      the other. The same loader turns order_date into DateTime on load, reading month-first and only
+      falling back to day-first when it must (case 7).
     cases:
     - schema-type-change
+    - semantic-date-mmdd-to-ddmm
     - baseline
     severity: High
+  - title: 'Changed meanings ship green: amounts ×100 and swapped dates'
+    line: Cents instead of dollars, and day-first dates, both ran green with no warning.
+    detail: 'Case 6: every amount arrived 100× too big (total revenue $40.9k became $4.09M). Case 7: day-first
+      dates were read month-first wherever possible, so 116 orders got the wrong date and 33 landed in
+      the future. Shape checks can''t see either; my validator caught both by comparing with the last
+      good run (median amount ×100; 59% of slash dates start with a day above 12).'
+    cases:
+    - semantic-dollars-to-cents
+    - semantic-date-mmdd-to-ddmm
+    severity: High
+  - title: What runs isn't what the canvas shows
+    line: The chatbot's prompt asked for 8 columns; the code that ran kept 10.
+    detail: In case 5 the code writer regenerated against the broken file, and Rhombus's own sandbox rule
+      ("don't drop input columns") rejected the 8-column version twice. The only record is the node's
+      Edit Code → Transcript; the canvas and run log show the prompt. Separately, a run log listed a column
+      from the previous file (total_amount) that wasn't in the data.
+    cases:
+    - schema-all-combined
+    - semantic-dollars-to-cents
+    severity: Medium
   - title: Building is non-deterministic, running is deterministic
     line: Three builds from one prompt differed; three runs of one pipeline were byte-identical.
     detail: The same prompt in three fresh projects gave the same nodes but different explanations and
@@ -375,12 +401,13 @@ summary:
     cases:
     - baseline
     severity: High
-  - title: Scheduled runs never execute on the Free plan
+  - title: Scheduled runs never execute, even after Rhombus enabled them
     line: The schedule shows Active with a countdown, then nothing runs and nobody is told.
-    detail: A 15-minute custom schedule and an hourly control both missed every slot. No executions, no
-      output, "Next run" went blank, and no email. Pricing lists scheduled runs only on paid plans, but
-      the app allowed creating one with no upgrade prompt. Every run in this project is manual as a result;
-      reported to Rhombus.
+    detail: 'A 15-minute custom schedule and an hourly control both missed every slot: no executions,
+      no output, "Next run" went blank, no email. Rhombus enabled scheduling for the exercise at 18:31;
+      the hourly schedule still missed 19:30 and 20:30, and a brand-new schedule missed 21:20. The app
+      shows "Active" with a countdown throughout. Every run in this project is manual as a result; follow-up
+      sent to Rhombus with screenshots.'
     cases:
     - baseline
     severity: High
