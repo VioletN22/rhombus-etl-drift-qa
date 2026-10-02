@@ -14,22 +14,44 @@
   },
   {
    "title": "The chatbot's fixes turned safe failures into silent bad data",
-   "line": "Both fixes made the run green by shipping a blank column or an empty file.",
-   "detail": "Asked about each failure, the chatbot guessed a cause without reading the input header (casing, then a \"cached execution\"), and edited the pipeline in the same turn without asking (5 credits each). Its patches quietly make missing columns optional. The next runs reported success with country blank on all 390 rows, then with a header-only file holding 0 of 397 orders.",
+   "line": "All three chatbot fixes made the run green by shipping a blank column, an empty file, or extra columns.",
+   "detail": "Asked about each failure, the chatbot guessed a cause without reading the input header (casing, then a \"cached execution\" twice), and edited the pipeline in the same turn without asking (5 credits each). Its patches quietly make missing columns optional. Results: country blank on all 390 rows (case 1); a header-only file with 0 of 397 orders (case 2); in case 5 it deleted and re-added the cleaning step, left the output unwired so nothing could run, then after rewiring shipped 10 columns with country blank on every row.",
    "severity": "Critical",
    "cases": [
     "schema-drop-column",
-    "schema-rename-column"
+    "schema-rename-column",
+    "schema-all-combined"
    ]
   },
   {
    "title": "A number column that turns into text ships silently",
    "line": "quantity arrived as '6 units' on a green run with no warning.",
-   "detail": "384 of 390 quantity values reached GCS as text. Nothing in the logs, and with no error there is no Ask Chatbot button. The type is decided when the file loads (Data Input labels quantity Numeric on the baseline, Categorical here), so the same value 'three' is blanked in one file and kept in the other.",
+   "detail": "384 of 390 quantity values reached GCS as text. Nothing in the logs, and with no error there is no Ask Chatbot button. The type is decided when the file loads (Data Input labels quantity Numeric on the baseline, Categorical here), so the same value 'three' is blanked in one file and kept in the other. The same loader turns order_date into DateTime on load, reading month-first and only falling back to day-first when it must (case 7).",
    "severity": "High",
    "cases": [
     "schema-type-change",
+    "semantic-date-mmdd-to-ddmm",
     "baseline"
+   ]
+  },
+  {
+   "title": "Changed meanings ship green: amounts \u00d7100 and swapped dates",
+   "line": "Cents instead of dollars, and day-first dates, both ran green with no warning.",
+   "detail": "Case 6: every amount arrived 100\u00d7 too big (total revenue $40.9k became $4.09M). Case 7: day-first dates were read month-first wherever possible, so 116 orders got the wrong date and 33 landed in the future. Shape checks can't see either; my validator caught both by comparing with the last good run (median amount \u00d7100; 59% of slash dates start with a day above 12).",
+   "severity": "High",
+   "cases": [
+    "semantic-dollars-to-cents",
+    "semantic-date-mmdd-to-ddmm"
+   ]
+  },
+  {
+   "title": "What runs isn't what the canvas shows",
+   "line": "The chatbot's prompt asked for 8 columns; the code that ran kept 10.",
+   "detail": "In case 5 the code writer regenerated against the broken file, and Rhombus's own sandbox rule (\"don't drop input columns\") rejected the 8-column version twice. The only record is the node's Edit Code \u2192 Transcript; the canvas and run log show the prompt. Separately, a run log listed a column from the previous file (total_amount) that wasn't in the data.",
+   "severity": "Medium",
+   "cases": [
+    "schema-all-combined",
+    "semantic-dollars-to-cents"
    ]
   },
   {
@@ -51,9 +73,9 @@
    ]
   },
   {
-   "title": "Scheduled runs never execute on the Free plan",
+   "title": "Scheduled runs never execute, even after Rhombus enabled them",
    "line": "The schedule shows Active with a countdown, then nothing runs and nobody is told.",
-   "detail": "A 15-minute custom schedule and an hourly control both missed every slot. No executions, no output, \"Next run\" went blank, and no email. Pricing lists scheduled runs only on paid plans, but the app allowed creating one with no upgrade prompt. Every run in this project is manual as a result; reported to Rhombus.",
+   "detail": "A 15-minute custom schedule and an hourly control both missed every slot: no executions, no output, \"Next run\" went blank, no email. Rhombus enabled scheduling for the exercise at 18:31; the hourly schedule still missed 19:30 and 20:30, and a brand-new schedule missed 21:20. The app shows \"Active\" with a countdown throughout. Every run in this project is manual as a result; follow-up sent to Rhombus with screenshots.",
    "severity": "High",
    "cases": [
     "baseline"
@@ -143,7 +165,7 @@
   "2026-10-02_type-change-run-green.png",
   "s3-bucket-policy-generated-by-rhombus.json"
  ],
- "built_at": "2026-10-02T11:51:59+00:00",
+ "built_at": "2026-10-02T11:52:33+00:00",
  "sources": {
   "reports": "data-validation/reports",
   "ledger": "observations/runs.csv",
