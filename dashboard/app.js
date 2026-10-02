@@ -464,9 +464,42 @@ const FACT = {
   gcs: { yes: ["s-none", "Yes"], no: ["s-ok", "No"] },
 };
 
-function renderFacts(c) {
+const mdInline = (s) => (window.marked && window.DOMPurify
+  ? DOMPurify.sanitize(marked.parseInline(s)) : esc(s));
+const normKey = (s) => s.toLowerCase().replace(/[^a-z]+/g, " ").trim();
+
+// The write-ups open with a two-column `| | |` table of facts before the first H2.
+// Pull it out so it can sit in the "At a glance" card instead of the prose.
+function splitObservation(md) {
+  const body = md.replace(/^#\s+.+\n+/, ""); // title is already the page heading
+  const first = body.search(/^##\s/m);
+  let pre = first < 0 ? body : body.slice(0, first);
+  const rest = first < 0 ? "" : body.slice(first);
+  const facts = [];
+  const lines = pre.split("\n");
+  const start = lines.findIndex((l) => /^\|\s*\|\s*\|\s*$/.test(l.trim()));
+  if (start >= 0) {
+    let end = start + 1;
+    while (end < lines.length && lines[end].trim().startsWith("|")) {
+      const cells = lines[end].trim().replace(/^\||\|$/g, "").split(/(?<!\\)\|/).map((x) => x.trim());
+      if (!/^-+$/.test(cells[0] || "") && cells[0]) facts.push([cells[0], cells.slice(1).join(" | ")]);
+      end += 1;
+    }
+    lines.splice(start, end - start);
+    pre = lines.join("\n");
+  }
+  const sections = [];
+  if (pre.trim()) sections.push({ title: "", md: pre });
+  for (const chunk of rest.split(/^(?=##\s)/m)) {
+    if (!chunk.trim()) continue;
+    const m = /^##\s+(.+)\n?([\s\S]*)$/.exec(chunk);
+    sections.push({ title: m[1].trim(), md: m[2] });
+  }
+  return { facts, sections };
+}
+
+function renderFacts(c, mdFacts) {
   const m = c.matrix;
-  const row = (k, v, note = "") => `<div class="fact"><dt>${esc(k)}</dt><dd>${v}${note ? `<span class="note">${esc(note)}</span>` : ""}</dd></div>`;
   const pick = (map, v) => (v && map[v] ? chip(map[v][0], map[v][1]) : `<span class="quiet">not recorded</span>`);
   // Output reaching GCS is only good news if the output is right.
   let gcs = pick(FACT.gcs, m.gcs_output);
@@ -475,32 +508,77 @@ function renderFacts(c) {
       ? chip("s-bad missed", "Yes, wrong data") : chip("s-none", "Yes");
   }
   const isBase = c.case === "baseline";
-  const rows = [
-    row("Rhombus run", m.rhombus_status ? chip(m.rhombus_status === "Success" ? "s-ok" : "s-bad", m.rhombus_status) : `<span class="quiet">not recorded</span>`),
-    row("Pipeline stopped?", pick(FACT.stopped, m.platform_behaviour)),
-    row("Output reached GCS?", gcs),
-    row("Logs clear?", scaleChip("logs_clear", m.logs_clear, true)),
+  const outcome = [
+    ["Rhombus run", m.rhombus_status ? chip(m.rhombus_status === "Success" ? "s-ok" : "s-bad", m.rhombus_status) : `<span class="quiet">not recorded</span>`],
+    ["Pipeline stopped?", pick(FACT.stopped, m.platform_behaviour)],
+    ["Output reached GCS?", gcs],
+    ["Logs clear?", scaleChip("logs_clear", m.logs_clear, true)],
   ];
   if (!isBase) {
-    rows.push(row("Chatbot diagnosis", scaleChip("chatbot_diagnosis", m.chatbot_diagnosis, true)));
-    rows.push(row("Chatbot fix worked?", scaleChip("chatbot_fix_worked", m.chatbot_fix_worked, true)));
+    outcome.push(["Chatbot diagnosis", scaleChip("chatbot_diagnosis", m.chatbot_diagnosis, true)]);
+    outcome.push(["Chatbot fix worked?", scaleChip("chatbot_fix_worked", m.chatbot_fix_worked, true)]);
   }
-  if (typeof m.credits_used === "number") rows.push(row("Credits", `<span class="num">${m.credits_used}</span>`));
-  if (m.schedule_after) rows.push(row("Schedule", `<span class="plain">${esc(m.schedule_after)}</span>`));
-  $("#facts").innerHTML = rows.join("");
+  if (sevChip(m.severity)) outcome.push(["Severity", sevChip(m.severity)]);
+  if (typeof m.credits_used === "number") outcome.push(["Credits", `<span class="num">${m.credits_used}</span>`]);
+  // A write-up row with the same label adds its wording under the chip, so nothing shows twice.
+  const notes = new Map(mdFacts.map(([k, v]) => [normKey(k), v]));
+  const used = new Set();
+  const row = (k, v, note = "") => `<div class="fact"><dt>${esc(k)}</dt><dd>${v}${note ? `<span class="note">${note}</span>` : ""}</dd></div>`;
+  const top = outcome.map(([k, v]) => {
+    const n = notes.get(normKey(k));
+    if (n !== undefined) used.add(normKey(k));
+    return row(k, v, n ? mdInline(n) : "");
+  });
+  if (m.schedule_after && !notes.has("schedule")) mdFacts = [...mdFacts, ["Schedule", esc(m.schedule_after)]];
+  const details = mdFacts.filter(([k]) => !used.has(normKey(k)))
+    .map(([k, v]) => row(k, `<span class="plain">${mdInline(v)}</span>`));
+  $("#facts").innerHTML = `<dl class="facts">${top.join("")}</dl>` +
+    (details.length ? `<h3 class="facts-sub">Run details</h3><dl class="facts details">${details.join("")}</dl>` : "");
 }
 
 const EVIDENCE_HREF = /^(?:\.\/)?(?:observations\/)?evidence\/([^\s/]+)$/;
 const REPORT_HREF = /^(?:data-validation\/)?reports\/([^\s/]+)\.json$/;
+const IMAGE_EXT = /\.(?:png|jpe?g|gif|webp)$/i;
 
-function renderMarkdown(el, md, c) {
-  const body = md.replace(/^#\s+.+\n+/, ""); // title is already the page heading
-  if (window.marked && window.DOMPurify) {
-    el.innerHTML = DOMPurify.sanitize(marked.parse(body));
-  } else {
-    el.innerHTML = `<pre class="raw">${esc(body)}</pre>`;
-    return;
-  }
+// Section kinds by heading. size "short" cards may share a row with a neighbour.
+const ICON = {
+  changed: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/>',
+  expected: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>',
+  happened: '<path d="M5 4v16"/><path d="M5 5h11l-2 4 2 4H5"/>',
+  logs: '<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/>',
+  chatbot: '<path d="M4 5h16v11H9l-5 4z"/>',
+  schedule: '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>',
+  destination: '<path d="M4 12h11"/><path d="M11 8l4 4-4 4"/><path d="M15 4h5v16h-5"/>',
+  validator: '<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 12l3 3 5-6"/>',
+  reproduce: '<path d="M5 12a7 7 0 1 0 2-5"/><path d="M5 4v4h4"/>',
+  impact: '<path d="M12 4v10"/><path d="M12 18v2"/><path d="M5 20h14L12 4z" fill="none"/>',
+  question: '<circle cx="12" cy="12" r="8"/><path d="M10 10a2 2 0 1 1 3 1.7c-.7.4-1 .9-1 1.6"/><path d="M12 16.5v.5"/>',
+  evidence: '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 8"/>',
+  checks: '<path d="M5 7h3M5 12h3M5 17h3"/><path d="M11 7h8M11 12h8M11 17h8"/>',
+  glance: '<path d="M4 6h16M4 12h16M4 18h16"/>',
+  note: '<path d="M6 4h9l3 3v13H6z"/><path d="M9 11h6M9 15h6"/>',
+};
+const KINDS = [
+  [/^what i changed/i, "changed", "short"],
+  [/^expected/i, "expected", "short"],
+  [/^what happened/i, "happened", "long"],
+  [/^logs?\b/i, "logs", "long"],
+  [/chatbot/i, "chatbot", "long"],
+  [/^schedule/i, "schedule", "short"],
+  [/destination/i, "destination", "long"],
+  [/^validator/i, "validator", "long"],
+  [/^reproduce/i, "reproduce", "short"],
+  [/^impact/i, "impact", "long"],
+  [/^who decided|\?/i, "question", "long"],
+];
+const kindOf = (title) => {
+  for (const [re, kind, size] of KINDS) if (re.test(title)) return { kind, size };
+  return { kind: "note", size: "long" };
+};
+const glyph = (kind) => `<svg class="glyph" viewBox="0 0 24 24" aria-hidden="true">${ICON[kind] || ICON.note}</svg>`;
+const cardHead = (kind, title, id) => `<div class="card-head">${glyph(kind)}<h2${id ? ` id="${id}"` : ""}>${mdInline(title)}</h2></div>`;
+
+function postProcess(el, c) {
   const evidence = new Set(c.evidence.map((e) => e.name));
   const reports = new Set(c.page_reports.map((r) => r.run));
   // Code spans that name a file we publish become links.
@@ -515,7 +593,7 @@ function renderMarkdown(el, md, c) {
     if (!href) return;
     const a = document.createElement("a");
     a.href = href;
-    if (href.startsWith("evidence/")) a.target = "_blank";
+    if (href.startsWith("evidence/")) { a.target = "_blank"; a.rel = "noopener"; }
     code.replaceWith(a);
     a.appendChild(code);
   });
@@ -525,7 +603,7 @@ function renderMarkdown(el, md, c) {
     if (/^(?:[a-z]+:|#|evidence\/)/i.test(href)) return;
     const base = c.observation.split("/").slice(0, -1).join("/");
     const ev = EVIDENCE_HREF.exec(href);
-    if (ev) { a.href = `evidence/${ev[1]}`; return; }
+    if (ev) { a.href = `evidence/${ev[1]}`; a.target = "_blank"; a.rel = "noopener"; return; }
     const parts = `${base}/${href}`.split("/");
     const out = [];
     for (const p of parts) { if (p === "..") out.pop(); else if (p && p !== ".") out.push(p); }
@@ -537,10 +615,91 @@ function renderMarkdown(el, md, c) {
     wrap.className = "scroll-x";
     t.replaceWith(wrap);
     wrap.appendChild(t);
-    // The write-ups open with a key/value table whose header row is empty.
     const head = t.querySelector("thead");
     if (head && !head.textContent.trim()) { head.remove(); t.classList.add("kv"); }
   });
+  // Verbatim errors read as code; quotes from people or the chatbot stay in prose.
+  el.querySelectorAll("blockquote").forEach((q) => {
+    const t = q.textContent;
+    const isError = /error|failed|exception|traceback|keyerror|---|code_sha|pipeline execution/i.test(t);
+    q.classList.add("callout", isError ? "callout-error" : "callout-quote");
+  });
+}
+
+// Small thumbnails for screenshots the card links to.
+function thumbs(el) {
+  const seen = new Set();
+  const items = [];
+  el.querySelectorAll('a[href^="evidence/"]').forEach((a) => {
+    const href = a.getAttribute("href");
+    if (!IMAGE_EXT.test(href) || seen.has(href)) return;
+    seen.add(href);
+    items.push(`<a class="thumb" href="${esc(href)}" target="_blank" rel="noopener" title="${esc(prettyName(href.split("/").pop()))}">
+      <img src="${esc(href)}" alt="${esc(prettyName(href.split("/").pop()))}" loading="lazy"></a>`);
+  });
+  if (!items.length) return;
+  const div = document.createElement("div");
+  div.className = "thumbs";
+  div.innerHTML = items.join("");
+  el.appendChild(div);
+}
+
+function renderMarkdown(el, md, c) {
+  if (window.marked && window.DOMPurify) {
+    el.innerHTML = DOMPurify.sanitize(marked.parse(md));
+    postProcess(el, c);
+  } else {
+    el.innerHTML = `<pre class="raw">${esc(md)}</pre>`;
+  }
+}
+
+function sectionCard(s, c, n) {
+  const { kind, size } = kindOf(s.title);
+  const card = document.createElement("section");
+  card.className = `card k-${kind}`;
+  const id = `sec-${n}`;
+  card.setAttribute("aria-labelledby", id);
+  card.innerHTML = (s.title ? cardHead(kind, s.title, id) : "") + `<div class="prose"></div>`;
+  if (!s.title) card.removeAttribute("aria-labelledby");
+  renderMarkdown(card.querySelector(".prose"), s.md, c);
+  thumbs(card.querySelector(".prose"));
+  return { card, kind, size };
+}
+
+function renderSections(c, sections) {
+  const host = $("#observation");
+  host.innerHTML = "";
+  if (!window.marked || !window.DOMPurify) {
+    const card = document.createElement("section");
+    card.className = "card";
+    card.innerHTML = `<div class="prose"><pre class="raw">${esc(c.observation_md)}</pre></div>`;
+    host.appendChild(card);
+    return;
+  }
+  const cards = sections.map((s, i) => sectionCard(s, c, i));
+  for (let i = 0; i < cards.length; i += 1) {
+    const a = cards[i];
+    const b = cards[i + 1];
+    // Expected and What happened sit in one card, side by side.
+    if (a.kind === "expected" && b?.kind === "happened") {
+      const pair = document.createElement("div");
+      pair.className = "card pair";
+      for (const x of [a, b]) { x.card.classList.remove("card"); x.card.classList.add("half"); pair.appendChild(x.card); }
+      host.appendChild(pair);
+      i += 1;
+      continue;
+    }
+    // Two short cards in a row share it; a short card alone takes the full width.
+    if (a.size === "short" && b?.size === "short" && b.kind !== "expected") {
+      const row = document.createElement("div");
+      row.className = "row2";
+      row.append(a.card, b.card);
+      host.appendChild(row);
+      i += 1;
+      continue;
+    }
+    host.appendChild(a.card);
+  }
 }
 let ALL_EVIDENCE = new Set();
 
@@ -644,15 +803,18 @@ function renderCase(d) {
   $("#case-chips").innerHTML = statusChip(c, "big") + sevChip(c.matrix.severity);
   $("#case-headline").textContent = c.headline || "";
   $("#case-body").hidden = false;
-  renderFacts(c);
-  if (c.observation_md) renderMarkdown($("#observation"), c.observation_md, c);
-  else $("#observation").innerHTML = `<div class="empty">No write-up found at <code>${esc(c.observation)}</code>.</div>`;
+  const obs = c.observation_md ? splitObservation(c.observation_md) : { facts: [], sections: [] };
+  renderFacts(c, obs.facts);
+  if (c.observation_md) renderSections(c, obs.sections);
+  else $("#observation").innerHTML = `<section class="card"><div class="empty">No write-up found at <code>${esc(c.observation)}</code>.</div></section>`;
   $("#obs-source").innerHTML = `Source: <a href="${blob(c.observation)}">${esc(c.observation)}</a>`;
-  $("#extra").innerHTML = (c.extra_md || []).map((x, i) => {
+  const extra = c.extra_md || [];
+  $("#extra").hidden = !extra.length;
+  $("#extra-body").innerHTML = extra.map((x, i) => {
     const t = /^#\s+(.+)$/m.exec(x.md);
     return `<details class="extra-md"><summary>${esc(t ? t[1] : x.path)}</summary><article class="prose" id="extra-${i}"></article></details>`;
   }).join("");
-  (c.extra_md || []).forEach((x, i) => renderMarkdown(document.getElementById(`extra-${i}`), x.md, { ...c, observation: x.path }));
+  extra.forEach((x, i) => renderMarkdown(document.getElementById(`extra-${i}`), x.md.replace(/^#\s+.+\n+/, ""), { ...c, observation: x.path }));
   renderEvidence(c);
   renderChecks(c);
   if (location.hash) document.getElementById(location.hash.slice(1))?.scrollIntoView();

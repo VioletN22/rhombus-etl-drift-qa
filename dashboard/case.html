@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 1l7 7-7 7-7-7z' fill='%2320a4b2'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="styles.css?v=1790923114">
+<link rel="stylesheet" href="styles.css?v=1790923724">
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js" defer></script>
 </head>
@@ -34,34 +34,32 @@
 <div class="wrap">
   <div id="case-missing" class="empty" hidden></div>
 
-  <div id="case-body" hidden>
-    <section class="summary-box" aria-labelledby="sum-h">
-      <h2 id="sum-h">At a glance</h2>
-      <dl class="facts" id="facts"></dl>
+  <div id="case-body" class="case-body" hidden>
+    <section class="card glance" aria-labelledby="sum-h">
+      <div class="card-head"><svg class="glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg><h2 id="sum-h">At a glance</h2></div>
+      <div id="facts"></div>
     </section>
 
-    <section aria-labelledby="obs-h">
-      <h2 id="obs-h" class="visually-hidden">Write-up</h2>
-      <article class="prose" id="observation"></article>
-      <div id="extra"></div>
-      <p class="source-link" id="obs-source"></p>
+    <div class="case-cards" id="observation" aria-label="Write-up"></div>
+
+    <section class="card" id="extra" aria-labelledby="ex-h" hidden>
+      <div class="card-head"><svg class="glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h9l3 3v13H6z"/><path d="M9 11h6M9 15h6"/></svg><h2 id="ex-h">Related notes</h2></div>
+      <div id="extra-body"></div>
     </section>
 
-    <section id="evidence" aria-labelledby="ev-h">
-      <div class="section-head">
-        <h2 id="ev-h">Evidence</h2>
-        <p>Screenshots, logs and generated code saved during the run. Select an image to open it full size.</p>
-      </div>
+    <section class="card" id="evidence" aria-labelledby="ev-h">
+      <div class="card-head"><svg class="glyph" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 8"/></svg><h2 id="ev-h">Evidence</h2></div>
+      <p class="card-sub">Screenshots, logs and generated code saved during the run. Select an image to open it full size.</p>
       <div id="evidence-body"></div>
     </section>
 
-    <section id="checks" aria-labelledby="ch-h">
-      <div class="section-head">
-        <h2 id="ch-h">Validator checks</h2>
-        <p>My independent validator's report for each output this case produced.</p>
-      </div>
+    <section class="card" id="checks" aria-labelledby="ch-h">
+      <div class="card-head"><svg class="glyph" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 12l3 3 5-6"/></svg><h2 id="ch-h">Validator checks</h2></div>
+      <p class="card-sub">My independent validator's report for each output this case produced.</p>
       <div id="checks-body"></div>
     </section>
+
+    <p class="source-link" id="obs-source"></p>
   </div>
 
   <nav class="pager" id="pager" aria-label="Other cases"></nav>
@@ -70,6 +68,6 @@
     <p>Rebuild with <code>python scripts/build_dashboard.py</code>. Source on <a id="repo-link" href="#">GitHub</a>.</p>
   </footer>
 </div>
-<script src="app.js?v=1790923114" defer></script>
+<script src="app.js?v=1790923724" defer></script>
 </body>
 </html>
