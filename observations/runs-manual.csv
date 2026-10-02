@@ -4,3 +4,4 @@ uploaded_at_aest,case,s3_version_id,size,run_started_aest,gcs_object,report,note
 2026-10-02T15:09:56,baseline (restore after drop-column),9OU4TBDc7OIaWY9K8PVy1FsA0OwNDPL9,32.1 KB,,,,regression check of chatbot patch
 2026-10-02T15:22:07,schema-rename-column,EfHU9zLaR5Ay1uqPvXotbtWFsiHolxaI,32.2 KB,,,,
 2026-10-02T15:52:58,schema-type-change,fauwQIACXEVBbjZ_pxx.g7.c3cWIxUxj,34.6 KB,,,,
+2026-10-02T16:11:26,schema-add-column,CFDR3eDky80pHiylkxeAAUcSR_MPhZsm,34.2 KB,,,,
