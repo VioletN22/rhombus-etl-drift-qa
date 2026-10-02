@@ -404,12 +404,17 @@ summary:
     - baseline
     severity: High
   - title: Scheduled runs never execute, even after Rhombus enabled them
-    line: The schedule shows Active with a countdown, then nothing runs and nobody is told.
+    line: The schedule shows Active, then nothing runs. Rhombus's own API shows it never fires and never
+      counts the misses.
     detail: 'A 15-minute custom schedule and an hourly control both missed every slot: no executions,
       no output, "Next run" went blank, no email. Rhombus enabled scheduling for the exercise at 18:31;
       the hourly schedule still missed 19:30 and 20:30, and a brand-new schedule missed 21:20. The app
       shows "Active" with a countdown throughout. Every run in this project is manual as a result; follow-up
-      sent to Rhombus with screenshots.'
+      sent to Rhombus with screenshots. The API explains it: the schedule is saved and enabled, next_run_at
+      is stuck at the first slot (21:20) after it passed, last_run_at is empty, skipped_runs_count is
+      0, and all 32 recorded runs were started by hand. There is no plan limit (limit: null). So the scheduler
+      saves the schedule and works out one run time, then nothing starts the run, and nothing records
+      that it was missed.'
     cases:
     - baseline
     severity: High

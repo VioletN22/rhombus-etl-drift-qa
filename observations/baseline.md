@@ -36,5 +36,17 @@ Same prompt and file, three fresh projects. The graph was the same each time (at
 ## Schedule
 A Custom `*/15 * * * *` schedule and an Hourly control both showed "Active" with a countdown and never ran: no executions, no GCS object, "Next run" went blank, no email. The account is on the Free plan, and the pricing page lists scheduled runs only on paid plans. Reported to Rhombus at 14:39. Evidence: `evidence/2026-10-02_schedule-no-executions-next-run-blank.png`, `evidence/2026-10-02_account-plan-free-credits.png`.
 
+**Update, evening of 2 Oct.** Rhombus enabled scheduling for the exercise at 18:31. The hourly schedule still missed 19:30 and 20:30, and a brand-new schedule missed 21:20 (screenshots `evidence/2026-10-02_schedule-after-enabled-still-no-runs.png`, `evidence/2026-10-02_schedule-fresh-minute-20-missed.png`). Rhombus's own API shows why, in plain terms: the schedule is saved and switched on, but nothing ever starts the run.
+
+| API field (`GET /pipeline/schedules/all`) | Value | Meaning |
+|---|---|---|
+| `enabled` | `true` | Switched on |
+| `next_run_at` | `2026-10-02T11:20:00Z` (21:20 AEST) | First slot, already passed, never moved on |
+| `last_run_at` | `null` | Never ran |
+| `skipped_runs_count` | `0` | Misses aren't even counted |
+| `schedule-limit` | `limit: null` | Not a plan limit |
+
+`GET /pipeline/executions/all`: all 32 runs have `trigger: "manual"`. Checked automatically by `api-tests/tests/schedule.spec.ts` (expected failure until Rhombus fixes it). Follow-up with screenshots sent to Rhombus at 21:27.
+
 ## Regression check
 After the drop-column chatbot patch, the baseline was re-run (15:11): output byte-identical to the original runs. The patch only changes behaviour when a column is missing (`data-validation/reports/baseline-after-chatbot-patch.json`).
