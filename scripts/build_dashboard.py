@@ -434,6 +434,17 @@ def build_summary(matrix: dict, cases: list[dict], consistency: list[dict],
     }
 
 
+def bust_cache(out_dir: Path, stamp: str) -> None:
+    """Version the JS/CSS links so browsers never mix a new page with a cached script."""
+    import re as _re
+    for page in ("index.html", "case.html"):
+        f = out_dir / page
+        if f.exists():
+            html = f.read_text()
+            html = _re.sub(r'(app\.js|styles\.css)(\?v=[0-9]+)?', lambda m: f"{m.group(1)}?v={stamp}", html)
+            f.write_text(html)
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--demo", action="store_true",
@@ -479,6 +490,8 @@ def main(argv: list[str] | None = None) -> int:
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(data, indent=1) + "\n")
+    import time as _t
+    bust_cache(args.out.parent, str(int(_t.time())))
     done = sum(c["status"] == "done" for c in cases)
     print(f"wrote {args.out.relative_to(ROOT)}: {'DEMO, ' if args.demo else ''}"
           f"{len(reports)} report(s), {len(runs)} run(s), {done}/{len(cases)} cases observed, "
