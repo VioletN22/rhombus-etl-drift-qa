@@ -829,9 +829,12 @@ async function main() {
   const page = document.body.dataset.page;
   let d;
   try {
+    if (window.DASH_DATA) d = window.DASH_DATA;
+    else {
     const res = await fetch("data.json", { cache: "no-store" });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     d = await res.json();
+    }
   } catch (err) {
     const msg = `Could not load data.json (${err.message}). Run python scripts/build_dashboard.py, then serve this folder over HTTP.`;
     const el = $("#meta") || $("#case-title");

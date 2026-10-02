@@ -441,7 +441,7 @@ def bust_cache(out_dir: Path, stamp: str) -> None:
         f = out_dir / page
         if f.exists():
             html = f.read_text()
-            html = _re.sub(r'(app\.js|styles\.css)(\?v=[0-9]+)?', lambda m: f"{m.group(1)}?v={stamp}", html)
+            html = _re.sub(r'(app\.js|data\.js|styles\.css)(\?v=[0-9]+)?', lambda m: f"{m.group(1)}?v={stamp}", html)
             f.write_text(html)
 
 
@@ -490,6 +490,8 @@ def main(argv: list[str] | None = None) -> int:
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(data, indent=1) + "\n")
+    # Same data as a script, so pages render on first paint instead of after a fetch.
+    (args.out.parent / "data.js").write_text("window.DASH_DATA = " + json.dumps(data) + ";\n")
     import time as _t
     bust_cache(args.out.parent, str(int(_t.time())))
     done = sum(c["status"] == "done" for c in cases)
