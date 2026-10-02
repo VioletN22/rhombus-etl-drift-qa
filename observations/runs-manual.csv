@@ -6,3 +6,5 @@ uploaded_at_aest,case,s3_version_id,size,run_started_aest,gcs_object,report,note
 2026-10-02T15:52:58,schema-type-change,fauwQIACXEVBbjZ_pxx.g7.c3cWIxUxj,34.6 KB,,,,
 2026-10-02T16:11:26,schema-add-column,CFDR3eDky80pHiylkxeAAUcSR_MPhZsm,34.2 KB,,,,
 2026-10-02T16:36:53,schema-all-combined,FwxOAybxjU7_Vb.sebyVXKw9SVr_0SBx,33.9 KB,16:37 (fail),none,,error names only amount_usd
+2026-10-02T16:55:04,schema-all-combined,FwxOAybxjU7_Vb.sebyVXKw9SVr_0SBx,33.9 KB,16:54 (after 4 chatbot requests),orders_cleaned_1790924103326,all-combined-after-fix.json,green; country blank all rows; 10 columns
+2026-10-02T17:11:44,semantic-dollars-to-cents,rtOoGcJTbJXsCbBFcP7Hpa87D.4BJqaZ,31.7 KB,~17:11,orders_cleaned_1790925115589,,
