@@ -1,0 +1,28 @@
+WEBVTT
+
+00:00.000 --> 00:03.000
+Case 1: same pipeline, but this time the file is missing the country column. (Re-run I recorded after the fact.)
+
+00:03.000 --> 00:09.000
+Step 1: upload the case 1 file to S3 as input/orders.csv, replacing the normal one.
+
+00:09.000 --> 00:14.000
+Uploaded. Its header has every column except country.
+
+00:14.000 --> 00:24.000
+Step 2: run the pipeline in Rhombus, exactly as before. Nothing in the pipeline has changed.
+
+00:24.000 --> 00:30.000
+It stops at the cleaning step: "Pipeline failed at orders_cleaned". Good, it didn't push bad data out.
+
+00:30.000 --> 00:35.000
+The logs say why, but only as 'country'. No hint that a column is missing from the input.
+
+00:35.000 --> 00:40.000
+And right under the error, another line says "Pipeline execution completed successfully". Confusing.
+
+00:40.000 --> 00:44.000
+Step 3: check Google Cloud Storage.
+
+00:44.000 --> 00:50.000
+No new file. The newest one is still from my last good run. So it failed safely, it just explained it badly.
