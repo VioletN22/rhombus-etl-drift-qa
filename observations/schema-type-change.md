@@ -22,6 +22,9 @@ Rhombus's changelog (21 Jun 2026) mentions "pre-execution validation for sorting
 - Every other column cleaned exactly as in the baseline (only the known email bug remains).
 - Side effect in the other direction: in the baseline, Rhombus typed `quantity` as Numeric on load and silently blanked `three` (5 rows). Here, because most values are text, it typed the column as Text and **kept** `three`. Same value, different outcome, depending on the rest of the column. Data-dependent type inference, invisible to the user.
 
+## Who decided "quantity is text"? (checked)
+The **Data Input** node's preview of this file labels `quantity` **Categorical** (raw values "6 units", "3 units", …); on the baseline file the same preview labelled it **Numeric**. That label is set when the file is loaded, before any AI-built step runs, and the AI-generated code never touches `quantity`. So the type decision comes from Rhombus's **ingest type inference** (a rule-based loader), not from either AI layer. The same preview also shows `order_date` already parsed to DateTime on load. Screenshot: `evidence/2026-10-02_type-change-data-input-preview-quantity-categorical.png`.
+
 ## Logs
 Nothing to read: the run reports success. Screenshot: `evidence/2026-10-02_type-change-run-green.png`.
 
