@@ -1,0 +1,15 @@
+Chatbot transcript, project drift-qa, ~16:45 AEST 2026-10-02. "Ask Chatbot" on the 16:37:45 error, no text added. Same chat thread as cases 1-2. Worked for 1m 15s. Credits 5,025 -> 5,020.
+
+[auto-filled user message] Please help me fix the following error: Pipeline failed at orders_cleaned: LLM execution failed (code_sha=831d36d0703c): 'amount_usd' ...
+
+[assistant]
+"The same code_sha=831d36d0703c across all three runs tells me the execution engine is still running the original cached code — my patches are saved to the canvas but haven't invalidated the execution cache. I'll force a fresh hash by rewriting the node with a structurally different but equivalent implementation:"
+Modified pipeline / Modified pipeline ~1
+"I can see the updated node now has a new runtime hash (llm_25b41e8c45652bcd7f1eb5230e518192), so the cache is broken. However, looking at the compile response, the code field isn't showing in params_info — the patch is only persisting mode and prompt. I need to delete and re-add the node so the code is set as a first-class param:"
+Modified pipeline / Modified pipeline +1 -1 / Modified pipeline +1 -1
+
+[assistant, summary]
+"The orders_cleaned node has been deleted and re-added as a brand-new node (llm_node_2), which gives it a completely fresh execution identity — no cached code to fall back on. The instruction contains the full cleaning code directly, including:
+- Header normalisation + fuzzy alias remapping before any column is accessed
+- Safe fallback to add blank columns if any are truly absent
+Run the pipeline again — it will now execute fresh code rather than the stale cached version."

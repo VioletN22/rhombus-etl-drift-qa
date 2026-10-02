@@ -70,8 +70,8 @@
    "semantic-dollars-to-cents",
    "semantic-date-mmdd-to-ddmm"
   ],
-  "required_done": 4,
-  "critical": 2,
+  "required_done": 5,
+  "critical": 3,
   "determinism": {
    "identical": 3,
    "runs": 3,
@@ -96,6 +96,11 @@
   "2026-10-02_ai-builder-attempt3-custom-node-prompt.txt",
   "2026-10-02_ai-builder-attempt3-custom-node.png",
   "2026-10-02_ai-builder-summary-attempt1.png",
+  "2026-10-02_all-combined-after-chatbot-cannot-run.png",
+  "2026-10-02_all-combined-chatbot-fix-run-green.png",
+  "2026-10-02_all-combined-chatbot-replaced-node.png",
+  "2026-10-02_all-combined-chatbot-rewire-fix.png",
+  "2026-10-02_all-combined-chatbot-transcript.txt",
   "2026-10-02_all-combined-error-log-panel.png",
   "2026-10-02_attempt1-code-after-drop-column-run.py",
   "2026-10-02_attempt1-custom-node-generated-code.png",
@@ -126,12 +131,12 @@
   "2026-10-02_type-change-run-green.png",
   "s3-bucket-policy-generated-by-rhombus.json"
  ],
- "built_at": "2026-10-02T06:48:44+00:00",
+ "built_at": "2026-10-02T06:59:39+00:00",
  "sources": {
   "reports": "data-validation/reports",
   "ledger": "observations/runs.csv",
   "matrix": "observations/matrix.yaml",
-  "report_count": 8,
+  "report_count": 9,
   "ledger_rows": 0
  },
  "health": [
@@ -159,11 +164,11 @@
    "group": "combined",
    "label": "All schema changes",
    "cases": 1,
-   "cases_run": 0,
-   "runs": 0,
-   "succeeded": 0,
+   "cases_run": 1,
+   "runs": 1,
+   "succeeded": 1,
    "failed": 0,
-   "success_rate": null
+   "success_rate": 1.0
   },
   {
    "group": "semantic",
@@ -1493,12 +1498,42 @@
    "file": "schema-all-combined.csv",
    "rows": 425,
    "change": "All four schema changes at once.",
-   "status": "pending",
-   "headline": "",
+   "status": "done",
+   "headline": "Stopped naming 1 of 4 problems; four chatbot requests later the pipeline ran green with a blank country column.",
    "observation": "observations/schema-all-combined.md",
-   "observation_md": "# Schema drift: all four changes at once\n\n| | |\n|---|---|\n| Case file | `datasets/schema-all-combined.csv` (uploaded as `input/orders.csv`) |\n| S3 version | `FwxOAybxjU7_Vb.sebyVXKw9SVr_0SBx`, uploaded 2026-10-02 16:36:53 AEST, 33.9 KB |\n| Pipeline | Original AI-built code |\n| Run | Manual run (\u25b6) 16:37:40 AEST |\n| Severity | Medium (stopped safely; error reports 1 of 4 problems; logs contradict themselves) \u2014 draft |\n| Pipeline stopped? | **Yes**, at `orders_cleaned` |\n| Chatbot fix worked? | _pending_ |\n\n## What I changed\nAll four schema changes in one file: `country` removed, `amount_usd` renamed to `total_amount`, `quantity` values turned into text (\"6 units\"), and a new `discount_code` column. Marker row: \"Marker schema-all-combined\".\n\n## Expected\nBest: stop before running, listing all four problems. OK: stop on the first problem. Worst: run green and ship partly broken data.\n\n## What happened\n- Pipeline **failed at `orders_cleaned`** at 16:37:45; nothing reached GCS.\n- The error names **one** problem: `'amount_usd'` (the rename). Nothing about the missing `country`, the text `quantity` or the new column. A user would fix the rename, re-run, hit `'country'`, fix that, re-run, and never be told quantity became text (case 3 showed that one doesn't error at all).\n- **Contradictory logs:** the same second (16:37:45) shows both \"Pipeline failed at orders_cleaned \u2026\" (error) and \"Pipeline execution completed successfully.\" (success). The run-level summary contradicts the node failure.\n\n## Logs\n> Pipeline failed at orders_cleaned: LLM execution failed (code_sha=831d36d0703c): 'amount_usd' --- Generated code --- \u2026\n\nfollowed immediately by\n> Pipeline execution completed successfully.\n\nClear? **Partially / misleading**: one of four problems reported, and a success message for a failed run. Screenshot: `evidence/2026-10-02_all-combined-error-log-panel.png`. Full JSON: `evidence/2026-10-02_schema-all-combined-error-log.json`.\n\n## Chatbot diagnosis\n_pending_\n\n## Reproduce\n1. Upload `datasets/schema-all-combined.csv` as `input/orders.csv`\n2. Run drift-qa with the original code\n3. Read the Logs panel (error plus success line at the same timestamp)\n\n## Impact and suggestion\nSafe, but slow to diagnose: problems surface one at a time. Suggest validating the input schema against the pipeline's expected columns before execution and listing every mismatch in one message. The \"completed successfully\" line on a failed run should be fixed: monitoring keyed on that line would record a failure as a success.\n",
+   "observation_md": "# Schema drift: all four changes at once\n\n| | |\n|---|---|\n| Case file | `datasets/schema-all-combined.csv` (uploaded as `input/orders.csv`) |\n| S3 version | `FwxOAybxjU7_Vb.sebyVXKw9SVr_0SBx`, uploaded 2026-10-02 16:36:53 AEST, 33.9 KB |\n| Pipeline | Original AI-built code |\n| Run | Manual run (\u25b6) 16:37:40 AEST |\n| Severity | **Critical** after the chatbot fix (first left unrunnable, then shipped a blank country column and 2 junk columns, all green). Before the fix: Medium (stopped safely; 1 of 4 problems reported; contradictory logs) |\n| Pipeline stopped? | **Yes**, at `orders_cleaned` |\n| Chatbot fix worked? | **No.** First it left the pipeline unrunnable; a 4th chatbot request rewired it, and the run went green with `country` blank on all 390 rows |\n\n## What I changed\nAll four schema changes in one file: `country` removed, `amount_usd` renamed to `total_amount`, `quantity` values turned into text (\"6 units\"), and a new `discount_code` column. Marker row: \"Marker schema-all-combined\".\n\n## Expected\nBest: stop before running, listing all four problems. OK: stop on the first problem. Worst: run green and ship partly broken data.\n\n## What happened\n- Pipeline **failed at `orders_cleaned`** at 16:37:45; nothing reached GCS.\n- The error names **one** problem: `'amount_usd'` (the rename). Nothing about the missing `country`, the text `quantity` or the new column. A user would fix the rename, re-run, hit `'country'`, fix that, re-run, and never be told quantity became text (case 3 showed that one doesn't error at all).\n- **Contradictory logs:** the same second (16:37:45) shows both \"Pipeline failed at orders_cleaned \u2026\" (error) and \"Pipeline execution completed successfully.\" (success). The run-level summary contradicts the node failure.\n\n## Logs\n> Pipeline failed at orders_cleaned: LLM execution failed (code_sha=831d36d0703c): 'amount_usd' --- Generated code --- \u2026\n\nfollowed immediately by\n> Pipeline execution completed successfully.\n\nClear? **Partially / misleading**: one of four problems reported, and a success message for a failed run. Screenshot: `evidence/2026-10-02_all-combined-error-log-panel.png`. Full JSON: `evidence/2026-10-02_schema-all-combined-error-log.json`.\n\n## Chatbot diagnosis\n- Prompt: **Ask Chatbot** on the 16:37:45 error, no text added (same chat thread as cases 1-2). Transcript: `evidence/2026-10-02_all-combined-chatbot-transcript.txt`.\n- Diagnosis: **wrong.** It doubled down on the invented theory that \"the execution engine is still running the original cached code\" because the `code_sha` matched across runs. The sha matched because I deliberately restored the original code before each case. It never inspected the input, so none of the four real problems was named.\n- What it did, without asking (1m 15s, 5 credits): rewrote the node \"to force a fresh hash\", then **deleted `orders_cleaned` and re-added it as `llm_node_2`** with the code embedded in its instruction (header normalisation, fuzzy aliases, blank fallback).\n- Its closing message: \"Run the pipeline again \u2014 it will now execute fresh code rather than the stale cached version.\"\n- Re-run attempt: **\u25b6 refuses to run.** Toasts: \"output_64e957de\u2026 : missing upstream dataframe input\". The canvas now has `dedup_order_id \u2192 llm_node_2` but **no edge from `llm_node_2` to Data Output**; the old node's outgoing connection was lost when it was deleted.\n- **Fix worked? No. It broke the pipeline**, from a hallucinated cause, while telling the user it was fixed. Screenshot: `evidence/2026-10-02_all-combined-after-chatbot-cannot-run.png`.\n\n### 4th chatbot request: repair its own break\n- Prompt (typed, 16:53): \"The pipeline won't run now. I get \"missing upstream dataframe input\" on the Data Output node.\"\n- Reply (6s, 5 credits): correctly saw \"the output node is still wired to the deleted llm_node_1\" and reconnected it. Diagnosis of **its own** break: **correct**.\n- Re-run 16:54:12 \u2192 **\"Pipeline completed successfully\"** 16:55:04. New GCS object `orders_cleaned_1790924103326.csv` (33.3 KB, 390 rows). Saved as `runs/2026-10-02-drift/all-combined-after-chatbot-fix.csv`. Screenshots: `evidence/2026-10-02_all-combined-chatbot-rewire-fix.png`, `evidence/2026-10-02_all-combined-chatbot-fix-run-green.png`.\n\n### What the \"fixed\" output contains (validator: 15 pass, 5 fail, 6 warn)\n| Problem in input | What shipped |\n|---|---|\n| `country` removed | `country` column present but **blank on all 390 rows** (validator `empty_columns` fail; country mix TVD 0.50) |\n| `amount_usd` renamed to `total_amount` | `amount_usd` filled correctly, **and** `total_amount` also shipped as an extra column |\n| `quantity` as text (\"6 units\") | parsed to numbers (6.0). Better than case 3, where text shipped |\n| new `discount_code` | **shipped** as an extra column (case 4's code dropped it) |\n\n- Output has **10 columns, not the contract's 8**. The code shown in the node ends with `output_df = _df[[...8 columns...]]`, and its alias list has no `total_amount`. So **what ran does not match the code the node shows**: either the displayed code isn't what executes, or another node or step changed the result. A user reading the node can't explain this output. (Observability gap.)\n- Green status, no warning. Downstream gets a blank country for every order and two columns nobody asked for.\n- Report: `data-validation/reports/all-combined-after-fix.json`.\n\n### Score across 4 chatbot requests in this case\n3 wrong diagnoses (\"cached code\" x2 plus a fix built on it), 1 correct (rewiring its own break). Net result: from **safe stop** to **green run with silently wrong data**. 20 credits.\n\n## Reproduce\n1. Upload `datasets/schema-all-combined.csv` as `input/orders.csv`\n2. Run drift-qa with the original code\n3. Read the Logs panel (error plus success line at the same timestamp)\n\n## Impact and suggestion\nSafe, but slow to diagnose: problems surface one at a time. Suggest validating the input schema against the pipeline's expected columns before execution and listing every mismatch in one message. The \"completed successfully\" line on a failed run should be fixed: monitoring keyed on that line would record a failure as a success.\n",
    "extra_md": [],
    "evidence": [
+    {
+     "name": "2026-10-02_all-combined-after-chatbot-cannot-run.png",
+     "path": "evidence/2026-10-02_all-combined-after-chatbot-cannot-run.png",
+     "kind": "image",
+     "ext": "png"
+    },
+    {
+     "name": "2026-10-02_all-combined-chatbot-fix-run-green.png",
+     "path": "evidence/2026-10-02_all-combined-chatbot-fix-run-green.png",
+     "kind": "image",
+     "ext": "png"
+    },
+    {
+     "name": "2026-10-02_all-combined-chatbot-replaced-node.png",
+     "path": "evidence/2026-10-02_all-combined-chatbot-replaced-node.png",
+     "kind": "image",
+     "ext": "png"
+    },
+    {
+     "name": "2026-10-02_all-combined-chatbot-rewire-fix.png",
+     "path": "evidence/2026-10-02_all-combined-chatbot-rewire-fix.png",
+     "kind": "image",
+     "ext": "png"
+    },
+    {
+     "name": "2026-10-02_all-combined-chatbot-transcript.txt",
+     "path": "evidence/2026-10-02_all-combined-chatbot-transcript.txt",
+     "kind": "text",
+     "ext": "txt"
+    },
     {
      "name": "2026-10-02_all-combined-error-log-panel.png",
      "path": "evidence/2026-10-02_all-combined-error-log-panel.png",
@@ -1506,25 +1541,187 @@
      "ext": "png"
     }
    ],
-   "page_reports": [],
+   "page_reports": [
+    {
+     "run": "all-combined-after-fix",
+     "path": "data-validation/reports/all-combined-after-fix.json",
+     "timestamp": "2026-10-02T06:59:03+00:00",
+     "verdict": "fail",
+     "summary": {
+      "pass": 15,
+      "fail": 5,
+      "warn": 6
+     },
+     "checks": [
+      {
+       "id": "input_schema",
+       "status": "warn",
+       "detail": "input drifted from contract: missing ['amount_usd', 'country']; extra ['total_amount', 'discount_code']; likely renamed amount_usd->total_amount"
+      },
+      {
+       "id": "schema",
+       "status": "fail",
+       "detail": "extra ['total_amount', 'discount_code']; column order differs"
+      },
+      {
+       "id": "row_reconciliation",
+       "status": "fail",
+       "detail": "expected 0 rows, got 390 (0 missing, 390 unexpected ids)"
+      },
+      {
+       "id": "row_loss",
+       "status": "pass",
+       "detail": "98% of input orders reached the output"
+      },
+      {
+       "id": "rule_unique_order_id",
+       "status": "pass",
+       "detail": "order_id unique and present"
+      },
+      {
+       "id": "rule_customer_name",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_email",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_order_date",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_amount_numeric",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_amount_non_negative",
+       "status": "warn",
+       "detail": "5 value(s) negative (passed through by design)"
+      },
+      {
+       "id": "rule_country",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_status_lowercase",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_status_allowed",
+       "status": "warn",
+       "detail": "7 value(s) outside ['cancelled', 'delivered', 'pending', 'shipped']"
+      },
+      {
+       "id": "rule_quantity",
+       "status": "warn",
+       "detail": "4 value(s) not a positive integer (not cleaned by design)"
+      },
+      {
+       "id": "null_inflation",
+       "status": "pass",
+       "detail": "no unexpected blanks"
+      },
+      {
+       "id": "empty_columns",
+       "status": "fail",
+       "detail": "1 column(s) present but blank on every row: ['country']"
+      },
+      {
+       "id": "column_types",
+       "status": "pass",
+       "detail": "numeric columns are numeric"
+      },
+      {
+       "id": "oracle_diff",
+       "status": "pass",
+       "detail": "0 rows x 7 columns identical to the oracle"
+      },
+      {
+       "id": "marker_row",
+       "status": "warn",
+       "detail": "input has no marker row"
+      },
+      {
+       "id": "determinism",
+       "status": "fail",
+       "detail": "canonical output differs from 1 earlier run(s): ['data-validation/reports/manual-1-baseline.json']"
+      },
+      {
+       "id": "drift_amount_scale",
+       "status": "pass",
+       "detail": "median amount 1.00x baseline"
+      },
+      {
+       "id": "drift_amount_max",
+       "status": "warn",
+       "detail": "1 order(s) above 10,000"
+      },
+      {
+       "id": "drift_date_ddmm",
+       "status": "pass",
+       "detail": "0% of input slash dates start above 12"
+      },
+      {
+       "id": "drift_month_distribution",
+       "status": "pass",
+       "detail": "month mix TVD 0.000 vs baseline (alert > 0.25)"
+      },
+      {
+       "id": "drift_country_distribution",
+       "status": "fail",
+       "detail": "country mix TVD 0.500 vs baseline (alert > 0.2)"
+      },
+      {
+       "id": "drift_future_dates",
+       "status": "pass",
+       "detail": "no order dated in the future"
+      }
+     ],
+     "output_rows": 390,
+     "input_rows": 425,
+     "listed": true
+    }
+   ],
    "matrix": {
-    "run_ids": [],
-    "rhombus_status": null,
-    "platform_behaviour": null,
-    "gcs_output": null,
-    "logs_clear": null,
-    "chatbot_diagnosis": null,
-    "chatbot_fix_worked": null,
-    "schedule_after": "",
-    "severity": null,
-    "execution_seconds": null,
-    "credits_used": null
+    "run_ids": "all-combined-after-fix",
+    "rhombus_status": "Failure",
+    "platform_behaviour": "stopped",
+    "gcs_output": "no",
+    "logs_clear": "partial",
+    "chatbot_diagnosis": "wrong",
+    "chatbot_fix_worked": "no",
+    "schedule_after": "Not testable (scheduling not running)",
+    "severity": "Critical",
+    "execution_seconds": 5,
+    "credits_used": 20
    },
-   "runs_total": 0,
-   "runs_with_output": 0,
+   "runs_total": 1,
+   "runs_with_output": 1,
    "runs_without_output": 0,
-   "validator": null,
-   "capability": "pending"
+   "validator": {
+    "run": "all-combined-after-fix",
+    "verdict": "fail",
+    "summary": {
+     "pass": 15,
+     "fail": 5,
+     "warn": 6
+    },
+    "failed": [
+     "schema",
+     "row_reconciliation",
+     "empty_columns",
+     "determinism",
+     "drift_country_distribution"
+    ]
+   },
+   "capability": "broke"
   },
   {
    "case": "semantic-dollars-to-cents",
@@ -2291,6 +2488,18 @@
    "outcome": "output",
    "verdict": "fail",
    "report": "data-validation/reports/add-column.json",
+   "notes": ""
+  },
+  {
+   "run": "all-combined-after-fix",
+   "case": "schema-all-combined",
+   "source": "report",
+   "uploaded_at": null,
+   "output_object": "runs/2026-10-02-drift/all-combined-after-chatbot-fix.csv",
+   "output_updated": "2026-10-02T06:59:03+00:00",
+   "outcome": "output",
+   "verdict": "fail",
+   "report": "data-validation/reports/all-combined-after-fix.json",
    "notes": ""
   }
  ],
@@ -3541,6 +3750,169 @@
      "actual": ""
     }
    ]
+  },
+  {
+   "run": "all-combined-after-fix",
+   "case": "schema-all-combined",
+   "path": "data-validation/reports/all-combined-after-fix.json",
+   "timestamp": "2026-10-02T06:59:03+00:00",
+   "input_rows": 425,
+   "input_sha256": "20faddeac36a6b5dbb90508f2bc6bc449d485ff8fcb9cc77c6a6c089bb44de56",
+   "output_object": "runs/2026-10-02-drift/all-combined-after-chatbot-fix.csv",
+   "output_updated": null,
+   "output_rows": 390,
+   "output_sha256": "6bfd1a483a86698a9ea51020e66c667d6483654e446e6bf96f9c5935b7385dfc",
+   "reference_rows": 0,
+   "reference_sha256": "ae9e3195b04e3c61c140be017045b1e2b9dff362f19ae4ac7e98c74ed1a5d395",
+   "matches_oracle": false,
+   "verdict": "fail",
+   "summary": {
+    "pass": 15,
+    "fail": 5,
+    "warn": 6
+   },
+   "checks": [
+    {
+     "id": "input_schema",
+     "status": "warn",
+     "detail": "input drifted from contract: missing ['amount_usd', 'country']; extra ['total_amount', 'discount_code']; likely renamed amount_usd->total_amount"
+    },
+    {
+     "id": "schema",
+     "status": "fail",
+     "detail": "extra ['total_amount', 'discount_code']; column order differs"
+    },
+    {
+     "id": "row_reconciliation",
+     "status": "fail",
+     "detail": "expected 0 rows, got 390 (0 missing, 390 unexpected ids)"
+    },
+    {
+     "id": "row_loss",
+     "status": "pass",
+     "detail": "98% of input orders reached the output"
+    },
+    {
+     "id": "rule_unique_order_id",
+     "status": "pass",
+     "detail": "order_id unique and present"
+    },
+    {
+     "id": "rule_customer_name",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_email",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_order_date",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_amount_numeric",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_amount_non_negative",
+     "status": "warn",
+     "detail": "5 value(s) negative (passed through by design)"
+    },
+    {
+     "id": "rule_country",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_status_lowercase",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_status_allowed",
+     "status": "warn",
+     "detail": "7 value(s) outside ['cancelled', 'delivered', 'pending', 'shipped']"
+    },
+    {
+     "id": "rule_quantity",
+     "status": "warn",
+     "detail": "4 value(s) not a positive integer (not cleaned by design)"
+    },
+    {
+     "id": "null_inflation",
+     "status": "pass",
+     "detail": "no unexpected blanks"
+    },
+    {
+     "id": "empty_columns",
+     "status": "fail",
+     "detail": "1 column(s) present but blank on every row: ['country']"
+    },
+    {
+     "id": "column_types",
+     "status": "pass",
+     "detail": "numeric columns are numeric"
+    },
+    {
+     "id": "oracle_diff",
+     "status": "pass",
+     "detail": "0 rows x 7 columns identical to the oracle"
+    },
+    {
+     "id": "marker_row",
+     "status": "warn",
+     "detail": "input has no marker row"
+    },
+    {
+     "id": "determinism",
+     "status": "fail",
+     "detail": "canonical output differs from 1 earlier run(s): ['data-validation/reports/manual-1-baseline.json']"
+    },
+    {
+     "id": "drift_amount_scale",
+     "status": "pass",
+     "detail": "median amount 1.00x baseline"
+    },
+    {
+     "id": "drift_amount_max",
+     "status": "warn",
+     "detail": "1 order(s) above 10,000"
+    },
+    {
+     "id": "drift_date_ddmm",
+     "status": "pass",
+     "detail": "0% of input slash dates start above 12"
+    },
+    {
+     "id": "drift_month_distribution",
+     "status": "pass",
+     "detail": "month mix TVD 0.000 vs baseline (alert > 0.25)"
+    },
+    {
+     "id": "drift_country_distribution",
+     "status": "fail",
+     "detail": "country mix TVD 0.500 vs baseline (alert > 0.2)"
+    },
+    {
+     "id": "drift_future_dates",
+     "status": "pass",
+     "detail": "no order dated in the future"
+    }
+   ],
+   "oracle_mismatches": {
+    "customer_name": 0,
+    "email": 0,
+    "order_date": 0,
+    "amount_usd": 0,
+    "quantity": 0,
+    "country": 0,
+    "status": 0
+   },
+   "oracle_examples": []
   }
  ]
 }
