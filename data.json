@@ -165,7 +165,7 @@
   "2026-10-02_type-change-run-green.png",
   "s3-bucket-policy-generated-by-rhombus.json"
  ],
- "built_at": "2026-10-02T12:04:37+00:00",
+ "built_at": "2026-10-02T12:12:06+00:00",
  "sources": {
   "reports": "data-validation/reports",
   "ledger": "observations/runs.csv",
@@ -353,6 +353,10 @@
      "ext": "png"
     }
    ],
+   "video": {
+    "src": "videos/baseline.mp4",
+    "captions": "videos/baseline.vtt"
+   },
    "page_reports": [
     {
      "run": "manual-1-baseline",
@@ -870,6 +874,7 @@
      "ext": "json"
     }
    ],
+   "video": null,
    "page_reports": [
     {
      "run": "drop-column-after-fix",
@@ -1060,6 +1065,7 @@
      "ext": "json"
     }
    ],
+   "video": null,
    "page_reports": [
     {
      "run": "rename-after-fix",
@@ -1229,6 +1235,7 @@
      "ext": "png"
     }
    ],
+   "video": null,
    "page_reports": [
     {
      "run": "type-change",
@@ -1393,6 +1400,7 @@
      "ext": "png"
     }
    ],
+   "video": null,
    "page_reports": [
     {
      "run": "add-column",
@@ -1617,6 +1625,7 @@
      "ext": "png"
     }
    ],
+   "video": null,
    "page_reports": [
     {
      "run": "all-combined-after-fix",
@@ -1818,6 +1827,7 @@
      "ext": "png"
     }
    ],
+   "video": null,
    "page_reports": [
     {
      "run": "dollars-to-cents",
@@ -2031,6 +2041,7 @@
      "ext": "png"
     }
    ],
+   "video": null,
    "page_reports": [
     {
      "run": "date-ddmm",
@@ -2225,6 +2236,7 @@
    "observation_md": null,
    "extra_md": [],
    "evidence": [],
+   "video": null,
    "page_reports": [],
    "matrix": {
     "run_ids": [],
@@ -2257,6 +2269,7 @@
    "observation_md": null,
    "extra_md": [],
    "evidence": [],
+   "video": null,
    "page_reports": [],
    "matrix": {
     "run_ids": [],
@@ -2289,6 +2302,7 @@
    "observation_md": null,
    "extra_md": [],
    "evidence": [],
+   "video": null,
    "page_reports": [],
    "matrix": {
     "run_ids": [],
@@ -2321,6 +2335,7 @@
    "observation_md": null,
    "extra_md": [],
    "evidence": [],
+   "video": null,
    "page_reports": [],
    "matrix": {
     "run_ids": [],
@@ -2353,6 +2368,7 @@
    "observation_md": null,
    "extra_md": [],
    "evidence": [],
+   "video": null,
    "page_reports": [],
    "matrix": {
     "run_ids": [],

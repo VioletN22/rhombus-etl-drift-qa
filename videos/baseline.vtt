@@ -1,0 +1,31 @@
+WEBVTT
+
+00:00.000 --> 00:05.000
+This is a re-run I screen-recorded after the fact. The original baseline runs were earlier on 2 Oct.
+
+00:05.000 --> 00:07.000
+Output side: my Google Cloud Storage bucket, where Rhombus writes the cleaned file.
+
+00:07.000 --> 00:09.000
+Input side: my S3 bucket. The pipeline always reads input/orders.csv.
+
+00:09.000 --> 00:13.000
+Step 1: upload the normal (baseline) file as orders.csv.
+
+00:13.000 --> 00:15.000
+Same file name every time, so the pipeline never changes. Only the data does.
+
+00:15.000 --> 00:18.000
+Upload done. S3 keeps every version, so I can prove which file each run used.
+
+00:18.000 --> 00:26.000
+Step 2: run the pipeline in Rhombus. I run it by hand because scheduled runs never fired on my account (reported to Rhombus).
+
+00:26.000 --> 00:28.000
+"Pipeline completed successfully."
+
+00:28.000 --> 00:33.000
+Step 3: the cleaned file lands in Google Cloud Storage as a new, timestamped CSV.
+
+00:33.000 --> 00:38.000
+Next I download it and check it with my own validator. The baseline gave byte-identical output 3 runs in a row.

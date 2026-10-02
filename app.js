@@ -769,6 +769,18 @@ function renderPager(d, c) {
     ${next ? `<a class="next" href="${caseHref(next.case)}"><span class="dir">Next →</span><span class="mono">${esc(next.case)}</span></a>` : "<span></span>"}`;
 }
 
+function renderReplay(c) {
+  if (!c.video) return;
+  const v = $("#replay-video");
+  v.src = c.video.src;
+  if (c.video.captions) {
+    const t = document.createElement("track");
+    Object.assign(t, { kind: "subtitles", srclang: "en", label: "English", src: c.video.captions, default: true });
+    v.appendChild(t);
+  }
+  $("#replay").hidden = false;
+}
+
 function renderCase(d) {
   const id = new URLSearchParams(location.search).get("id");
   const c = d.cases.find((x) => x.case === id);
@@ -799,6 +811,7 @@ function renderCase(d) {
   $("#case-outcome").classList.add((CAPABILITY[c.capability] || CAPABILITY.pending)[0]);
   $("#case-body").hidden = false;
   const obs = c.observation_md ? splitObservation(c.observation_md) : { facts: [], sections: [] };
+  renderReplay(c);
   renderFacts(c, obs.facts);
   if (c.observation_md) renderSections(c, obs.sections);
   else $("#observation").innerHTML = `<section class="card"><div class="empty">No write-up found at <code>${esc(c.observation)}</code>.</div></section>`;
