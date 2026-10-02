@@ -387,33 +387,61 @@ function renderLearnings(d) {
   }).join("");
 }
 
-function caseCard(c, d) {
-  const done = c.status === "done";
-  const required = d.summary.required.includes(c.case);
-  const tag = c.case === "baseline" ? "Baseline" : required ? (GROUP_LABEL_SHORT[c.group] || c.group)
-    : c.group === "edge" ? "Edge case" : "Bonus";
-  if (!done) {
-    return `<article class="case-card pending">
-      <div class="cc-top"><span class="cc-name">${esc(c.case)}</span><span class="cc-tag">${esc(tag)}</span></div>
-      <p class="cc-change">${esc(c.change)}</p>
-      <div class="cc-chips">${chip("s-none", "Not run yet")}</div></article>`;
-  }
-  return `<article class="case-card">
-    <div class="cc-top"><span class="cc-name">${esc(c.case)}</span><span class="cc-tag">${esc(tag)}</span></div>
-    <div class="cc-chips">${statusChip(c, "big")}${sevChip(c.matrix.severity)}</div>
-    <p class="cc-head">${esc(c.headline || c.change)}</p>
-    <p class="cc-change">${esc(c.change)}</p>
-    <a class="cc-link" href="${caseHref(c.case)}">Open case <span aria-hidden="true">→</span><span class="visually-hidden"> ${esc(c.case)}</span></a>
-  </article>`;
-}
-const GROUP_LABEL_SHORT = { schema: "Schema drift", combined: "Schema drift", semantic: "Semantic drift", edge: "Edge case" };
+// ---- case tabs (both pages) -------------------------------------------------
 
-function renderCaseGrid(d) {
-  const main = d.cases.filter((c) => c.case === "baseline" || d.summary.required.includes(c.case));
-  const extra = d.cases.filter((c) => !main.includes(c));
-  $("#case-grid").innerHTML = main.map((c) => caseCard(c, d)).join("");
-  $("#case-grid-extra").innerHTML = extra.map((c) => caseCard(c, d)).join("");
-  $("#extra-head").hidden = !extra.length;
+const TAB_LABEL = {
+  baseline: "Baseline",
+  "schema-drop-column": "1 · Drop column",
+  "schema-rename-column": "2 · Rename",
+  "schema-type-change": "3 · Type change",
+  "schema-add-column": "4 · Add column",
+  "schema-all-combined": "5 · All combined",
+  "semantic-dollars-to-cents": "6 · Dollars → cents",
+  "semantic-date-mmdd-to-ddmm": "7 · Date DD/MM",
+  "semantic-country-code-swap": "Bonus · Country swap",
+};
+function tabLabel(c) {
+  if (TAB_LABEL[c.case]) return TAB_LABEL[c.case];
+  const words = c.case.replace(/^(schema|semantic|edge)-/, "").split("-");
+  const name = words.join(" ").replace(/^./, (x) => x.toUpperCase());
+  return c.group === "edge" ? `Edge · ${name}` : `Bonus · ${name}`;
+}
+const tabTip = (c) => (c.status === "done" ? caseStatus(c).label : "Not run yet");
+
+function renderTabs(d, current) {
+  const shown = d.cases.filter((c) => c.status === "done" || c.case === "baseline" ||
+    d.summary.required.includes(c.case));
+  const cur = (key) => (key === current ? ` aria-current="page"` : "");
+  const caseTabs = shown.map((c) => {
+    const s = caseStatus(c);
+    const tip = tabTip(c);
+    return `<a class="tab ${c.status === "done" ? "" : "pending"}" href="${caseHref(c.case)}" title="${esc(tip)}"${cur(c.case)}>` +
+      `<span class="tab-dot ${s.cls}" aria-hidden="true"></span>${esc(tabLabel(c))}` +
+      `<span class="visually-hidden">, ${esc(tip)}</span></a>`;
+  }).join("");
+  $("#tabs").innerHTML = `<div class="wrap"><div class="tab-row">
+    <a class="tab" href="./"${cur("overview")}>Overview</a><span class="tab-sep" aria-hidden="true"></span>
+    ${caseTabs}<span class="tab-sep" aria-hidden="true"></span>
+    <a class="tab" href="./#metrics" data-metrics${cur("metrics")}>Metrics</a></div></div>`;
+  showActiveTab();
+}
+
+// On narrow screens, scroll the bar (never the page) so the active tab is visible.
+function showActiveTab() {
+  const row = $("#tabs .tab-row");
+  const a = row?.querySelector('[aria-current="page"]');
+  if (!a) return;
+  if (a.offsetLeft < row.scrollLeft || a.offsetLeft + a.offsetWidth > row.scrollLeft + row.clientWidth) {
+    row.scrollLeft = a.offsetLeft - (row.clientWidth - a.offsetWidth) / 2;
+  }
+}
+
+function setHomeTab() {
+  const metrics = location.hash === "#metrics" || ($("#metrics")?.contains(document.getElementById(location.hash.slice(1))) ?? false);
+  document.querySelectorAll("#tabs .tab").forEach((a) => a.removeAttribute("aria-current"));
+  const a = metrics ? $("#tabs [data-metrics]") : $('#tabs a[href="./"]');
+  a?.setAttribute("aria-current", "page");
+  showActiveTab();
 }
 
 function openMetricsForHash() {
@@ -584,7 +612,7 @@ function renderPager(d, c) {
   const prev = list[i - 1];
   const next = list[i + 1];
   $("#pager").innerHTML = `${prev ? `<a class="prev" href="${caseHref(prev.case)}"><span class="dir">← Previous</span><span class="mono">${esc(prev.case)}</span></a>` : "<span></span>"}
-    <a class="home" href="./#cases">All cases</a>
+    <a class="home" href="./">Overview</a>
     ${next ? `<a class="next" href="${caseHref(next.case)}"><span class="dir">Next →</span><span class="mono">${esc(next.case)}</span></a>` : "<span></span>"}`;
 }
 
@@ -592,10 +620,11 @@ function renderCase(d) {
   const id = new URLSearchParams(location.search).get("id");
   const c = d.cases.find((x) => x.case === id);
   $("#repo-link").href = GITHUB_BASE;
+  renderTabs(d, c ? c.case : null);
   if (!c) {
     $("#case-title").textContent = "Case not found";
     $("#case-missing").hidden = false;
-    $("#case-missing").innerHTML = `No case called <code>${esc(id || "")}</code>. <a href="./#cases">Back to all cases</a>.`;
+    $("#case-missing").innerHTML = `No case called <code>${esc(id || "")}</code>. <a href="./">Back to the overview</a>.`;
     return;
   }
   ALL_EVIDENCE = new Set(d.evidence_files || []);
@@ -607,9 +636,9 @@ function renderCase(d) {
   $("#case-change").innerHTML = `<span class="k">What changed</span> ${esc(c.change)}`;
   renderPager(d, c);
   if (c.status !== "done") {
-    $("#case-chips").innerHTML = chip("s-none", "Not run yet");
+    $("#case-chips").innerHTML = chip("s-none", "Not run yet", "big");
     $("#case-missing").hidden = false;
-    $("#case-missing").innerHTML = `This case has not been run against Rhombus yet. Its write-up will appear here once <code>${esc(c.observation)}</code> exists and the case is marked <code>done</code> in <code>observations/matrix.yaml</code>.`;
+    $("#case-missing").innerHTML = `<strong>Not run yet.</strong> This case has not been run against Rhombus yet. Its write-up will appear here once <code>${esc(c.observation)}</code> exists and the case is marked <code>done</code> in <code>observations/matrix.yaml</code>.`;
     return;
   }
   $("#case-chips").innerHTML = statusChip(c, "big") + sevChip(c.matrix.severity);
@@ -652,7 +681,7 @@ async function main() {
   $("#verdict").textContent = d.verdict || "";
   renderStats(d);
   renderLearnings(d);
-  renderCaseGrid(d);
+  renderTabs(d, "overview");
   renderCapability(d);
   renderHealth(d);
   renderTiming(d);
@@ -661,7 +690,17 @@ async function main() {
   renderChatbot(d);
   renderRuns(d);
   openMetricsForHash();
-  window.addEventListener("hashchange", openMetricsForHash);
+  setHomeTab();
+  window.addEventListener("hashchange", () => { openMetricsForHash(); setHomeTab(); });
+  $("#metrics").addEventListener("toggle", () => {
+    if (!$("#metrics").open && location.hash) history.replaceState(null, "", location.pathname);
+    setHomeTab();
+  });
+  $("#tabs [data-metrics]").addEventListener("click", (e) => {
+    if (location.hash !== "#metrics") return;
+    e.preventDefault(); // same hash: no hashchange, so open and jump by hand
+    openMetricsForHash();
+  });
 }
 
 main();
