@@ -110,7 +110,7 @@ function renderCapability(d) {
     const cell = (k, body, sub = "") => `<div class="hm-cell"><span class="k">${k}</span>${body}` +
       (sub ? `<span class="chart-note">${esc(sub)}</span>` : "") + `</div>`;
     html += `<div class="hm-row ${done ? "" : "pending"}">
-      <div class="hm-case"><span class="name">${esc(c.case)}</span><span class="change">${esc(c.change)}</span></div>
+      <div class="hm-case"><span class="name">${done ? `<a href="${caseHref(c.case)}">${esc(c.case)}</a>` : esc(c.case)}</span><span class="change">${esc(c.change)}</span></div>
       ${cell("Rhombus", capChip(c.capability), behaviour)}
       ${cell("Validator", c.validator ? verdictChip(c.validator.verdict, c.validator.summary) : (done ? pendingChip("No report") : quiet()))}
       ${cell("Logs", scaleChip("logs_clear", m.logs_clear, done))}
@@ -275,7 +275,7 @@ function renderChatbot(d) {
       <td>${ok ? scaleChip("chatbot_diagnosis", c.matrix.chatbot_diagnosis, ok) : pendingChip()}</td>
       <td>${scaleChip("chatbot_fix_worked", c.matrix.chatbot_fix_worked, ok)}</td>
       <td>${ok && c.matrix.schedule_after ? esc(c.matrix.schedule_after) : quiet()}</td>
-      <td>${ok ? `<a href="${blob(c.observation)}">${esc(c.observation.split("/").pop())}</a>` : `<span class="local">Not written yet</span>`}</td></tr>`;
+      <td>${ok ? `<a href="${caseHref(c.case)}">Open case</a>` : `<span class="local">Not written yet</span>`}</td></tr>`;
   }).join("");
   $("#chatbot-body").innerHTML = `<div class="tally">${tally}</div>
     <div class="scroll-x"><table class="scorecard"><thead><tr><th>Case</th><th>Diagnosis</th><th>Suggested fix</th><th>Schedule afterwards</th><th>Observation</th></tr></thead>
@@ -298,7 +298,7 @@ function renderRuns(d) {
       ? `<span class="local">${esc(r.report)} (local only)</span>`
       : `<a href="${blob(r.report)}">Report</a>`;
     const obsDone = d.cases.find((c) => c.case === r.case)?.status === "done";
-    const obs = obsDone && caseObs[r.case] ? `<a href="${blob(caseObs[r.case])}">Observation</a>` : "";
+    const obs = obsDone && caseObs[r.case] ? `<a href="${caseHref(r.case)}">Case</a>` : "";
     const btn = rep ? `<button class="expand" aria-expanded="false" aria-controls="checks-${i}" data-target="checks-${i}">Checks</button>` : "";
     const detail = rep ? `<tr class="detail" id="checks-${i}" hidden><td colspan="5"><ul class="checks">${rep.checks.map((c) => {
       const s = c.status === "pass" ? chip("s-ok", "pass") : c.status === "warn" ? chip("s-warn", "warn") : chip("s-bad", "fail");
@@ -322,17 +322,337 @@ function renderRuns(d) {
   });
 }
 
+// ---- home page ----------------------------------------------------------------
+
+// Plain-language status for a case card: what Rhombus did, not the validator's view.
+function caseStatus(c) {
+  if (c.status !== "done") return { cls: "s-none", label: "Pending" };
+  const cap = c.capability;
+  if (cap === "handled") return { cls: "s-ok", label: "Handled" };
+  if (cap === "warned") return { cls: "s-warn", label: "Warned" };
+  if (cap === "missed") return { cls: "s-bad missed", label: "Silent wrong data" };
+  if (cap === "broke") {
+    return c.matrix.platform_behaviour === "stopped"
+      ? { cls: "s-stop", label: "Stopped (safe)" } : { cls: "s-bad", label: "Broke" };
+  }
+  if (cap === "unverified") return { cls: "s-none", label: "Not validated" };
+  return { cls: "s-none", label: "Pending" };
+}
+const statusChip = (c, extra = "") => {
+  const s = caseStatus(c);
+  return chip(s.cls, s.label, extra);
+};
+const sevChip = (sev) => {
+  if (!sev || sev === "na") return "";
+  const [cls, label] = SCALE.severity[sev] || ["s-none", sev];
+  return chip(cls, label, "sev");
+};
+const caseHref = (id) => `case.html?id=${encodeURIComponent(id)}`;
+
+function caseTitle(c) {
+  const m = /^#\s+(.+)$/m.exec(c.observation_md || "");
+  return m ? m[1].replace(/`/g, "") : c.case;
+}
+
+function renderStats(d) {
+  const s = d.summary;
+  const det = s.determinism;
+  const stat = (big, label, sub = "") => `<div class="stat"><div class="big">${big}</div>
+    <div class="label">${esc(label)}</div>${sub ? `<div class="sub">${esc(sub)}</div>` : ""}</div>`;
+  $("#stats").innerHTML = [
+    stat(`${s.required_done}<span class="of">/${s.required.length}</span>`, "required cases run",
+      `${s.required.length - s.required_done} still to run`),
+    stat(String(s.critical), "critical findings", "wrong data shipped as a success"),
+    stat(det ? `${det.identical}<span class="of">/${det.runs}</span>` : "–", "identical runs",
+      det ? `same input, same pipeline (${det.case})` : "no trial yet"),
+    stat(String(s.credits_used ?? "–"), "credits used", s.credits_note),
+  ].join("");
+}
+
+function renderLearnings(d) {
+  if (!d.learnings?.length) {
+    $("#learnings").innerHTML = `<div class="empty">No learnings yet. Add them under <code>summary.learnings</code> in <code>observations/matrix.yaml</code>.</div>`;
+    return;
+  }
+  $("#learnings").innerHTML = d.learnings.map((l) => {
+    const links = l.cases.map((id) => `<a href="${caseHref(id)}">${esc(id)}</a>`).join(", ");
+    return `<article class="learning">
+      <div class="learning-top">${sevChip(l.severity)}</div>
+      <h3>${esc(l.title)}</h3>
+      ${l.line ? `<p class="line">${esc(l.line)}</p>` : ""}
+      <details><summary>Read more</summary>
+        <p>${esc(l.detail)}</p>
+        ${links ? `<p class="related">Case${l.cases.length === 1 ? "" : "s"}: ${links}</p>` : ""}
+      </details></article>`;
+  }).join("");
+}
+
+function caseCard(c, d) {
+  const done = c.status === "done";
+  const required = d.summary.required.includes(c.case);
+  const tag = c.case === "baseline" ? "Baseline" : required ? (GROUP_LABEL_SHORT[c.group] || c.group)
+    : c.group === "edge" ? "Edge case" : "Bonus";
+  if (!done) {
+    return `<article class="case-card pending">
+      <div class="cc-top"><span class="cc-name">${esc(c.case)}</span><span class="cc-tag">${esc(tag)}</span></div>
+      <p class="cc-change">${esc(c.change)}</p>
+      <div class="cc-chips">${chip("s-none", "Not run yet")}</div></article>`;
+  }
+  return `<article class="case-card">
+    <div class="cc-top"><span class="cc-name">${esc(c.case)}</span><span class="cc-tag">${esc(tag)}</span></div>
+    <div class="cc-chips">${statusChip(c, "big")}${sevChip(c.matrix.severity)}</div>
+    <p class="cc-head">${esc(c.headline || c.change)}</p>
+    <p class="cc-change">${esc(c.change)}</p>
+    <a class="cc-link" href="${caseHref(c.case)}">Open case <span aria-hidden="true">→</span><span class="visually-hidden"> ${esc(c.case)}</span></a>
+  </article>`;
+}
+const GROUP_LABEL_SHORT = { schema: "Schema drift", combined: "Schema drift", semantic: "Semantic drift", edge: "Edge case" };
+
+function renderCaseGrid(d) {
+  const main = d.cases.filter((c) => c.case === "baseline" || d.summary.required.includes(c.case));
+  const extra = d.cases.filter((c) => !main.includes(c));
+  $("#case-grid").innerHTML = main.map((c) => caseCard(c, d)).join("");
+  $("#case-grid-extra").innerHTML = extra.map((c) => caseCard(c, d)).join("");
+  $("#extra-head").hidden = !extra.length;
+}
+
+function openMetricsForHash() {
+  const id = location.hash.slice(1);
+  const target = id && document.getElementById(id);
+  const box = $("#metrics");
+  if (target && box && box.contains(target)) {
+    box.open = true;
+    // After fonts and layout settle, or the browser's own fragment jump wins.
+    const go = () => target.scrollIntoView({ behavior: "instant", block: "start" });
+    requestAnimationFrame(go);
+    document.fonts?.ready.then(() => setTimeout(go, 50));
+  }
+}
+
+// ---- case page ----------------------------------------------------------------
+
+const FACT = {
+  stopped: { stopped: ["s-stop", "Yes, it stopped"], warned: ["s-warn", "Warned, kept going"], carried_on: ["s-none", "No, ran to the end"] },
+  gcs: { yes: ["s-none", "Yes"], no: ["s-ok", "No"] },
+};
+
+function renderFacts(c) {
+  const m = c.matrix;
+  const row = (k, v, note = "") => `<div class="fact"><dt>${esc(k)}</dt><dd>${v}${note ? `<span class="note">${esc(note)}</span>` : ""}</dd></div>`;
+  const pick = (map, v) => (v && map[v] ? chip(map[v][0], map[v][1]) : `<span class="quiet">not recorded</span>`);
+  // Output reaching GCS is only good news if the output is right.
+  let gcs = pick(FACT.gcs, m.gcs_output);
+  if (m.gcs_output === "yes") {
+    gcs = c.capability === "handled" ? chip("s-ok", "Yes") : c.capability === "missed"
+      ? chip("s-bad missed", "Yes, wrong data") : chip("s-none", "Yes");
+  }
+  const isBase = c.case === "baseline";
+  const rows = [
+    row("Rhombus run", m.rhombus_status ? chip(m.rhombus_status === "Success" ? "s-ok" : "s-bad", m.rhombus_status) : `<span class="quiet">not recorded</span>`),
+    row("Pipeline stopped?", pick(FACT.stopped, m.platform_behaviour)),
+    row("Output reached GCS?", gcs),
+    row("Logs clear?", scaleChip("logs_clear", m.logs_clear, true)),
+  ];
+  if (!isBase) {
+    rows.push(row("Chatbot diagnosis", scaleChip("chatbot_diagnosis", m.chatbot_diagnosis, true)));
+    rows.push(row("Chatbot fix worked?", scaleChip("chatbot_fix_worked", m.chatbot_fix_worked, true)));
+  }
+  if (typeof m.credits_used === "number") rows.push(row("Credits", `<span class="num">${m.credits_used}</span>`));
+  if (m.schedule_after) rows.push(row("Schedule", `<span class="plain">${esc(m.schedule_after)}</span>`));
+  $("#facts").innerHTML = rows.join("");
+}
+
+const EVIDENCE_HREF = /^(?:\.\/)?(?:observations\/)?evidence\/([^\s/]+)$/;
+const REPORT_HREF = /^(?:data-validation\/)?reports\/([^\s/]+)\.json$/;
+
+function renderMarkdown(el, md, c) {
+  const body = md.replace(/^#\s+.+\n+/, ""); // title is already the page heading
+  if (window.marked && window.DOMPurify) {
+    el.innerHTML = DOMPurify.sanitize(marked.parse(body));
+  } else {
+    el.innerHTML = `<pre class="raw">${esc(body)}</pre>`;
+    return;
+  }
+  const evidence = new Set(c.evidence.map((e) => e.name));
+  const reports = new Set(c.page_reports.map((r) => r.run));
+  // Code spans that name a file we publish become links.
+  el.querySelectorAll("code").forEach((code) => {
+    if (code.closest("a, pre")) return;
+    const text = code.textContent.trim();
+    let href = null;
+    const ev = EVIDENCE_HREF.exec(text);
+    if (ev && (evidence.has(ev[1]) || ALL_EVIDENCE.has(ev[1]))) href = `evidence/${ev[1]}`;
+    const rep = REPORT_HREF.exec(text);
+    if (rep && reports.has(rep[1])) href = `#report-${rep[1]}`;
+    if (!href) return;
+    const a = document.createElement("a");
+    a.href = href;
+    if (href.startsWith("evidence/")) a.target = "_blank";
+    code.replaceWith(a);
+    a.appendChild(code);
+  });
+  // Relative markdown links: evidence resolves locally, everything else to GitHub.
+  el.querySelectorAll("a[href]").forEach((a) => {
+    const href = a.getAttribute("href");
+    if (/^(?:[a-z]+:|#|evidence\/)/i.test(href)) return;
+    const base = c.observation.split("/").slice(0, -1).join("/");
+    const ev = EVIDENCE_HREF.exec(href);
+    if (ev) { a.href = `evidence/${ev[1]}`; return; }
+    const parts = `${base}/${href}`.split("/");
+    const out = [];
+    for (const p of parts) { if (p === "..") out.pop(); else if (p && p !== ".") out.push(p); }
+    a.href = blob(out.join("/"));
+  });
+  el.querySelectorAll("table").forEach((t) => {
+    if (t.parentElement.classList.contains("scroll-x")) return;
+    const wrap = document.createElement("div");
+    wrap.className = "scroll-x";
+    t.replaceWith(wrap);
+    wrap.appendChild(t);
+    // The write-ups open with a key/value table whose header row is empty.
+    const head = t.querySelector("thead");
+    if (head && !head.textContent.trim()) { head.remove(); t.classList.add("kv"); }
+  });
+}
+let ALL_EVIDENCE = new Set();
+
+function prettyName(name) {
+  return name.replace(/^\d{4}-\d{2}-\d{2}_/, "").replace(/\.[a-z0-9]+$/i, "").replace(/[-_]+/g, " ");
+}
+
+function renderEvidence(c) {
+  if (!c.evidence.length) {
+    $("#evidence-body").innerHTML = `<div class="empty">No evidence files match this case. Files in <code>observations/evidence/</code> are matched by name; set <code>evidence_keywords</code> in <code>matrix.yaml</code> to widen the match.</div>`;
+    return;
+  }
+  const imgs = c.evidence.filter((e) => e.kind === "image");
+  const texts = c.evidence.filter((e) => e.kind !== "image");
+  const gallery = imgs.length ? `<div class="gallery">${imgs.map((e) => `<figure>
+      <a href="${esc(e.path)}" target="_blank" rel="noopener"><img src="${esc(e.path)}" alt="${esc(prettyName(e.name))}" loading="lazy"></a>
+      <figcaption>${esc(prettyName(e.name))}</figcaption></figure>`).join("")}</div>` : "";
+  const files = texts.length ? `<div class="files">${texts.map((e) => `<details class="file" data-src="${esc(e.path)}">
+      <summary><span class="ext">${esc(e.ext)}</span><span class="fname">${esc(prettyName(e.name))}</span></summary>
+      <pre>Loading</pre><p class="file-link"><a href="${esc(e.path)}" target="_blank" rel="noopener">Open raw file</a></p></details>`).join("")}</div>` : "";
+  $("#evidence-body").innerHTML = gallery + files;
+  $("#evidence-body").addEventListener("toggle", async (ev) => {
+    const box = ev.target;
+    if (!box.matches?.("details.file") || !box.open || box.dataset.loaded) return;
+    box.dataset.loaded = "1";
+    const pre = box.querySelector("pre");
+    try {
+      const res = await fetch(box.dataset.src);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      let text = await res.text();
+      if (box.dataset.src.endsWith(".json")) {
+        try { text = JSON.stringify(JSON.parse(text), null, 2); } catch { /* show as is */ }
+      }
+      pre.textContent = text;
+    } catch (err) {
+      pre.textContent = `Could not load (${err.message}).`;
+    }
+  }, true);
+}
+
+function renderChecks(c) {
+  if (!c.page_reports.length) {
+    $("#checks-body").innerHTML = `<div class="empty">No validator report for this case yet.</div>`;
+    return;
+  }
+  $("#checks-body").innerHTML = c.page_reports.map((r, i) => {
+    const order = { fail: 0, warn: 1, pass: 2 };
+    const checks = [...r.checks].sort((a, b) => order[a.status] - order[b.status]);
+    const rows = checks.map((k) => {
+      const s = k.status === "pass" ? chip("s-ok", "pass") : k.status === "warn" ? chip("s-warn", "warn") : chip("s-bad", "fail");
+      return `<tr><td>${s}</td><td class="id">${esc(k.id)}</td><td class="detail">${esc(k.detail)}</td></tr>`;
+    }).join("");
+    const s = r.summary;
+    const counts = `${s.fail} fail, ${s.warn} warn, ${s.pass} pass`;
+    const note = r.listed ? "" : `<span class="note">also matched to this case</span>`;
+    return `<details class="report" id="report-${esc(r.run)}" ${i === 0 ? "open" : ""}>
+      <summary><span class="run mono">${esc(r.run)}</span>${verdictChip(r.verdict, r.summary)}
+        <span class="counts">${counts}, ${r.output_rows} of ${r.input_rows} rows out</span>${note}</summary>
+      <div class="scroll-x"><table class="check-table"><thead><tr><th>Result</th><th>Check</th><th>Detail</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <p class="file-link"><a href="${blob(r.path)}">Full report on GitHub</a></p>
+    </details>`;
+  }).join("");
+}
+
+function renderPager(d, c) {
+  const done = d.cases.filter((x) => x.status === "done");
+  const list = done.some((x) => x.case === c.case) ? done : d.cases;
+  const i = list.findIndex((x) => x.case === c.case);
+  const prev = list[i - 1];
+  const next = list[i + 1];
+  $("#pager").innerHTML = `${prev ? `<a class="prev" href="${caseHref(prev.case)}"><span class="dir">← Previous</span><span class="mono">${esc(prev.case)}</span></a>` : "<span></span>"}
+    <a class="home" href="./#cases">All cases</a>
+    ${next ? `<a class="next" href="${caseHref(next.case)}"><span class="dir">Next →</span><span class="mono">${esc(next.case)}</span></a>` : "<span></span>"}`;
+}
+
+function renderCase(d) {
+  const id = new URLSearchParams(location.search).get("id");
+  const c = d.cases.find((x) => x.case === id);
+  $("#repo-link").href = GITHUB_BASE;
+  if (!c) {
+    $("#case-title").textContent = "Case not found";
+    $("#case-missing").hidden = false;
+    $("#case-missing").innerHTML = `No case called <code>${esc(id || "")}</code>. <a href="./#cases">Back to all cases</a>.`;
+    return;
+  }
+  ALL_EVIDENCE = new Set(d.evidence_files || []);
+  const title = caseTitle(c);
+  document.title = `${c.case} · Rhombus Drift QA`;
+  $("#crumb-case").textContent = c.case;
+  $("#case-title").textContent = title;
+  $("#case-slug").textContent = title === c.case ? "" : c.case;
+  $("#case-change").innerHTML = `<span class="k">What changed</span> ${esc(c.change)}`;
+  renderPager(d, c);
+  if (c.status !== "done") {
+    $("#case-chips").innerHTML = chip("s-none", "Not run yet");
+    $("#case-missing").hidden = false;
+    $("#case-missing").innerHTML = `This case has not been run against Rhombus yet. Its write-up will appear here once <code>${esc(c.observation)}</code> exists and the case is marked <code>done</code> in <code>observations/matrix.yaml</code>.`;
+    return;
+  }
+  $("#case-chips").innerHTML = statusChip(c, "big") + sevChip(c.matrix.severity);
+  $("#case-headline").textContent = c.headline || "";
+  $("#case-body").hidden = false;
+  renderFacts(c);
+  if (c.observation_md) renderMarkdown($("#observation"), c.observation_md, c);
+  else $("#observation").innerHTML = `<div class="empty">No write-up found at <code>${esc(c.observation)}</code>.</div>`;
+  $("#obs-source").innerHTML = `Source: <a href="${blob(c.observation)}">${esc(c.observation)}</a>`;
+  $("#extra").innerHTML = (c.extra_md || []).map((x, i) => {
+    const t = /^#\s+(.+)$/m.exec(x.md);
+    return `<details class="extra-md"><summary>${esc(t ? t[1] : x.path)}</summary><article class="prose" id="extra-${i}"></article></details>`;
+  }).join("");
+  (c.extra_md || []).forEach((x, i) => renderMarkdown(document.getElementById(`extra-${i}`), x.md, { ...c, observation: x.path }));
+  renderEvidence(c);
+  renderChecks(c);
+  if (location.hash) document.getElementById(location.hash.slice(1))?.scrollIntoView();
+}
+
+// ---- boot -----------------------------------------------------------------------
+
 async function main() {
+  const page = document.body.dataset.page;
   let d;
   try {
     const res = await fetch("data.json", { cache: "no-store" });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     d = await res.json();
   } catch (err) {
-    $("#meta").textContent = `Could not load data.json (${err.message}). Run python scripts/build_dashboard.py, then serve this folder over HTTP.`;
+    const msg = `Could not load data.json (${err.message}). Run python scripts/build_dashboard.py, then serve this folder over HTTP.`;
+    const el = $("#meta") || $("#case-title");
+    if (el) el.textContent = msg;
+    return;
+  }
+  if (page === "case") {
+    renderCase(d);
     return;
   }
   renderMeta(d);
+  $("#verdict").textContent = d.verdict || "";
+  renderStats(d);
+  renderLearnings(d);
+  renderCaseGrid(d);
   renderCapability(d);
   renderHealth(d);
   renderTiming(d);
@@ -340,6 +660,8 @@ async function main() {
   renderBuilder(d);
   renderChatbot(d);
   renderRuns(d);
+  openMetricsForHash();
+  window.addEventListener("hashchange", openMetricsForHash);
 }
 
 main();

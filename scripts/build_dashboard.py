@@ -462,6 +462,7 @@ def main(argv: list[str] | None = None) -> int:
         "verdict": summary.pop("verdict"),
         "learnings": summary.pop("learnings"),
         "summary": summary,
+        "evidence_files": published,
         "built_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "sources": {
             "reports": str(folder.relative_to(ROOT)),
