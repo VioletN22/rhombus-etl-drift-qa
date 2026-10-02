@@ -365,6 +365,15 @@ function renderStats(d) {
   ].join("");
 }
 
+function renderSuites(d) {
+  const suites = d.summary.suites || [];
+  $("#suites").innerHTML = suites.map((t) => `<div class="suite">
+      <div class="suite-top"><h3>${esc(t.name)}</h3>${chip(t.state === "ok" ? "s-ok" : "s-none", t.result)}</div>
+      <p class="suite-tool"><code>${esc(t.path)}</code> · ${esc(t.tool)}</p>
+      <p>${esc(t.note)}</p></div>`).join("");
+  $("#suites-block").hidden = !suites.length;
+}
+
 function renderLearnings(d) {
   if (!d.learnings?.length) {
     $("#learnings").innerHTML = `<div class="empty">No learnings yet. Add them under <code>summary.learnings</code> in <code>observations/matrix.yaml</code>.</div>`;
@@ -867,6 +876,7 @@ async function main() {
   $("#verdict").textContent = d.verdict || "";
   renderStats(d);
   renderLearnings(d);
+  renderSuites(d);
   renderTabs(d, "overview");
   renderCapability(d);
   renderHealth(d);

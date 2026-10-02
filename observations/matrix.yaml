@@ -375,10 +375,12 @@ summary:
     severity: High
   - title: What runs isn't what the canvas shows
     line: The chatbot's prompt asked for 8 columns; the code that ran kept 10.
-    detail: In case 5 the code writer regenerated against the broken file, and Rhombus's own sandbox rule
-      ("don't drop input columns") rejected the 8-column version twice. The only record is the node's
+    detail: 'In case 5 the code writer regenerated against the broken file, and Rhombus''s own sandbox
+      rule ("don''t drop input columns") rejected the 8-column version twice. The only record is the node''s
       Edit Code → Transcript; the canvas and run log show the prompt. Separately, a run log listed a column
-      from the previous file (total_amount) that wasn't in the data.
+      from the previous file (total_amount) that wasn''t in the data. The record is also fragile: the
+      Logs panel starts empty in a new session ("No logs yet" after dozens of runs), and the code Transcript
+      is kept in the browser''s local storage.'
     cases:
     - schema-all-combined
     - semantic-dollars-to-cents
@@ -411,3 +413,24 @@ summary:
     cases:
     - baseline
     severity: High
+  suites:
+  - name: UI tests
+    tool: Playwright
+    path: ui-tests/
+    result: 7 / 7 pass
+    note: 'Pipeline journey on the live project: S3 source, graph shape, GCS destination, a real run,
+      schedule. The schedule check is an expected failure that tracks the known scheduling bug.'
+    state: ok
+  - name: Data validation
+    tool: Python, pytest
+    path: data-validation/
+    result: 75 / 75 pass
+    note: Unit tests for the validator itself. The validator then checks every Rhombus output against
+      the contract and the baseline.
+    state: ok
+  - name: API tests
+    tool: Playwright request
+    path: api-tests/
+    result: In progress
+    note: At least 2 backend tests from the network tab, one negative (no session).
+    state: pending

@@ -434,6 +434,7 @@ def build_summary(matrix: dict, cases: list[dict], consistency: list[dict],
         "credits_used": credits,
         "credits_note": s.get("credits_note") or "",
         "learnings": learnings,
+        "suites": as_list(s.get("suites")),
     }
 
 
