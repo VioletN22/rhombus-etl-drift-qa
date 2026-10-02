@@ -165,7 +165,7 @@
   "2026-10-02_type-change-run-green.png",
   "s3-bucket-policy-generated-by-rhombus.json"
  ],
- "built_at": "2026-10-02T12:41:25+00:00",
+ "built_at": "2026-10-02T12:47:48+00:00",
  "sources": {
   "reports": "data-validation/reports",
   "ledger": "observations/runs.csv",
@@ -2059,7 +2059,10 @@
      "ext": "png"
     }
    ],
-   "video": null,
+   "video": {
+    "src": "videos/semantic-date-mmdd-to-ddmm.mp4",
+    "captions": "videos/semantic-date-mmdd-to-ddmm.vtt"
+   },
    "page_reports": [
     {
      "run": "date-ddmm",
