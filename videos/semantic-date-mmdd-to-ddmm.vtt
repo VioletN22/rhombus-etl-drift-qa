@@ -1,0 +1,19 @@
+WEBVTT
+
+00:00.000 --> 00:06.000
+Case 7: dates switch from US style (04/20/2026) to Australian style (20/04/2026). (Re-run recorded after the fact.)
+
+00:06.000 --> 00:13.000
+Step 2: run the same pipeline.
+
+00:13.000 --> 00:18.000
+"Pipeline completed successfully." No warning.
+
+00:18.000 --> 00:23.000
+In the Data Input profile, order_date is already a DateTime. Rhombus converted the dates while loading the file, before any cleaning.
+
+00:23.000 --> 00:27.000
+It read them month-first wherever it could, so 08/02 (8 Feb) became 2 Aug. The range now ends on 7 December 2026, in the future.
+
+00:27.000 --> 00:30.000
+Delivered to Google Cloud Storage as a success: 116 orders with swapped dates, and no warning.
