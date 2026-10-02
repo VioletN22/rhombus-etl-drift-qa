@@ -1,0 +1,1079 @@
+{
+  "config": {
+    "argv": [
+      "/Users/macbook01/.local/bin/node",
+      "/Users/macbook01/personal/rhombus-etl-drift-qa/node_modules/.bin/playwright",
+      "test"
+    ],
+    "configFile": "/Users/macbook01/personal/rhombus-etl-drift-qa/playwright.config.ts",
+    "rootDir": "/Users/macbook01/personal/rhombus-etl-drift-qa",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "setup",
+        "name": "setup",
+        "testDir": "/Users/macbook01/personal/rhombus-etl-drift-qa/ui-tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/auth\\.setup\\.ts/"
+        ],
+        "timeout": 120000
+      },
+      {
+        "outputDir": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "ui",
+        "name": "ui",
+        "testDir": "/Users/macbook01/personal/rhombus-etl-drift-qa/ui-tests/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 120000
+      },
+      {
+        "outputDir": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "api",
+        "name": "api",
+        "testDir": "/Users/macbook01/personal/rhombus-etl-drift-qa/api-tests/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 120000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "html",
+        {
+          "open": "never"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "reports/playwright.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.63.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "ui-tests/auth.setup.ts",
+      "file": "ui-tests/auth.setup.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "signed-in session",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 360000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "setup",
+              "projectName": "setup",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2403,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-02T13:25:47.563Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/auth.setup.ts-signed-in-session-setup/test-finished-1.png"
+                    },
+                    {
+                      "name": "video",
+                      "contentType": "video/webm",
+                      "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/auth.setup.ts-signed-in-session-setup/video.webm"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/auth.setup.ts-signed-in-session-setup/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "17e3fe6f4d9d8bd79c6b-9d9fed5ee2a291aed080",
+          "file": "ui-tests/auth.setup.ts",
+          "line": 17,
+          "column": 6
+        }
+      ]
+    },
+    {
+      "title": "ui-tests/tests/pipeline-journey.spec.ts",
+      "file": "ui-tests/tests/pipeline-journey.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "S3 -> AI-built cleaning -> GCS",
+          "file": "ui-tests/tests/pipeline-journey.spec.ts",
+          "line": 11,
+          "column": 6,
+          "specs": [
+            {
+              "title": "S3 source is connected to the input bucket",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "ui",
+                  "projectName": "ui",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4302,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T13:25:50.654Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/pipeline-journey-S3---AI-b-883bb-nnected-to-the-input-bucket-ui/test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/pipeline-journey-S3---AI-b-883bb-nnected-to-the-input-bucket-ui/video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/pipeline-journey-S3---AI-b-883bb-nnected-to-the-input-bucket-ui/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "2b88f89b7ef8000c10f7-d330389d4bc31a91afaa",
+              "file": "ui-tests/tests/pipeline-journey.spec.ts",
+              "line": 16,
+              "column": 7
+            },
+            {
+              "title": "AI-built graph runs from one input to one output through 3+ steps",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "ui",
+                  "projectName": "ui",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3089,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T13:25:55.323Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/pipeline-journey-S3---AI-b-c6384--one-output-through-3-steps-ui/test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/pipeline-journey-S3---AI-b-c6384--one-output-through-3-steps-ui/video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/pipeline-journey-S3---AI-b-c6384--one-output-through-3-steps-ui/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "2b88f89b7ef8000c10f7-09bcce8a2d9f19fbea52",
+              "file": "ui-tests/tests/pipeline-journey.spec.ts",
+              "line": 23,
+              "column": 7
+            },
+            {
+              "title": "Data Output writes CSV to the GCS bucket",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "ui",
+                  "projectName": "ui",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4331,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T13:25:58.568Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/pipeline-journey-S3---AI-b-0d53e-rites-CSV-to-the-GCS-bucket-ui/test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/pipeline-journey-S3---AI-b-0d53e-rites-CSV-to-the-GCS-bucket-ui/video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/pipeline-journey-S3---AI-b-0d53e-rites-CSV-to-the-GCS-bucket-ui/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "2b88f89b7ef8000c10f7-580cfe732abe33eeb27d",
+              "file": "ui-tests/tests/pipeline-journey.spec.ts",
+              "line": 40,
+              "column": 7
+            },
+            {
+              "title": "a manual run of the baseline file succeeds and is logged",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 300000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "ui",
+                  "projectName": "ui",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 16044,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T13:26:03.076Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/pipeline-journey-S3---AI-b-acc30-file-succeeds-and-is-logged-ui/test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/pipeline-journey-S3---AI-b-acc30-file-succeeds-and-is-logged-ui/video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/pipeline-journey-S3---AI-b-acc30-file-succeeds-and-is-logged-ui/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "2b88f89b7ef8000c10f7-7fb038f16e12e83e98a9",
+              "file": "ui-tests/tests/pipeline-journey.spec.ts",
+              "line": 46,
+              "column": 7
+            },
+            {
+              "title": "a schedule exists and is switched on",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "ui",
+                  "projectName": "ui",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3335,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T13:26:19.622Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/pipeline-journey-S3---AI-b-a67e9-e-exists-and-is-switched-on-ui/test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/pipeline-journey-S3---AI-b-a67e9-e-exists-and-is-switched-on-ui/video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/pipeline-journey-S3---AI-b-a67e9-e-exists-and-is-switched-on-ui/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "2b88f89b7ef8000c10f7-69cd26c6ab737321f17e",
+              "file": "ui-tests/tests/pipeline-journey.spec.ts",
+              "line": 55,
+              "column": 7
+            },
+            {
+              "title": "the active schedule shows when it will run next",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "fail",
+                      "description": "Scheduled runs do not fire; see observations/FINDINGS.md",
+                      "location": {
+                        "file": "/Users/macbook01/personal/rhombus-etl-drift-qa/ui-tests/tests/pipeline-journey.spec.ts",
+                        "line": 65,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "expectedStatus": "failed",
+                  "projectId": "ui",
+                  "projectName": "ui",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 3303,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoMatch\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected pattern: \u001b[32m/Next run:[ \\t]*\\S/\u001b[39m\nReceived string:  \u001b[31m\"Schedules\u001b[39m\n\u001b[31mManage schedules within this project\u001b[39m\n\u001b[31mAdd Schedule\u001b[39m\n\u001b[31mSchedule for drift-qa\u001b[39m\n\u001b[31mActive\u001b[39m\n\u001b[31mHourly\u001b[39m\n\u001b[31mAt minute 20\u001b[39m\n\u001b[31mNext run:\"\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoMatch\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected pattern: \u001b[32m/Next run:[ \\t]*\\S/\u001b[39m\nReceived string:  \u001b[31m\"Schedules\u001b[39m\n\u001b[31mManage schedules within this project\u001b[39m\n\u001b[31mAdd Schedule\u001b[39m\n\u001b[31mSchedule for drift-qa\u001b[39m\n\u001b[31mActive\u001b[39m\n\u001b[31mHourly\u001b[39m\n\u001b[31mAt minute 20\u001b[39m\n\u001b[31mNext run:\"\u001b[39m\n    at /Users/macbook01/personal/rhombus-etl-drift-qa/ui-tests/tests/pipeline-journey.spec.ts:67:27",
+                        "location": {
+                          "file": "/Users/macbook01/personal/rhombus-etl-drift-qa/ui-tests/tests/pipeline-journey.spec.ts",
+                          "column": 27,
+                          "line": 67
+                        },
+                        "snippet": "  65 |     test.fail(true, 'Scheduled runs do not fire; see observations/FINDINGS.md');\n  66 |     const schedule = await rhombus.schedule();\n> 67 |     expect(schedule.text).toMatch(/Next run:[ \\t]*\\S/);\n     |                           ^\n  68 |   });\n  69 | });\n  70 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/macbook01/personal/rhombus-etl-drift-qa/ui-tests/tests/pipeline-journey.spec.ts",
+                            "column": 27,
+                            "line": 67
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoMatch\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected pattern: \u001b[32m/Next run:[ \\t]*\\S/\u001b[39m\nReceived string:  \u001b[31m\"Schedules\u001b[39m\n\u001b[31mManage schedules within this project\u001b[39m\n\u001b[31mAdd Schedule\u001b[39m\n\u001b[31mSchedule for drift-qa\u001b[39m\n\u001b[31mActive\u001b[39m\n\u001b[31mHourly\u001b[39m\n\u001b[31mAt minute 20\u001b[39m\n\u001b[31mNext run:\"\u001b[39m\n\n  65 |     test.fail(true, 'Scheduled runs do not fire; see observations/FINDINGS.md');\n  66 |     const schedule = await rhombus.schedule();\n> 67 |     expect(schedule.text).toMatch(/Next run:[ \\t]*\\S/);\n     |                           ^\n  68 |   });\n  69 | });\n  70 |\n    at /Users/macbook01/personal/rhombus-etl-drift-qa/ui-tests/tests/pipeline-journey.spec.ts:67:27"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T13:26:23.129Z",
+                      "annotations": [
+                        {
+                          "type": "fail",
+                          "description": "Scheduled runs do not fire; see observations/FINDINGS.md",
+                          "location": {
+                            "file": "/Users/macbook01/personal/rhombus-etl-drift-qa/ui-tests/tests/pipeline-journey.spec.ts",
+                            "line": 65,
+                            "column": 10
+                          }
+                        }
+                      ],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/pipeline-journey-S3---AI-b-e6e2b-shows-when-it-will-run-next-ui/test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/pipeline-journey-S3---AI-b-e6e2b-shows-when-it-will-run-next-ui/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/pipeline-journey-S3---AI-b-e6e2b-shows-when-it-will-run-next-ui/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/pipeline-journey-S3---AI-b-e6e2b-shows-when-it-will-run-next-ui/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/macbook01/personal/rhombus-etl-drift-qa/ui-tests/tests/pipeline-journey.spec.ts",
+                        "column": 27,
+                        "line": 67
+                      }
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "2b88f89b7ef8000c10f7-61e4d6d4df0e00c20617",
+              "file": "ui-tests/tests/pipeline-journey.spec.ts",
+              "line": 61,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "api-tests/tests/auth.negative.spec.ts",
+      "file": "api-tests/tests/auth.negative.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "access control",
+          "file": "api-tests/tests/auth.negative.spec.ts",
+          "line": 15,
+          "column": 6,
+          "specs": [
+            {
+              "title": "no token: /api/dataset/projects/all returns 401",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 58,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T13:26:26.861Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/auth.negative-access-contr-acf2e-et-projects-all-returns-401-api/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "51893087d024c0662bcf-ef1012b59d4b4f508a73",
+              "file": "api-tests/tests/auth.negative.spec.ts",
+              "line": 17,
+              "column": 9
+            },
+            {
+              "title": "no token: /api/dataset/analyzer/v2/pipeline/executions/all returns 401",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 30,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T13:26:26.941Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/auth.negative-access-contr-e7c75--executions-all-returns-401-api/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "51893087d024c0662bcf-8faa7ddc8546d6607594",
+              "file": "api-tests/tests/auth.negative.spec.ts",
+              "line": 17,
+              "column": 9
+            },
+            {
+              "title": "no token: /api/dataset/analyzer/v2/pipeline/schedules/all returns 401",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 32,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T13:26:26.976Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/auth.negative-access-contr-c7a61-e-schedules-all-returns-401-api/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "51893087d024c0662bcf-9daaf0af828685012888",
+              "file": "api-tests/tests/auth.negative.spec.ts",
+              "line": 17,
+              "column": 9
+            },
+            {
+              "title": "a made-up token is rejected",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 32,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T13:26:27.014Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/auth.negative-access-control-a-made-up-token-is-rejected-api/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "51893087d024c0662bcf-d41eee059ab41f237df0",
+              "file": "api-tests/tests/auth.negative.spec.ts",
+              "line": 24,
+              "column": 7
+            },
+            {
+              "title": "no token: project nodes return 401, not the pipeline",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 200,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T13:26:27.051Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/auth.negative-access-contr-140ac-return-401-not-the-pipeline-api/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "51893087d024c0662bcf-e44c17a07a3457922cbd",
+              "file": "api-tests/tests/auth.negative.spec.ts",
+              "line": 32,
+              "column": 7
+            },
+            {
+              "title": "signed in: a project id that does not exist returns 404",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 133,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T13:26:27.262Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/auth.negative-access-contr-f0efb--does-not-exist-returns-404-api/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "51893087d024c0662bcf-c9891c8b19413a2bfd02",
+              "file": "api-tests/tests/auth.negative.spec.ts",
+              "line": 38,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "api-tests/tests/pipeline.spec.ts",
+      "file": "api-tests/tests/pipeline.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "project and pipeline",
+          "file": "api-tests/tests/pipeline.spec.ts",
+          "line": 10,
+          "column": 6,
+          "specs": [
+            {
+              "title": "project list includes the test project",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 181,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T13:26:27.414Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/pipeline-project-and-pipel-97a44-t-includes-the-test-project-api/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7df0157fa3d95ec90e97-c53161a171bbf8feb9e3",
+              "file": "api-tests/tests/pipeline.spec.ts",
+              "line": 11,
+              "column": 7
+            },
+            {
+              "title": "pipeline nodes form one path from input to output",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 298,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T13:26:27.606Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/pipeline-project-and-pipel-7337e-e-path-from-input-to-output-api/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7df0157fa3d95ec90e97-0d23e5ca140669dbb3be",
+              "file": "api-tests/tests/pipeline.spec.ts",
+              "line": 19,
+              "column": 7
+            },
+            {
+              "title": "every failed run records the failing node and an error",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 354,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T13:26:27.918Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/pipeline-project-and-pipel-f5645-e-failing-node-and-an-error-api/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7df0157fa3d95ec90e97-cbd5bb089e8292c56498",
+              "file": "api-tests/tests/pipeline.spec.ts",
+              "line": 38,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "api-tests/tests/schedule.spec.ts",
+      "file": "api-tests/tests/schedule.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "schedule",
+          "file": "api-tests/tests/schedule.spec.ts",
+          "line": 9,
+          "column": 6,
+          "specs": [
+            {
+              "title": "the project has an enabled schedule with a cron expression",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 279,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T13:26:28.289Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/schedule-schedule-the-proj-db56e-dule-with-a-cron-expression-api/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0c763654641d7f9e8f11-ca07c10fd934a1f5cb80",
+              "file": "api-tests/tests/schedule.spec.ts",
+              "line": 10,
+              "column": 7
+            },
+            {
+              "title": "scheduled runs actually happen",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [
+                    {
+                      "type": "fail",
+                      "description": "Scheduled runs never fire on this account; see observations/FINDINGS.md",
+                      "location": {
+                        "file": "/Users/macbook01/personal/rhombus-etl-drift-qa/api-tests/tests/schedule.spec.ts",
+                        "line": 22,
+                        "column": 10
+                      }
+                    }
+                  ],
+                  "expectedStatus": "failed",
+                  "projectId": "api",
+                  "projectName": "api",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 538,
+                      "error": {
+                        "message": "Error: next_run_at is in the future\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m1790947589113\u001b[39m\nReceived:   \u001b[31m1790940000000\u001b[39m",
+                        "stack": "Error: next_run_at is in the future\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m1790947589113\u001b[39m\nReceived:   \u001b[31m1790940000000\u001b[39m\n    at /Users/macbook01/personal/rhombus-etl-drift-qa/api-tests/tests/schedule.spec.ts:29:87",
+                        "location": {
+                          "file": "/Users/macbook01/personal/rhombus-etl-drift-qa/api-tests/tests/schedule.spec.ts",
+                          "column": 87,
+                          "line": 29
+                        },
+                        "snippet": "  27 |       .executions.filter((r) => r.project_id === projectId);\n  28 |\n> 29 |     expect(new Date(schedule.next_run_at!).getTime(), 'next_run_at is in the future').toBeGreaterThan(Date.now());\n     |                                                                                       ^\n  30 |     expect(schedule.last_run_at, 'last_run_at is set').not.toBeNull();\n  31 |     expect(runs.some((r) => r.trigger !== 'manual'), 'at least one run not started by hand').toBe(true);\n  32 |   });"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/macbook01/personal/rhombus-etl-drift-qa/api-tests/tests/schedule.spec.ts",
+                            "column": 87,
+                            "line": 29
+                          },
+                          "message": "Error: next_run_at is in the future\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m1790947589113\u001b[39m\nReceived:   \u001b[31m1790940000000\u001b[39m\n\n  27 |       .executions.filter((r) => r.project_id === projectId);\n  28 |\n> 29 |     expect(new Date(schedule.next_run_at!).getTime(), 'next_run_at is in the future').toBeGreaterThan(Date.now());\n     |                                                                                       ^\n  30 |     expect(schedule.last_run_at, 'last_run_at is set').not.toBeNull();\n  31 |     expect(runs.some((r) => r.trigger !== 'manual'), 'at least one run not started by hand').toBe(true);\n  32 |   });\n    at /Users/macbook01/personal/rhombus-etl-drift-qa/api-tests/tests/schedule.spec.ts:29:87"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T13:26:28.583Z",
+                      "annotations": [
+                        {
+                          "type": "fail",
+                          "description": "Scheduled runs never fire on this account; see observations/FINDINGS.md",
+                          "location": {
+                            "file": "/Users/macbook01/personal/rhombus-etl-drift-qa/api-tests/tests/schedule.spec.ts",
+                            "line": 22,
+                            "column": 10
+                          }
+                        }
+                      ],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/schedule-schedule-scheduled-runs-actually-happen-api/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/macbook01/personal/rhombus-etl-drift-qa/test-results/schedule-schedule-scheduled-runs-actually-happen-api/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/macbook01/personal/rhombus-etl-drift-qa/api-tests/tests/schedule.spec.ts",
+                        "column": 87,
+                        "line": 29
+                      }
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0c763654641d7f9e8f11-0684be94fff95020de07",
+              "file": "api-tests/tests/schedule.spec.ts",
+              "line": 19,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-02T13:25:47.347Z",
+    "duration": 41808.713,
+    "expected": 18,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

@@ -434,14 +434,106 @@ def build_summary(matrix: dict, cases: list[dict], consistency: list[dict],
         "credits_used": credits,
         "credits_note": s.get("credits_note") or "",
         "learnings": learnings,
-        "suites": as_list(s.get("suites")),
     }
+
+
+
+SUITES_DOC = ROOT / "docs" / "suites.yaml"
+PW_JSON = ROOT / "reports" / "playwright.json"
+PYTEST_XML = ROOT / "reports" / "pytest.xml"
+SUITE_EVIDENCE = ROOT / "reports" / "evidence"
+ANSI = re.compile(r"\x1b\[[0-9;]*m")
+
+
+def _slug(text: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")[:60]
+
+
+def playwright_tests() -> dict[str, list[dict]]:
+    """Latest Playwright results per project. Videos and screenshots are copied into
+    reports/evidence so they survive test-results/ being cleared between runs."""
+    if not PW_JSON.exists():
+        return {}
+    report = json.loads(PW_JSON.read_text())
+    SUITE_EVIDENCE.mkdir(parents=True, exist_ok=True)
+    out: dict[str, list[dict]] = {}
+
+    def walk(suite: dict, file: str) -> None:
+        file = suite.get("file") or file
+        for spec in suite.get("specs", []):
+            for t in spec["tests"]:
+                r = t["results"][-1]
+                status = {"expected": "pass", "unexpected": "fail", "skipped": "skip", "flaky": "pass"}[t["status"]]
+                if status == "pass" and t["expectedStatus"] == "failed":
+                    status = "expected-fail"
+                item = {"title": spec["title"], "file": file, "status": status,
+                        "duration_ms": r["duration"], "video": None, "screenshot": None, "error": None}
+                if r.get("errors"):
+                    item["error"] = ANSI.sub("", r["errors"][0].get("message", "")).strip().splitlines()[0][:240]
+                base = f"{t['projectName']}-{_slug(spec['title'])}"
+                for a in r.get("attachments", []):
+                    kind = {"video": "video", "screenshot": "screenshot"}.get(a["name"])
+                    if not kind or not a.get("path"):
+                        continue
+                    target = SUITE_EVIDENCE / f"{base}{Path(a['path']).suffix}"
+                    if Path(a["path"]).exists():
+                        shutil.copy2(a["path"], target)
+                    if target.exists():
+                        item[kind] = f"evidence/suites/{target.name}"
+                out.setdefault(t["projectName"], []).append(item)
+        for child in suite.get("suites", []):
+            walk(child, file)
+
+    for suite in report["suites"]:
+        walk(suite, suite.get("file", ""))
+    out["_meta"] = [{"run_at": report["stats"]["startTime"], "duration_ms": report["stats"]["duration"]}]
+    return out
+
+
+def pytest_tests() -> list[dict]:
+    if not PYTEST_XML.exists():
+        return []
+    import xml.etree.ElementTree as ET
+    tests = []
+    for case in ET.parse(PYTEST_XML).iter("testcase"):
+        failed = case.find("failure") is not None or case.find("error") is not None
+        skipped = case.find("skipped") is not None
+        tests.append({"title": case.get("name"), "file": case.get("classname", "").replace(".", "/") + ".py",
+                      "status": "fail" if failed else "skip" if skipped else "pass",
+                      "duration_ms": round(float(case.get("time", 0)) * 1000)})
+    return tests
+
+
+def build_suites() -> list[dict]:
+    if not SUITES_DOC.exists():
+        return []
+    pw = playwright_tests()
+    meta = (pw.get("_meta") or [{}])[0]
+    out = []
+    for doc in yaml.safe_load(SUITES_DOC.read_text()):
+        explain = doc.get("tests") or {}
+        if doc["id"] == "data":
+            tests, run_at = pytest_tests(), (datetime.fromtimestamp(PYTEST_XML.stat().st_mtime, timezone.utc).isoformat(timespec="seconds") if PYTEST_XML.exists() else None)
+        else:
+            tests, run_at = pw.get(doc["id"], []), meta.get("run_at")
+        for t in tests:
+            t["explain"] = explain.get(t["title"], "")
+        counts = {k: sum(t["status"] == k for t in tests) for k in ("pass", "expected-fail", "fail", "skip")}
+        out.append({**{k: v for k, v in doc.items() if k != "tests"}, "tests": tests, "counts": counts,
+                    "total": len(tests), "run_at": run_at,
+                    "ok": bool(tests) and counts["fail"] == 0})
+    if SUITE_EVIDENCE.exists():
+        dest = ROOT / "dashboard" / "evidence" / "suites"
+        dest.mkdir(parents=True, exist_ok=True)
+        for f in SUITE_EVIDENCE.iterdir():
+            shutil.copy2(f, dest / f.name)
+    return out
 
 
 def bust_cache(out_dir: Path, stamp: str) -> None:
     """Version the JS/CSS links so browsers never mix a new page with a cached script."""
     import re as _re
-    for page in ("index.html", "case.html"):
+    for page in ("index.html", "case.html", "suite.html"):
         f = out_dir / page
         if f.exists():
             html = f.read_text()
@@ -477,6 +569,7 @@ def main(argv: list[str] | None = None) -> int:
         "verdict": summary.pop("verdict"),
         "learnings": summary.pop("learnings"),
         "summary": summary,
+        "suites": build_suites(),
         "evidence_files": published,
         "built_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "sources": {

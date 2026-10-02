@@ -1,0 +1,79 @@
+# Plain-English descriptions of each test suite, shown on the dashboard's suite pages.
+# Results and evidence come from the latest run (reports/playwright.json, reports/pytest.xml).
+
+- id: ui
+  name: UI tests
+  tool: Playwright
+  path: ui-tests/
+  run: npm run test:ui
+  needs: Node 20+, `npm install`, and a saved login (`npm run login` opens a window to sign in once).
+  summary: >-
+    Clicks through the real drift-qa project the way a person would and checks the whole
+    pipeline journey from the brief: the S3 source, the AI-built graph, the GCS destination,
+    a real run, and the schedule.
+  how:
+    - Signs in once by hand (the account has two-step sign-in) and reuses the saved session after that, so the suite never handles a password.
+    - The AI builder names nodes differently every time, so the graph test checks what kind of node each one is and how they connect, never their names.
+    - Waits for real events (the end-of-run message, a new log entry) instead of fixed pauses. A script fails the build if anyone adds a sleep.
+    - Rhombus shows a false "Ad Blocker Detected" pop-up in a clean test browser. The suite closes it whenever it appears.
+    - The schedule check is marked as an expected failure. It passes while the known bug exists and turns red once Rhombus fixes scheduling.
+  limits:
+    - Runs against whatever file is in S3. The drift cases were uploaded by hand, so they live in the observations and videos rather than in this suite.
+    - Two locators rely on Rhombus's CSS classes (the selected destination dot and the logs panel) because those elements have no label or test id.
+  tests:
+    S3 source is connected to the input bucket: Opens the Data Input's connections and checks the S3 connection is Connected and points at s3://violet-rhombus-drift-in/input/.
+    AI-built graph runs from one input to one output through 3+ steps: Reads every node and edge on the canvas and checks there is one input, one output, at least 3 cleaning steps, and that every node sits on the path from input to output. This is the check that would have caught the chatbot unwiring the output in case 5.
+    Data Output writes CSV to the GCS bucket: Opens the Data Output node and checks the GCS bucket is the selected destination and the export format is CSV.
+    a manual run of the baseline file succeeds and is logged: Clicks Run, waits for "Pipeline completed successfully", and checks the logs gained exactly one new run.
+    a schedule exists and is switched on: Opens the Schedule tab and checks a schedule exists, says Active and has its switch on.
+    the active schedule shows when it will run next: Checks "Next run" shows a time. Expected to fail while the scheduling bug exists.
+
+- id: api
+  name: API tests
+  tool: Playwright request
+  path: api-tests/
+  run: npm run test:api
+  needs: The same saved login as the UI tests. No browser opens.
+  summary: >-
+    Calls the backend endpoints the Rhombus web app itself uses, found in the browser's network
+    tab, and checks status codes and response contents. Covers the pipeline, the run history,
+    the schedule, and what happens without a valid login.
+  how:
+    - Gets a bearer token the same way the web app does (its session endpoint), then calls api.rhombusai.com with it.
+    - Every response is checked against a schema written from real responses, so a renamed or missing field fails the test with a clear message.
+    - Negative tests send no token, a made-up token, and an id that doesn't exist, and check the body gives nothing away.
+    - 'The schedule test reads the backend''s own view of the schedule. It shows the bug the UI hides: next_run_at stuck in the past, last_run_at empty, every run started by hand.'
+  limits:
+    - Read-only. It doesn't create, change or delete anything in Rhombus.
+    - Endpoints are undocumented and were taken from the network tab, so they may change without notice.
+  tests:
+    'no token: /api/dataset/projects/all returns 401': Without a token, the project list is refused with 401 and only says Unauthorized.
+    'no token: /api/dataset/analyzer/v2/pipeline/executions/all returns 401': Without a token, the run history is refused with 401.
+    'no token: /api/dataset/analyzer/v2/pipeline/schedules/all returns 401': Without a token, the schedules are refused with 401.
+    a made-up token is rejected: A fake bearer token gets 401, not data.
+    'no token: project nodes return 401, not the pipeline': Without a token, the pipeline graph is refused and the response contains no node data.
+    'signed in: a project id that does not exist returns 404': Signed in, asking for a project that doesn't exist returns 404 Not Found.
+    project list includes the test project: The project list returns 200, matches the schema, and includes drift-qa.
+    pipeline nodes form one path from input to output: The same graph check as the UI test, done on the API data, so the two can be compared.
+    every failed run records the failing node and an error: Every failed run in the history names the node that failed and has an error message.
+    the project has an enabled schedule with a cron expression: The project has exactly one schedule, it's enabled, and its cron expression is valid.
+    scheduled runs actually happen: Checks next_run_at is in the future, last_run_at is set, and at least one run wasn't started by hand. Expected to fail while the scheduling bug exists.
+
+- id: data
+  name: Data validation
+  tool: Python, pandas, pytest
+  path: data-validation/
+  run: npm run test:data
+  needs: Python 3.11+ and `pip install -r data-validation/requirements.txt`.
+  summary: >-
+    Two parts. The validator compares each Rhombus output in GCS with the input file in S3
+    and the baseline run. These 75 unit tests check the validator itself, so a "pass" from it
+    can be trusted.
+  how:
+    - Checks schema, row counts, every cleaning rule, nulls, and a column-by-column diff against an independent reference cleaner.
+    - 'Determinism: hashes each output in a canonical form, so reruns of the same file can be compared byte for byte.'
+    - 'Drift detectors compare with the baseline run: amounts about 100x higher, dates that only make sense day-first, future dates, and shifts in the country mix.'
+    - Several checks were added during testing, after Rhombus outputs exposed gaps (an all-blank column, an empty file, text in a number column).
+  limits:
+    - Detectors use simple thresholds tuned on this dataset. They flag likely problems; they don't prove intent.
+  tests: {}

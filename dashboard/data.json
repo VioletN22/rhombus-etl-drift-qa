@@ -101,34 +101,795 @@
    "case": "baseline"
   },
   "credits_used": 35,
-  "credits_note": "of 5,050. 15 on two extra AI builds, 20 on four chatbot requests (5 each); runs cost nothing visible.",
-  "suites": [
-   {
-    "name": "UI tests",
-    "tool": "Playwright",
-    "path": "ui-tests/",
-    "result": "7 / 7 pass",
-    "note": "Pipeline journey on the live project: S3 source, graph shape, GCS destination, a real run, schedule. The schedule check is an expected failure that tracks the known scheduling bug.",
-    "state": "ok"
-   },
-   {
-    "name": "Data validation",
-    "tool": "Python, pytest",
-    "path": "data-validation/",
-    "result": "75 / 75 pass",
-    "note": "Unit tests for the validator itself. The validator then checks every Rhombus output against the contract and the baseline.",
-    "state": "ok"
-   },
-   {
-    "name": "API tests",
-    "tool": "Playwright request",
-    "path": "api-tests/",
-    "result": "In progress",
-    "note": "At least 2 backend tests from the network tab, one negative (no session).",
-    "state": "pending"
-   }
-  ]
+  "credits_note": "of 5,050. 15 on two extra AI builds, 20 on four chatbot requests (5 each); runs cost nothing visible."
  },
+ "suites": [
+  {
+   "id": "ui",
+   "name": "UI tests",
+   "tool": "Playwright",
+   "path": "ui-tests/",
+   "run": "npm run test:ui",
+   "needs": "Node 20+, `npm install`, and a saved login (`npm run login` opens a window to sign in once).",
+   "summary": "Clicks through the real drift-qa project the way a person would and checks the whole pipeline journey from the brief: the S3 source, the AI-built graph, the GCS destination, a real run, and the schedule.",
+   "how": [
+    "Signs in once by hand (the account has two-step sign-in) and reuses the saved session after that, so the suite never handles a password.",
+    "The AI builder names nodes differently every time, so the graph test checks what kind of node each one is and how they connect, never their names.",
+    "Waits for real events (the end-of-run message, a new log entry) instead of fixed pauses. A script fails the build if anyone adds a sleep.",
+    "Rhombus shows a false \"Ad Blocker Detected\" pop-up in a clean test browser. The suite closes it whenever it appears.",
+    "The schedule check is marked as an expected failure. It passes while the known bug exists and turns red once Rhombus fixes scheduling."
+   ],
+   "limits": [
+    "Runs against whatever file is in S3. The drift cases were uploaded by hand, so they live in the observations and videos rather than in this suite.",
+    "Two locators rely on Rhombus's CSS classes (the selected destination dot and the logs panel) because those elements have no label or test id."
+   ],
+   "tests": [
+    {
+     "title": "S3 source is connected to the input bucket",
+     "file": "ui-tests/tests/pipeline-journey.spec.ts",
+     "status": "pass",
+     "duration_ms": 4302,
+     "video": "evidence/suites/ui-s3-source-is-connected-to-the-input-bucket.webm",
+     "screenshot": "evidence/suites/ui-s3-source-is-connected-to-the-input-bucket.png",
+     "error": null,
+     "explain": "Opens the Data Input's connections and checks the S3 connection is Connected and points at s3://violet-rhombus-drift-in/input/."
+    },
+    {
+     "title": "AI-built graph runs from one input to one output through 3+ steps",
+     "file": "ui-tests/tests/pipeline-journey.spec.ts",
+     "status": "pass",
+     "duration_ms": 3089,
+     "video": "evidence/suites/ui-ai-built-graph-runs-from-one-input-to-one-output-through-3-s.webm",
+     "screenshot": "evidence/suites/ui-ai-built-graph-runs-from-one-input-to-one-output-through-3-s.png",
+     "error": null,
+     "explain": "Reads every node and edge on the canvas and checks there is one input, one output, at least 3 cleaning steps, and that every node sits on the path from input to output. This is the check that would have caught the chatbot unwiring the output in case 5."
+    },
+    {
+     "title": "Data Output writes CSV to the GCS bucket",
+     "file": "ui-tests/tests/pipeline-journey.spec.ts",
+     "status": "pass",
+     "duration_ms": 4331,
+     "video": "evidence/suites/ui-data-output-writes-csv-to-the-gcs-bucket.webm",
+     "screenshot": "evidence/suites/ui-data-output-writes-csv-to-the-gcs-bucket.png",
+     "error": null,
+     "explain": "Opens the Data Output node and checks the GCS bucket is the selected destination and the export format is CSV."
+    },
+    {
+     "title": "a manual run of the baseline file succeeds and is logged",
+     "file": "ui-tests/tests/pipeline-journey.spec.ts",
+     "status": "pass",
+     "duration_ms": 16044,
+     "video": "evidence/suites/ui-a-manual-run-of-the-baseline-file-succeeds-and-is-logged.webm",
+     "screenshot": "evidence/suites/ui-a-manual-run-of-the-baseline-file-succeeds-and-is-logged.png",
+     "error": null,
+     "explain": "Clicks Run, waits for \"Pipeline completed successfully\", and checks the logs gained exactly one new run."
+    },
+    {
+     "title": "a schedule exists and is switched on",
+     "file": "ui-tests/tests/pipeline-journey.spec.ts",
+     "status": "pass",
+     "duration_ms": 3335,
+     "video": "evidence/suites/ui-a-schedule-exists-and-is-switched-on.webm",
+     "screenshot": "evidence/suites/ui-a-schedule-exists-and-is-switched-on.png",
+     "error": null,
+     "explain": "Opens the Schedule tab and checks a schedule exists, says Active and has its switch on."
+    },
+    {
+     "title": "the active schedule shows when it will run next",
+     "file": "ui-tests/tests/pipeline-journey.spec.ts",
+     "status": "expected-fail",
+     "duration_ms": 3303,
+     "video": "evidence/suites/ui-the-active-schedule-shows-when-it-will-run-next.webm",
+     "screenshot": "evidence/suites/ui-the-active-schedule-shows-when-it-will-run-next.png",
+     "error": "Error: expect(received).toMatch(expected)",
+     "explain": "Checks \"Next run\" shows a time. Expected to fail while the scheduling bug exists."
+    }
+   ],
+   "counts": {
+    "pass": 5,
+    "expected-fail": 1,
+    "fail": 0,
+    "skip": 0
+   },
+   "total": 6,
+   "run_at": "2026-10-02T13:25:47.347Z",
+   "ok": true
+  },
+  {
+   "id": "api",
+   "name": "API tests",
+   "tool": "Playwright request",
+   "path": "api-tests/",
+   "run": "npm run test:api",
+   "needs": "The same saved login as the UI tests. No browser opens.",
+   "summary": "Calls the backend endpoints the Rhombus web app itself uses, found in the browser's network tab, and checks status codes and response contents. Covers the pipeline, the run history, the schedule, and what happens without a valid login.",
+   "how": [
+    "Gets a bearer token the same way the web app does (its session endpoint), then calls api.rhombusai.com with it.",
+    "Every response is checked against a schema written from real responses, so a renamed or missing field fails the test with a clear message.",
+    "Negative tests send no token, a made-up token, and an id that doesn't exist, and check the body gives nothing away.",
+    "The schedule test reads the backend's own view of the schedule. It shows the bug the UI hides: next_run_at stuck in the past, last_run_at empty, every run started by hand."
+   ],
+   "limits": [
+    "Read-only. It doesn't create, change or delete anything in Rhombus.",
+    "Endpoints are undocumented and were taken from the network tab, so they may change without notice."
+   ],
+   "tests": [
+    {
+     "title": "no token: /api/dataset/projects/all returns 401",
+     "file": "api-tests/tests/auth.negative.spec.ts",
+     "status": "pass",
+     "duration_ms": 58,
+     "video": null,
+     "screenshot": null,
+     "error": null,
+     "explain": "Without a token, the project list is refused with 401 and only says Unauthorized."
+    },
+    {
+     "title": "no token: /api/dataset/analyzer/v2/pipeline/executions/all returns 401",
+     "file": "api-tests/tests/auth.negative.spec.ts",
+     "status": "pass",
+     "duration_ms": 30,
+     "video": null,
+     "screenshot": null,
+     "error": null,
+     "explain": "Without a token, the run history is refused with 401."
+    },
+    {
+     "title": "no token: /api/dataset/analyzer/v2/pipeline/schedules/all returns 401",
+     "file": "api-tests/tests/auth.negative.spec.ts",
+     "status": "pass",
+     "duration_ms": 32,
+     "video": null,
+     "screenshot": null,
+     "error": null,
+     "explain": "Without a token, the schedules are refused with 401."
+    },
+    {
+     "title": "a made-up token is rejected",
+     "file": "api-tests/tests/auth.negative.spec.ts",
+     "status": "pass",
+     "duration_ms": 32,
+     "video": null,
+     "screenshot": null,
+     "error": null,
+     "explain": "A fake bearer token gets 401, not data."
+    },
+    {
+     "title": "no token: project nodes return 401, not the pipeline",
+     "file": "api-tests/tests/auth.negative.spec.ts",
+     "status": "pass",
+     "duration_ms": 200,
+     "video": null,
+     "screenshot": null,
+     "error": null,
+     "explain": "Without a token, the pipeline graph is refused and the response contains no node data."
+    },
+    {
+     "title": "signed in: a project id that does not exist returns 404",
+     "file": "api-tests/tests/auth.negative.spec.ts",
+     "status": "pass",
+     "duration_ms": 133,
+     "video": null,
+     "screenshot": null,
+     "error": null,
+     "explain": "Signed in, asking for a project that doesn't exist returns 404 Not Found."
+    },
+    {
+     "title": "project list includes the test project",
+     "file": "api-tests/tests/pipeline.spec.ts",
+     "status": "pass",
+     "duration_ms": 181,
+     "video": null,
+     "screenshot": null,
+     "error": null,
+     "explain": "The project list returns 200, matches the schema, and includes drift-qa."
+    },
+    {
+     "title": "pipeline nodes form one path from input to output",
+     "file": "api-tests/tests/pipeline.spec.ts",
+     "status": "pass",
+     "duration_ms": 298,
+     "video": null,
+     "screenshot": null,
+     "error": null,
+     "explain": "The same graph check as the UI test, done on the API data, so the two can be compared."
+    },
+    {
+     "title": "every failed run records the failing node and an error",
+     "file": "api-tests/tests/pipeline.spec.ts",
+     "status": "pass",
+     "duration_ms": 354,
+     "video": null,
+     "screenshot": null,
+     "error": null,
+     "explain": "Every failed run in the history names the node that failed and has an error message."
+    },
+    {
+     "title": "the project has an enabled schedule with a cron expression",
+     "file": "api-tests/tests/schedule.spec.ts",
+     "status": "pass",
+     "duration_ms": 279,
+     "video": null,
+     "screenshot": null,
+     "error": null,
+     "explain": "The project has exactly one schedule, it's enabled, and its cron expression is valid."
+    },
+    {
+     "title": "scheduled runs actually happen",
+     "file": "api-tests/tests/schedule.spec.ts",
+     "status": "expected-fail",
+     "duration_ms": 538,
+     "video": null,
+     "screenshot": null,
+     "error": "Error: next_run_at is in the future",
+     "explain": "Checks next_run_at is in the future, last_run_at is set, and at least one run wasn't started by hand. Expected to fail while the scheduling bug exists."
+    }
+   ],
+   "counts": {
+    "pass": 10,
+    "expected-fail": 1,
+    "fail": 0,
+    "skip": 0
+   },
+   "total": 11,
+   "run_at": "2026-10-02T13:25:47.347Z",
+   "ok": true
+  },
+  {
+   "id": "data",
+   "name": "Data validation",
+   "tool": "Python, pandas, pytest",
+   "path": "data-validation/",
+   "run": "npm run test:data",
+   "needs": "Python 3.11+ and `pip install -r data-validation/requirements.txt`.",
+   "summary": "Two parts. The validator compares each Rhombus output in GCS with the input file in S3 and the baseline run. These 75 unit tests check the validator itself, so a \"pass\" from it can be trusted.",
+   "how": [
+    "Checks schema, row counts, every cleaning rule, nulls, and a column-by-column diff against an independent reference cleaner.",
+    "Determinism: hashes each output in a canonical form, so reruns of the same file can be compared byte for byte.",
+    "Drift detectors compare with the baseline run: amounts about 100x higher, dates that only make sense day-first, future dates, and shifts in the country mix.",
+    "Several checks were added during testing, after Rhombus outputs exposed gaps (an all-blank column, an empty file, text in a number column)."
+   ],
+   "limits": [
+    "Detectors use simple thresholds tuned on this dataset. They flag likely problems; they don't prove intent."
+   ],
+   "tests": [
+    {
+     "title": "test_tvd_bounds",
+     "file": "tests/test_drift_detectors.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_slash_share_ignores_non_slash_dates",
+     "file": "tests/test_drift_detectors.py",
+     "status": "pass",
+     "duration_ms": 3,
+     "explain": ""
+    },
+    {
+     "title": "test_baseline_is_quiet_except_its_planted_outlier",
+     "file": "tests/test_drift_detectors.py",
+     "status": "pass",
+     "duration_ms": 26,
+     "explain": ""
+    },
+    {
+     "title": "test_cents_fires_scale_and_max",
+     "file": "tests/test_drift_detectors.py",
+     "status": "pass",
+     "duration_ms": 8,
+     "explain": ""
+    },
+    {
+     "title": "test_ddmm_fires_on_input_share_and_future_dates",
+     "file": "tests/test_drift_detectors.py",
+     "status": "pass",
+     "duration_ms": 8,
+     "explain": ""
+    },
+    {
+     "title": "test_country_swap_fires_country_tvd_only",
+     "file": "tests/test_drift_detectors.py",
+     "status": "pass",
+     "duration_ms": 7,
+     "explain": ""
+    },
+    {
+     "title": "test_exact_duplicates_then_first_per_order_id_wins",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 3,
+     "explain": ""
+    },
+    {
+     "title": "test_order_id_whitespace_does_not_create_a_second_order",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 2,
+     "explain": ""
+    },
+    {
+     "title": "test_rows_missing_key_or_amount_are_dropped",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 2,
+     "explain": ""
+    },
+    {
+     "title": "test_first_row_per_id_is_chosen_before_missing_amounts_are_dropped",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 2,
+     "explain": ""
+    },
+    {
+     "title": "test_reconciliation_identity_holds_on_the_real_baseline",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 5,
+     "explain": ""
+    },
+    {
+     "title": "test_name_trimmed_title_case[  mIa jOnEs -Mia Jones]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_name_trimmed_title_case[WILLIAM WILLIAMS-William Williams]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_name_trimmed_title_case[jos\\xe9 smith-Jos\\xe9 Smith]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_name_trimmed_title_case[-]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_email_lowercase_valid_or_blank[ GRACE.LEE76@EXAMPLE.COM -grace.lee76@example.com]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_email_lowercase_valid_or_blank[bob@-]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_email_lowercase_valid_or_blank[n/a-]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_email_lowercase_valid_or_blank[not-an-email-]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_email_lowercase_valid_or_blank[@example.com-]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_email_lowercase_valid_or_blank[a b@c.com-]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_email_lowercase_valid_or_blank[-]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_dates_to_iso_or_blank[04/20/2026-2026-04-20]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_dates_to_iso_or_blank[2026-03-05-2026-03-05]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_dates_to_iso_or_blank[Aug 14 2026-2026-08-14]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_dates_to_iso_or_blank[Aug 4 2026-2026-08-04]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_dates_to_iso_or_blank[02/30/2026-]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_dates_to_iso_or_blank[20/04/2026-]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_dates_to_iso_or_blank[yesterday-]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_dates_to_iso_or_blank[-]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_amount_strip_and_parse[$1,234.50-1234.5]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_amount_strip_and_parse[81.99-81.99]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_amount_strip_and_parse[-12.30--12.3]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_amount_strip_and_parse[ $5 -5.0]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_amount_strip_and_parse[-None]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_amount_strip_and_parse[three-None]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_country_iso2_unknown_kept[Australia-AU]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_country_iso2_unknown_kept[aus-AU]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_country_iso2_unknown_kept[ au -AU]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_country_iso2_unknown_kept[New Zealand-NZ]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_country_iso2_unknown_kept[nz-NZ]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_country_iso2_unknown_kept[usa-US]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_country_iso2_unknown_kept[United States-US]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_country_iso2_unknown_kept[uk-GB]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_country_iso2_unknown_kept[United Kingdom-GB]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_country_iso2_unknown_kept[GB-GB]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_country_iso2_unknown_kept[Austria-AUSTRIA]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_country_iso2_unknown_kept[AT-AT]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_country_iso2_unknown_kept[-]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 0,
+     "explain": ""
+    },
+    {
+     "title": "test_status_lowercased_typo_kept_quantity_untouched",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 3,
+     "explain": ""
+    },
+    {
+     "title": "test_output_has_contract_columns_in_order",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 3,
+     "explain": ""
+    },
+    {
+     "title": "test_missing_amount_column_means_no_rows_survive",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 3,
+     "explain": ""
+    },
+    {
+     "title": "test_empty_input_gives_empty_output",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 3,
+     "explain": ""
+    },
+    {
+     "title": "test_deterministic_across_runs",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 14,
+     "explain": ""
+    },
+    {
+     "title": "test_encoding_and_delimiter_variants_parse_to_the_same_data[edge-bom-utf8]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 12,
+     "explain": ""
+    },
+    {
+     "title": "test_encoding_and_delimiter_variants_parse_to_the_same_data[edge-semicolon]",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 10,
+     "explain": ""
+    },
+    {
+     "title": "test_empty_columns_flags_fully_blank_column",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 2,
+     "explain": ""
+    },
+    {
+     "title": "test_empty_output_reports_instead_of_crashing",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 214,
+     "explain": ""
+    },
+    {
+     "title": "test_column_types_flags_text_quantity",
+     "file": "tests/test_reference_clean.py",
+     "status": "pass",
+     "duration_ms": 2,
+     "explain": ""
+    },
+    {
+     "title": "test_oracle_output_passes_every_check",
+     "file": "tests/test_validate_e2e.py",
+     "status": "pass",
+     "duration_ms": 53,
+     "explain": ""
+    },
+    {
+     "title": "test_report_shape",
+     "file": "tests/test_validate_e2e.py",
+     "status": "pass",
+     "duration_ms": 39,
+     "explain": ""
+    },
+    {
+     "title": "test_naive_pipeline_on_baseline_only_loses_the_word_quantities",
+     "file": "tests/test_validate_e2e.py",
+     "status": "pass",
+     "duration_ms": 37,
+     "explain": ""
+    },
+    {
+     "title": "test_schema_drift_fails_in_the_expected_check[schema-add-column]",
+     "file": "tests/test_validate_e2e.py",
+     "status": "pass",
+     "duration_ms": 39,
+     "explain": ""
+    },
+    {
+     "title": "test_schema_drift_fails_in_the_expected_check[schema-all-combined]",
+     "file": "tests/test_validate_e2e.py",
+     "status": "pass",
+     "duration_ms": 45,
+     "explain": ""
+    },
+    {
+     "title": "test_schema_drift_fails_in_the_expected_check[schema-drop-column]",
+     "file": "tests/test_validate_e2e.py",
+     "status": "pass",
+     "duration_ms": 36,
+     "explain": ""
+    },
+    {
+     "title": "test_schema_drift_fails_in_the_expected_check[schema-rename-column]",
+     "file": "tests/test_validate_e2e.py",
+     "status": "pass",
+     "duration_ms": 36,
+     "explain": ""
+    },
+    {
+     "title": "test_schema_drift_fails_in_the_expected_check[schema-type-change]",
+     "file": "tests/test_validate_e2e.py",
+     "status": "pass",
+     "duration_ms": 37,
+     "explain": ""
+    },
+    {
+     "title": "test_rename_to_a_similar_name_is_caught_by_name",
+     "file": "tests/test_validate_e2e.py",
+     "status": "pass",
+     "duration_ms": 33,
+     "explain": ""
+    },
+    {
+     "title": "test_marker_detects_output_built_from_the_wrong_input",
+     "file": "tests/test_validate_e2e.py",
+     "status": "pass",
+     "duration_ms": 42,
+     "explain": ""
+    },
+    {
+     "title": "test_prefix_picks_newest_object_and_respects_after",
+     "file": "tests/test_validate_e2e.py",
+     "status": "pass",
+     "duration_ms": 45,
+     "explain": ""
+    },
+    {
+     "title": "test_hash_ignores_row_order_and_number_formatting",
+     "file": "tests/test_validate_e2e.py",
+     "status": "pass",
+     "duration_ms": 79,
+     "explain": ""
+    },
+    {
+     "title": "test_hash_catches_a_single_changed_cell",
+     "file": "tests/test_validate_e2e.py",
+     "status": "pass",
+     "duration_ms": 79,
+     "explain": ""
+    },
+    {
+     "title": "test_oracle_diff_and_null_inflation_pinpoint_cells",
+     "file": "tests/test_validate_e2e.py",
+     "status": "pass",
+     "duration_ms": 40,
+     "explain": ""
+    },
+    {
+     "title": "test_row_reconciliation_names_the_missing_ids",
+     "file": "tests/test_validate_e2e.py",
+     "status": "pass",
+     "duration_ms": 44,
+     "explain": ""
+    },
+    {
+     "title": "test_cli_cents_output_passes_rules_but_fires_scale_detector",
+     "file": "tests/test_validate_e2e.py",
+     "status": "pass",
+     "duration_ms": 263,
+     "explain": ""
+    }
+   ],
+   "counts": {
+    "pass": 75,
+    "expected-fail": 0,
+    "fail": 0,
+    "skip": 0
+   },
+   "total": 75,
+   "run_at": "2026-10-02T13:26:31+00:00",
+   "ok": true
+  }
+ ],
  "evidence_files": [
   "2026-10-01_gcp-key-creation-blocked-by-org-policy.png",
   "2026-10-01_gcp-key-policy-overridden-not-enforced.png",
@@ -191,7 +952,7 @@
   "2026-10-02_type-change-run-green.png",
   "s3-bucket-policy-generated-by-rhombus.json"
  ],
- "built_at": "2026-10-02T13:17:53+00:00",
+ "built_at": "2026-10-02T13:30:20+00:00",
  "sources": {
   "reports": "data-validation/reports",
   "ledger": "observations/runs.csv",
