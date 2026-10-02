@@ -83,10 +83,6 @@ function renderMeta(d) {
     `${d.sources.report_count} validator report${d.sources.report_count === 1 ? "" : "s"}. ` +
     `Built ${built}.`;
   $("#banner").hidden = !d.demo;
-  $("#repo-link").href = GITHUB_BASE;
-  $("#foot-sources").innerHTML = `Data: <code>${esc(d.sources.reports)}</code>` +
-    (d.sources.ledger ? `, <code>${esc(d.sources.ledger)}</code>` : "") +
-    `, <code>${esc(d.sources.matrix)}</code>.`;
 }
 
 function renderCapability(d) {
@@ -776,7 +772,6 @@ function renderPager(d, c) {
 function renderCase(d) {
   const id = new URLSearchParams(location.search).get("id");
   const c = d.cases.find((x) => x.case === id);
-  $("#repo-link").href = GITHUB_BASE;
   renderTabs(d, c ? c.case : null);
   if (!c) {
     $("#case-title").textContent = "Case not found";
@@ -792,7 +787,6 @@ function renderCase(d) {
   $("#case-kicker").textContent = cut > 0 ? title.slice(0, cut) : "";
   $("#case-title").textContent = cut > 0 ? title.slice(cut + 2).replace(/^./, (ch) => ch.toUpperCase()) : title;
   $("#case-change").textContent = c.change || "";
-  renderPager(d, c);
   if (c.status !== "done") {
     $("#case-chips").innerHTML = chip("s-none", "Not run yet");
     $("#case-headline").textContent = "Not run against Rhombus yet.";
