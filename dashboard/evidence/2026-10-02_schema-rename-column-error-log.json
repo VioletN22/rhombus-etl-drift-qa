@@ -1,0 +1,14 @@
+{
+  "captured_from": "Rhombus Logs panel, project drift-qa, 2026-10-02 15:23:08 AEST (5 visible: 4 ok, 0 warn, 1 error)",
+  "kind": "pipeline_summary",
+  "status": "error",
+  "failure": {
+    "message": "Pipeline failed at orders_cleaned: LLM execution failed (code_sha=831d36d0703c): 'amount_usd'\n--- Generated code ---\nimport pandas as pd\nimport numpy as np\ndef _safe_to_timedelta_wrapper(arg, *args, **kwargs):\n    try:\n        arg_series = pd.Series(arg)\n    except Exception:\n        arg_serie…",
+    "reason": "LLM execution failed (code_sha=831d36d0703c): 'amount_usd'\n--- Generated code ---\n...",
+    "nodeId": "llm_node_1",
+    "nodeLabel": "orders_cleaned",
+    "nodeRef": "llm_5d9881397c30a4164489f419da64138e"
+  },
+  "nodeId": "llm_node_1",
+  "nodeName": "orders_cleaned"
+}

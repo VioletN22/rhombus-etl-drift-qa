@@ -16,10 +16,18 @@
 #   credits_used        number, from the Rhombus credits page
 #   capability          optional override: handled | warned | broke | missed
 #                       (otherwise derived, see dashboard/README.md)
+#   headline            one plain sentence for the dashboard case card
+#   evidence_keywords   optional: words matched against observations/evidence file
+#                       names (default: the case slug minus its group prefix)
+#   extra_md            optional: more markdown files shown on the case page
+#
+# The summary section at the end of this file feeds the dashboard home page
+# (verdict, required cases, credits, learnings).
 
 cases:
 - case: baseline
   change: Known-good input the pipeline is built against.
+  headline: Clean input runs green and gives byte-identical output 3 times out of 3, with three small, repeatable cleaning bugs.
   status: done
   run_ids:
   - manual-1-baseline
@@ -36,9 +44,11 @@ cases:
   execution_seconds: null
   credits_used: 0
   observation: observations/baseline.md
+  evidence_keywords: [baseline, attempt1, attempt2, attempt3, determinism, schedule, account-plan, duplicate-exports, output-node-defaults]
   capability: handled
 - case: schema-drop-column
   change: country column removed.
+  headline: "Rhombus stopped with a one-word error ('country'); the chatbot's fix then shipped a blank country column as a success."
   status: done
   run_ids: drop-column-after-fix
   rhombus_status: Failure
@@ -52,9 +62,11 @@ cases:
   execution_seconds: null
   credits_used: 5
   observation: observations/schema-drop-column.md
+  extra_md: [observations/analysis/chatbot-fix-fail-fast-vs-silent-default.md]
   capability: broke
 - case: schema-rename-column
   change: amount_usd renamed to total_amount; values identical.
+  headline: Rhombus stopped but gave no hint about the rename; the chatbot's fix shipped an empty file marked successful.
   status: done
   run_ids: rename-after-fix
   rhombus_status: Failure
@@ -68,9 +80,11 @@ cases:
   execution_seconds: 5
   credits_used: 5
   observation: observations/schema-rename-column.md
+  evidence_keywords: [rename, restore2]
   capability: broke
 - case: schema-type-change
   change: quantity int -> text ('3 units').
+  headline: "A green run delivered quantity as text ('6 units') with no warning, so there was nothing to ask the chatbot about."
   status: done
   run_ids: type-change
   rhombus_status: Success
@@ -272,3 +286,61 @@ ai_builder_runs:
   follow_up_prompts: 0
   notes: Output node renamed. Correctly said GCS destination must be selected. Node prompt keeps the non-empty
     local part.
+summary:
+  verdict: Rhombus fails safely on schema drift, but its AI chatbot turns those safe failures into silent bad data.
+  required:
+  - schema-drop-column
+  - schema-rename-column
+  - schema-type-change
+  - schema-add-column
+  - schema-all-combined
+  - semantic-dollars-to-cents
+  - semantic-date-mmdd-to-ddmm
+  credits_used: 25
+  credits_note: of 5,050. 15 on two extra AI builds, 10 on two chatbot fixes; runs cost nothing visible.
+  learnings:
+  - title: Rhombus stops on missing columns, but the error only says 'country'
+    line: Nothing bad reached GCS, but the error is a raw one-word KeyError.
+    detail: Dropping country and renaming amount_usd both failed at the AI-built step, and no output was written. The
+      log reads "LLM execution failed (code_sha=...) 'country'" followed by a code dump. It never says a column
+      is missing, never mentions the new total_amount column, and "LLM execution failed" points at the AI rather
+      than the data.
+    cases: [schema-drop-column, schema-rename-column]
+    severity: Medium
+  - title: The chatbot's fixes turned safe failures into silent bad data
+    line: Both fixes made the run green by shipping a blank column or an empty file.
+    detail: Asked about each failure, the chatbot guessed a cause without reading the input header (casing, then a
+      "cached execution"), and edited the pipeline in the same turn without asking (5 credits each). Its patches
+      quietly make missing columns optional. The next runs reported success with country blank on all 390 rows,
+      then with a header-only file holding 0 of 397 orders.
+    cases: [schema-drop-column, schema-rename-column]
+    severity: Critical
+  - title: A number column that turns into text ships silently
+    line: quantity arrived as '6 units' on a green run with no warning.
+    detail: 384 of 390 quantity values reached GCS as text. Nothing in the logs, and with no error there is no Ask
+      Chatbot button. The type is decided when the file loads (Data Input labels quantity Numeric on the baseline,
+      Categorical here), so the same value 'three' is blanked in one file and kept in the other.
+    cases: [schema-type-change, baseline]
+    severity: High
+  - title: Building is non-deterministic, running is deterministic
+    line: Three builds from one prompt differed; three runs of one pipeline were byte-identical.
+    detail: The same prompt in three fresh projects gave the same nodes but different explanations and different
+      wording inside the custom step. Attempt 1 lost "non-empty local part" from the email rule, so '@example.com'
+      passes. Running the built pipeline on the same file three times gave byte-identical output (sha256
+      df95576e...), because the generated code is saved and reused.
+    cases: [baseline]
+    severity: Medium
+  - title: The assistant claimed GCS output isn't supported
+    line: Attempt 2 told the user to download and upload by hand; GCS output works.
+    detail: With an identical prompt, attempt 2 said Rhombus supports only S3 and PostgreSQL as destinations. That
+      is false; the test project writes to GCS and the docs list it. Attempt 1 silently defaulted to Download
+      Locally, and attempt 3 correctly said to select the GCS destination. Three attempts, three different answers.
+    cases: [baseline]
+    severity: High
+  - title: Scheduled runs never execute on the Free plan
+    line: The schedule shows Active with a countdown, then nothing runs and nobody is told.
+    detail: A 15-minute custom schedule and an hourly control both missed every slot. No executions, no output, "Next
+      run" went blank, and no email. Pricing lists scheduled runs only on paid plans, but the app allowed creating
+      one with no upgrade prompt. Every run in this project is manual as a result; reported to Rhombus.
+    cases: [baseline]
+    severity: High

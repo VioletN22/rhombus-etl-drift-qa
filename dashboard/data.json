@@ -1,6 +1,87 @@
 {
  "demo": false,
- "built_at": "2026-10-02T06:09:30+00:00",
+ "verdict": "Rhombus fails safely on schema drift, but its AI chatbot turns those safe failures into silent bad data.",
+ "learnings": [
+  {
+   "title": "Rhombus stops on missing columns, but the error only says 'country'",
+   "line": "Nothing bad reached GCS, but the error is a raw one-word KeyError.",
+   "detail": "Dropping country and renaming amount_usd both failed at the AI-built step, and no output was written. The log reads \"LLM execution failed (code_sha=...) 'country'\" followed by a code dump. It never says a column is missing, never mentions the new total_amount column, and \"LLM execution failed\" points at the AI rather than the data.",
+   "severity": "Medium",
+   "cases": [
+    "schema-drop-column",
+    "schema-rename-column"
+   ]
+  },
+  {
+   "title": "The chatbot's fixes turned safe failures into silent bad data",
+   "line": "Both fixes made the run green by shipping a blank column or an empty file.",
+   "detail": "Asked about each failure, the chatbot guessed a cause without reading the input header (casing, then a \"cached execution\"), and edited the pipeline in the same turn without asking (5 credits each). Its patches quietly make missing columns optional. The next runs reported success with country blank on all 390 rows, then with a header-only file holding 0 of 397 orders.",
+   "severity": "Critical",
+   "cases": [
+    "schema-drop-column",
+    "schema-rename-column"
+   ]
+  },
+  {
+   "title": "A number column that turns into text ships silently",
+   "line": "quantity arrived as '6 units' on a green run with no warning.",
+   "detail": "384 of 390 quantity values reached GCS as text. Nothing in the logs, and with no error there is no Ask Chatbot button. The type is decided when the file loads (Data Input labels quantity Numeric on the baseline, Categorical here), so the same value 'three' is blanked in one file and kept in the other.",
+   "severity": "High",
+   "cases": [
+    "schema-type-change",
+    "baseline"
+   ]
+  },
+  {
+   "title": "Building is non-deterministic, running is deterministic",
+   "line": "Three builds from one prompt differed; three runs of one pipeline were byte-identical.",
+   "detail": "The same prompt in three fresh projects gave the same nodes but different explanations and different wording inside the custom step. Attempt 1 lost \"non-empty local part\" from the email rule, so '@example.com' passes. Running the built pipeline on the same file three times gave byte-identical output (sha256 df95576e...), because the generated code is saved and reused.",
+   "severity": "Medium",
+   "cases": [
+    "baseline"
+   ]
+  },
+  {
+   "title": "The assistant claimed GCS output isn't supported",
+   "line": "Attempt 2 told the user to download and upload by hand; GCS output works.",
+   "detail": "With an identical prompt, attempt 2 said Rhombus supports only S3 and PostgreSQL as destinations. That is false; the test project writes to GCS and the docs list it. Attempt 1 silently defaulted to Download Locally, and attempt 3 correctly said to select the GCS destination. Three attempts, three different answers.",
+   "severity": "High",
+   "cases": [
+    "baseline"
+   ]
+  },
+  {
+   "title": "Scheduled runs never execute on the Free plan",
+   "line": "The schedule shows Active with a countdown, then nothing runs and nobody is told.",
+   "detail": "A 15-minute custom schedule and an hourly control both missed every slot. No executions, no output, \"Next run\" went blank, and no email. Pricing lists scheduled runs only on paid plans, but the app allowed creating one with no upgrade prompt. Every run in this project is manual as a result; reported to Rhombus.",
+   "severity": "High",
+   "cases": [
+    "baseline"
+   ]
+  }
+ ],
+ "summary": {
+  "required": [
+   "schema-drop-column",
+   "schema-rename-column",
+   "schema-type-change",
+   "schema-add-column",
+   "schema-all-combined",
+   "semantic-dollars-to-cents",
+   "semantic-date-mmdd-to-ddmm"
+  ],
+  "required_done": 3,
+  "critical": 2,
+  "determinism": {
+   "identical": 3,
+   "runs": 3,
+   "target": 3,
+   "case": "baseline"
+  },
+  "credits_used": 25,
+  "credits_note": "of 5,050. 15 on two extra AI builds, 10 on two chatbot fixes; runs cost nothing visible."
+ },
+ "built_at": "2026-10-02T06:14:31+00:00",
  "sources": {
   "reports": "data-validation/reports",
   "ledger": "observations/runs.csv",
@@ -68,7 +149,529 @@
    "rows": 425,
    "change": "Known-good input the pipeline is built against.",
    "status": "done",
+   "headline": "Clean input runs green and gives byte-identical output 3 times out of 3, with three small, repeatable cleaning bugs.",
    "observation": "observations/baseline.md",
+   "observation_md": "# Baseline: the known-good input\n\n| | |\n|---|---|\n| Case file | `datasets/baseline.csv` (uploaded as `input/orders.csv`) |\n| S3 version | `CHuf92rP4C8D6P2cEVXOfuRWgdWNfnh0`, uploaded 2026-09-29 20:41 AEST, 32.1 KB |\n| Pipeline | AI builder attempt 1 (`/pipeline` with `prompts/pipeline-prompt.md`), 5 nodes |\n| Runs | Manual runs (\u25b6) 13:29, 14:41 and 14:50 AEST on 2026-10-02. Scheduled runs never executed on this account |\n| Severity | **Medium**: three small cleaning bugs, all repeatable |\n| Pipeline stopped? | **No.** All 5 nodes green, output in GCS each time |\n\n## What I changed\nNothing. This is the file the pipeline was built against; every drift case is a copy of it with one change.\n\n## What happened\n- All 5 nodes green. Output `orders_cleaned_1790911751099.csv` (29.9 KB) reached GCS.\n- 390 rows with exactly the reference order_ids: dedup and the drop rules are correct. Names, dates, amounts, country codes and status match the reference.\n- Validator: 3 fail (`rule_email`, `null_inflation`, `oracle_diff`) and 3 warn, all explained by the bugs below (`data-validation/reports/manual-1-baseline.json`).\n\n## Determinism: 3 of 3 identical\nRuns 2 (14:41) and 3 (14:50) wrote files byte-identical to run 1 (canonical sha256 `df95576e...`), with the same three validator failures. The custom step's generated Python was diffed after runs 1 and 2: identical, 94 lines. The code is saved after the first run and reused, so the second AI layer does not regenerate per run. Evidence: `evidence/2026-10-02_attempt1-orders_cleaned-code-after-run2.py`.\n\n## The three bugs (same on every run)\n- **Email rule too loose.** `@example.com` (5 rows) is kept as valid. The builder rewrote my rule as \"contains '@' and at least one '.' after the '@'\", dropping \"non-empty local part\"; the code followed that faithfully. Attempt 3's node prompt kept the condition. Evidence: `evidence/2026-10-02_attempt1-custom-node-prompt.txt`.\n- **`quantity` \"three\" blanked (5 rows).** The generated code never touches `quantity`. The Data Input node types the column Numeric on load and nulls non-numbers, with no warning.\n- **Integers written as floats.** `order_id` arrives as `10001.0`, `quantity` as `6.0`, because the columns contain blanks. A join on `order_id` downstream would miss.\n\n## Side effects found along the way\n- **Apply runs the pipeline.** Clicking Apply on the Data Output node gives no feedback; four clicks wrote four identical exports to GCS in 14 seconds. Saving edited code with Apply also runs and exports. Evidence: `evidence/2026-10-02_gcs-duplicate-exports-from-apply.png`.\n- **Every run writes a new object** (`orders_cleaned_<epoch-ms>.csv`); nothing overwrites or cleans up, so consumers must pick the newest file.\n- **Output silently defaulted to Download Locally** when the prompt asked for GCS and no destination existed yet. Evidence: `evidence/2026-10-02_output-node-defaults-download-locally.png`.\n\n## The AI builder, three attempts\nSame prompt and file, three fresh projects. The graph was the same each time (attempt 3 renamed the output node), but the explanations differed: attempt 1 defaulted to local download without saying so, attempt 2 claimed GCS is not a supported destination (false), attempt 3 correctly said to select the GCS destination. Evidence: `evidence/2026-10-02_ai-builder-attempt2-reply.txt`, `evidence/2026-10-02_ai-builder-attempt2-gcs-claim.png`.\n\n## Schedule\nA Custom `*/15 * * * *` schedule and an Hourly control both showed \"Active\" with a countdown and never ran: no executions, no GCS object, \"Next run\" went blank, no email. The account is on the Free plan, and the pricing page lists scheduled runs only on paid plans. Reported to Rhombus at 14:39. Evidence: `evidence/2026-10-02_schedule-no-executions-next-run-blank.png`, `evidence/2026-10-02_account-plan-free-credits.png`.\n\n## Regression check\nAfter the drop-column chatbot patch, the baseline was re-run (15:11): output byte-identical to the original runs. The patch only changes behaviour when a column is missing (`data-validation/reports/baseline-after-chatbot-patch.json`).\n",
+   "extra_md": [],
+   "evidence": [
+    {
+     "name": "2026-10-02_account-plan-free-credits.png",
+     "path": "evidence/2026-10-02_account-plan-free-credits.png",
+     "kind": "image",
+     "ext": "png"
+    },
+    {
+     "name": "2026-10-02_ai-builder-attempt2-gcs-claim.png",
+     "path": "evidence/2026-10-02_ai-builder-attempt2-gcs-claim.png",
+     "kind": "image",
+     "ext": "png"
+    },
+    {
+     "name": "2026-10-02_ai-builder-attempt2-reply.txt",
+     "path": "evidence/2026-10-02_ai-builder-attempt2-reply.txt",
+     "kind": "text",
+     "ext": "txt"
+    },
+    {
+     "name": "2026-10-02_ai-builder-attempt3-custom-node-prompt.txt",
+     "path": "evidence/2026-10-02_ai-builder-attempt3-custom-node-prompt.txt",
+     "kind": "text",
+     "ext": "txt"
+    },
+    {
+     "name": "2026-10-02_ai-builder-attempt3-custom-node.png",
+     "path": "evidence/2026-10-02_ai-builder-attempt3-custom-node.png",
+     "kind": "image",
+     "ext": "png"
+    },
+    {
+     "name": "2026-10-02_ai-builder-summary-attempt1.png",
+     "path": "evidence/2026-10-02_ai-builder-summary-attempt1.png",
+     "kind": "image",
+     "ext": "png"
+    },
+    {
+     "name": "2026-10-02_attempt1-code-after-drop-column-run.py",
+     "path": "evidence/2026-10-02_attempt1-code-after-drop-column-run.py",
+     "kind": "text",
+     "ext": "py"
+    },
+    {
+     "name": "2026-10-02_attempt1-custom-node-generated-code.png",
+     "path": "evidence/2026-10-02_attempt1-custom-node-generated-code.png",
+     "kind": "image",
+     "ext": "png"
+    },
+    {
+     "name": "2026-10-02_attempt1-custom-node-prompt.txt",
+     "path": "evidence/2026-10-02_attempt1-custom-node-prompt.txt",
+     "kind": "text",
+     "ext": "txt"
+    },
+    {
+     "name": "2026-10-02_attempt1-orders_cleaned-code-after-run2.py",
+     "path": "evidence/2026-10-02_attempt1-orders_cleaned-code-after-run2.py",
+     "kind": "text",
+     "ext": "py"
+    },
+    {
+     "name": "2026-10-02_attempt1-orders_cleaned-generated-code.py",
+     "path": "evidence/2026-10-02_attempt1-orders_cleaned-generated-code.py",
+     "kind": "text",
+     "ext": "py"
+    },
+    {
+     "name": "2026-10-02_gcs-duplicate-exports-from-apply.png",
+     "path": "evidence/2026-10-02_gcs-duplicate-exports-from-apply.png",
+     "kind": "image",
+     "ext": "png"
+    },
+    {
+     "name": "2026-10-02_output-node-defaults-download-locally.png",
+     "path": "evidence/2026-10-02_output-node-defaults-download-locally.png",
+     "kind": "image",
+     "ext": "png"
+    },
+    {
+     "name": "2026-10-02_schedule-created-every-15-min.png",
+     "path": "evidence/2026-10-02_schedule-created-every-15-min.png",
+     "kind": "image",
+     "ext": "png"
+    },
+    {
+     "name": "2026-10-02_schedule-hourly-control-minute-30.png",
+     "path": "evidence/2026-10-02_schedule-hourly-control-minute-30.png",
+     "kind": "image",
+     "ext": "png"
+    },
+    {
+     "name": "2026-10-02_schedule-no-executions-next-run-blank.png",
+     "path": "evidence/2026-10-02_schedule-no-executions-next-run-blank.png",
+     "kind": "image",
+     "ext": "png"
+    }
+   ],
+   "page_reports": [
+    {
+     "run": "manual-1-baseline",
+     "path": "data-validation/reports/manual-1-baseline.json",
+     "timestamp": "2026-10-02T05:56:24+00:00",
+     "verdict": "fail",
+     "summary": {
+      "pass": 13,
+      "fail": 3,
+      "warn": 3
+     },
+     "checks": [
+      {
+       "id": "input_schema",
+       "status": "pass",
+       "detail": "columns and order match the contract"
+      },
+      {
+       "id": "schema",
+       "status": "pass",
+       "detail": "columns and order match the contract"
+      },
+      {
+       "id": "row_reconciliation",
+       "status": "pass",
+       "detail": "390 rows, same order_ids as the oracle"
+      },
+      {
+       "id": "row_loss",
+       "status": "pass",
+       "detail": "98% of input orders reached the output"
+      },
+      {
+       "id": "rule_unique_order_id",
+       "status": "pass",
+       "detail": "order_id unique and present"
+      },
+      {
+       "id": "rule_customer_name",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_email",
+       "status": "fail",
+       "detail": "5 value(s) not lowercase valid-or-blank"
+      },
+      {
+       "id": "rule_order_date",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_amount_numeric",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_amount_non_negative",
+       "status": "warn",
+       "detail": "5 value(s) negative (passed through by design)"
+      },
+      {
+       "id": "rule_country",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_status_lowercase",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_status_allowed",
+       "status": "warn",
+       "detail": "7 value(s) outside ['cancelled', 'delivered', 'pending', 'shipped']"
+      },
+      {
+       "id": "rule_quantity",
+       "status": "warn",
+       "detail": "4 value(s) not a positive integer (not cleaned by design)"
+      },
+      {
+       "id": "null_inflation",
+       "status": "fail",
+       "detail": "5 cell(s) blank where the oracle has a value: {'quantity': 5}"
+      },
+      {
+       "id": "empty_columns",
+       "status": "pass",
+       "detail": "every contract column has data"
+      },
+      {
+       "id": "column_types",
+       "status": "pass",
+       "detail": "numeric columns are numeric"
+      },
+      {
+       "id": "oracle_diff",
+       "status": "fail",
+       "detail": "10 cell(s) differ from the oracle: {'email': 5, 'quantity': 5}"
+      },
+      {
+       "id": "marker_row",
+       "status": "pass",
+       "detail": "output was built from 'baseline'"
+      }
+     ],
+     "output_rows": 390,
+     "input_rows": 425,
+     "listed": true
+    },
+    {
+     "run": "manual-2-baseline",
+     "path": "data-validation/reports/manual-2-baseline.json",
+     "timestamp": "2026-10-02T04:42:54+00:00",
+     "verdict": "fail",
+     "summary": {
+      "pass": 11,
+      "fail": 3,
+      "warn": 3
+     },
+     "checks": [
+      {
+       "id": "input_schema",
+       "status": "pass",
+       "detail": "columns and order match the contract"
+      },
+      {
+       "id": "schema",
+       "status": "pass",
+       "detail": "columns and order match the contract"
+      },
+      {
+       "id": "row_reconciliation",
+       "status": "pass",
+       "detail": "390 rows, same order_ids as the oracle"
+      },
+      {
+       "id": "rule_unique_order_id",
+       "status": "pass",
+       "detail": "order_id unique and present"
+      },
+      {
+       "id": "rule_customer_name",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_email",
+       "status": "fail",
+       "detail": "5 value(s) not lowercase valid-or-blank"
+      },
+      {
+       "id": "rule_order_date",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_amount_numeric",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_amount_non_negative",
+       "status": "warn",
+       "detail": "5 value(s) negative (passed through by design)"
+      },
+      {
+       "id": "rule_country",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_status_lowercase",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_status_allowed",
+       "status": "warn",
+       "detail": "7 value(s) outside ['cancelled', 'delivered', 'pending', 'shipped']"
+      },
+      {
+       "id": "rule_quantity",
+       "status": "warn",
+       "detail": "4 value(s) not a positive integer (not cleaned by design)"
+      },
+      {
+       "id": "null_inflation",
+       "status": "fail",
+       "detail": "5 cell(s) blank where the oracle has a value: {'quantity': 5}"
+      },
+      {
+       "id": "oracle_diff",
+       "status": "fail",
+       "detail": "10 cell(s) differ from the oracle: {'email': 5, 'quantity': 5}"
+      },
+      {
+       "id": "marker_row",
+       "status": "pass",
+       "detail": "output was built from 'baseline'"
+      },
+      {
+       "id": "determinism",
+       "status": "pass",
+       "detail": "canonical output identical to 1 earlier run(s)"
+      }
+     ],
+     "output_rows": 390,
+     "input_rows": 425,
+     "listed": true
+    },
+    {
+     "run": "manual-3-baseline",
+     "path": "data-validation/reports/manual-3-baseline.json",
+     "timestamp": "2026-10-02T04:51:53+00:00",
+     "verdict": "fail",
+     "summary": {
+      "pass": 11,
+      "fail": 3,
+      "warn": 3
+     },
+     "checks": [
+      {
+       "id": "input_schema",
+       "status": "pass",
+       "detail": "columns and order match the contract"
+      },
+      {
+       "id": "schema",
+       "status": "pass",
+       "detail": "columns and order match the contract"
+      },
+      {
+       "id": "row_reconciliation",
+       "status": "pass",
+       "detail": "390 rows, same order_ids as the oracle"
+      },
+      {
+       "id": "rule_unique_order_id",
+       "status": "pass",
+       "detail": "order_id unique and present"
+      },
+      {
+       "id": "rule_customer_name",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_email",
+       "status": "fail",
+       "detail": "5 value(s) not lowercase valid-or-blank"
+      },
+      {
+       "id": "rule_order_date",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_amount_numeric",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_amount_non_negative",
+       "status": "warn",
+       "detail": "5 value(s) negative (passed through by design)"
+      },
+      {
+       "id": "rule_country",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_status_lowercase",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_status_allowed",
+       "status": "warn",
+       "detail": "7 value(s) outside ['cancelled', 'delivered', 'pending', 'shipped']"
+      },
+      {
+       "id": "rule_quantity",
+       "status": "warn",
+       "detail": "4 value(s) not a positive integer (not cleaned by design)"
+      },
+      {
+       "id": "null_inflation",
+       "status": "fail",
+       "detail": "5 cell(s) blank where the oracle has a value: {'quantity': 5}"
+      },
+      {
+       "id": "oracle_diff",
+       "status": "fail",
+       "detail": "10 cell(s) differ from the oracle: {'email': 5, 'quantity': 5}"
+      },
+      {
+       "id": "marker_row",
+       "status": "pass",
+       "detail": "output was built from 'baseline'"
+      },
+      {
+       "id": "determinism",
+       "status": "pass",
+       "detail": "canonical output identical to 2 earlier run(s)"
+      }
+     ],
+     "output_rows": 390,
+     "input_rows": 425,
+     "listed": true
+    },
+    {
+     "run": "baseline-after-chatbot-patch",
+     "path": "data-validation/reports/baseline-after-chatbot-patch.json",
+     "timestamp": "2026-10-02T05:12:15+00:00",
+     "verdict": "fail",
+     "summary": {
+      "pass": 12,
+      "fail": 3,
+      "warn": 3
+     },
+     "checks": [
+      {
+       "id": "input_schema",
+       "status": "pass",
+       "detail": "columns and order match the contract"
+      },
+      {
+       "id": "schema",
+       "status": "pass",
+       "detail": "columns and order match the contract"
+      },
+      {
+       "id": "row_reconciliation",
+       "status": "pass",
+       "detail": "390 rows, same order_ids as the oracle"
+      },
+      {
+       "id": "rule_unique_order_id",
+       "status": "pass",
+       "detail": "order_id unique and present"
+      },
+      {
+       "id": "rule_customer_name",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_email",
+       "status": "fail",
+       "detail": "5 value(s) not lowercase valid-or-blank"
+      },
+      {
+       "id": "rule_order_date",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_amount_numeric",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_amount_non_negative",
+       "status": "warn",
+       "detail": "5 value(s) negative (passed through by design)"
+      },
+      {
+       "id": "rule_country",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_status_lowercase",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_status_allowed",
+       "status": "warn",
+       "detail": "7 value(s) outside ['cancelled', 'delivered', 'pending', 'shipped']"
+      },
+      {
+       "id": "rule_quantity",
+       "status": "warn",
+       "detail": "4 value(s) not a positive integer (not cleaned by design)"
+      },
+      {
+       "id": "null_inflation",
+       "status": "fail",
+       "detail": "5 cell(s) blank where the oracle has a value: {'quantity': 5}"
+      },
+      {
+       "id": "empty_columns",
+       "status": "pass",
+       "detail": "every contract column has data"
+      },
+      {
+       "id": "oracle_diff",
+       "status": "fail",
+       "detail": "10 cell(s) differ from the oracle: {'email': 5, 'quantity': 5}"
+      },
+      {
+       "id": "marker_row",
+       "status": "pass",
+       "detail": "output was built from 'baseline'"
+      },
+      {
+       "id": "determinism",
+       "status": "pass",
+       "detail": "canonical output identical to 1 earlier run(s)"
+      }
+     ],
+     "output_rows": 390,
+     "input_rows": 425,
+     "listed": false
+    }
+   ],
    "matrix": {
     "run_ids": [
      "manual-1-baseline",
@@ -112,7 +715,167 @@
    "rows": 425,
    "change": "country column removed.",
    "status": "done",
+   "headline": "Rhombus stopped with a one-word error ('country'); the chatbot's fix then shipped a blank country column as a success.",
    "observation": "observations/schema-drop-column.md",
+   "observation_md": "# Schema drift: drop a column (`country`)\n\n| | |\n|---|---|\n| Case file | `datasets/schema-drop-column.csv` (uploaded as `input/orders.csv`) |\n| S3 version | `83k9nJAdqftt9BP6sG_CNbcfZGCwhEwG`, uploaded 2026-10-02 14:55:36 AEST, 29.5 KB |\n| Run | Manual run (\u25b6) ~14:57 AEST. Scheduled runs don't execute on this account; see `FINDINGS.md` and the email to Rhombus |\n| Severity | **Critical** after the chatbot fix (silent blank column shipped). Before the fix: Medium (stopped, cryptic error) |\n| Pipeline stopped? | **Yes**, at `orders_cleaned` |\n| Chatbot fix worked? | **No.** Wrong diagnosis; the \"fix\" made the run green by shipping a blank `country` column |\n\n## What I changed\nRemoved the `country` column from the baseline. Every other column and row is identical; marker row reads \"Marker schema-drop-column\".\n\n## Expected\nThe AI-built `orders_cleaned` step standardises `country` (rule 7), so it references the column by name. A careful platform should stop or warn with a clear \"column `country` not found\" message and not write output.\n\n## What happened\n- Pipeline **failed at `orders_cleaned`** at 14:57:04. Logs: 13 entries, 12 OK, 1 error.\n- **No output reached GCS** (newest object is still the 14:50:28 baseline run). Good: no partial or wrong data shipped.\n- The generated code is unchanged after the failure (diff against the pre-drift copy: identical, 94 lines). The failing line is `df['country'] = df['country'].apply(standardize_country)` (line 86), a plain pandas `KeyError`.\n- After the failure the Transform panel showed \"Generating code\u2026 Starting code generation. The live transcript will appear shortly.\" but the saved code didn't change.\n\n## Logs\nExact error (full JSON in `evidence/2026-10-02_schema-drop-column-error-log.json`):\n\n> Pipeline failed at orders_cleaned: LLM execution failed (code_sha=831d36d0703c): 'country' --- Generated code --- import pandas as pd ...\n\nClear? **Partially.** It names the failing step, which is useful, but the cause is shown only as `'country'` (a raw Python KeyError, no \"missing column\" wording), followed by a dump of generated code. A non-developer wouldn't know the input file lost a column. \"LLM execution failed\" also suggests the AI failed, not the data.\n\nScreenshots: `evidence/2026-10-02_drop-column-run-regenerating-code.png`, `evidence/2026-10-02_drop-column-error-log-panel.png`.\n\n## Chatbot diagnosis\n- Prompt: clicked **Ask Chatbot** on the error; no text added. Transcript: `evidence/2026-10-02_drop-column-chatbot-transcript.txt`.\n- Diagnosis: **wrong.** \"The column name in the source CSV likely differs in casing or has extra whitespace.\" It didn't inspect the input; the column is absent.\n- It **edited the pipeline without asking**: lowercased and trimmed headers, skipped rules whose column is missing, and \"ensure[d] all 8 required columns are present before the final select\". Cost 5 credits.\n- Re-run (\u25b6, 15:05:56): **green**, wrote `orders_cleaned_1790917556079.csv` (29.1 KB) to GCS with **`country` blank on all 390 rows**. Marker row confirms it read the drop-column file.\n- Validator (`reports/drop-column-after-fix.json`): fails `empty_columns` (country blank on every row) plus the 3 known baseline bugs.\n- **Fix worked? No.** It converted a loud, safe failure into a silent success that ships wrong data. A downstream report grouped by country would quietly show everything as \"unknown\".\n- Regression on the baseline: re-uploaded the baseline (S3 version `9OU4TBDc...`, 15:09:56) and re-ran at 15:11. Output is **byte-identical** to the pre-patch baseline runs (sha256 df95576e...). The patch didn't change how normal data is cleaned; it only changes behaviour when a column is missing.\n\nValidator note: the first version of my validator passed this output on `rule_country`, because blank is allowed and the oracle (built from an input with no country) is also blank. I added `empty_columns` (fail if a contract column is blank on every row) with a regression test. My own tooling had a blind spot that this case exposed.\n\n## Schedule afterwards\nNot testable on this account (scheduled runs never execute; reported to Rhombus 14:39).\n\n## Reproduce\n1. Upload `datasets/schema-drop-column.csv` to `s3://violet-rhombus-drift-in/input/orders.csv`\n2. Run the drift-qa pipeline\n3. Check Logs and the GCS bucket for a new object\n\n## Impact and suggestion\nGood outcome on safety: it failed loudly and shipped nothing. Weak on explanation. Suggest translating `KeyError: 'col'` in AI-generated steps into \"Input is missing column `country`, which step `orders_cleaned` uses (rule: standardise country)\", plus a schema check on Data Input that flags missing columns before any step runs.\n",
+   "extra_md": [
+    {
+     "path": "observations/analysis/chatbot-fix-fail-fast-vs-silent-default.md",
+     "md": "# Was the chatbot's fix good practice? (drop-column case)\n\nDiscussion notes, 2026-10-02. Feeds the drop-column observation, the README top findings and the interview.\n\n## What it actually did\nIt never established that `country` was missing. It guessed a naming mismatch, then added three changes:\n1. Lowercase and trim every column name.\n2. Guard every rule with `if col in df.columns`: if a column is missing, skip its rule.\n3. Before the final select, make sure all 8 columns exist, creating any missing one (empty).\n\nChanges 2 and 3 turn **every** column into an optional one, for this case and every future run. Nobody asked for that.\n\n## Fail fast vs. silent default\n| | Fail fast (original pipeline) | Silent default (patched pipeline) |\n|---|---|---|\n| Missing required column | Run stops, nothing written | Run succeeds, blank column written |\n| Who notices | The operator, immediately | Someone downstream, weeks later |\n| Damage | A delayed file | Wrong data in the warehouse and reports |\n| Debuggability | Points at the cause | Hides the cause |\n\nIn data engineering, a **required** column disappearing should fail fast. Defaulting a missing value is fine only when the column is **declared optional** and the default is **explicit and logged** (e.g. \"country missing, filled with 'UNKNOWN', 390 rows affected\"). The patch does neither: it makes every column optional implicitly, and it reports success.\n\n## Why it's an LLM-quality issue, not just a coding one\n- **Diagnosis without evidence:** it had the data (Preview, Profile) and could have checked the input columns. It guessed instead (\"likely differs in casing\").\n- **Optimising for the wrong goal:** it made the error go away (\"should complete cleanly\") instead of making the pipeline correct. Classic \"make the test pass\" behaviour.\n- **Acting without consent:** it edited the production pipeline in the same turn, without proposing the change first.\n- **Overconfident wording:** \"the root cause of the KeyError\" stated as fact.\n\n## What good would look like\n1. Check the input schema and say: \"Column `country` is not in the current file (7 columns found). It was there in previous runs.\"\n2. Offer options, without applying any:\n   - fail the run (recommended for a required column),\n   - map from another column if one looks like a rename,\n   - fill with an explicit default and flag the rows.\n3. Apply the chosen option only after confirmation, and log it.\n\n## Severity\nCritical for the \"after fix\" state: wrong data shipped with a success status. Before the fix the platform's behaviour was safe (Medium, for the unclear error).\n\n## One fair point for Rhombus\nDefensive code isn't wrong in itself, and a casing mismatch is a real cause of `KeyError` in CSV pipelines, so the guess was plausible. The problem is guessing when the evidence was one click away, and changing behaviour silently.\n"
+    }
+   ],
+   "evidence": [
+    {
+     "name": "2026-10-02_attempt1-code-after-drop-column-run.py",
+     "path": "evidence/2026-10-02_attempt1-code-after-drop-column-run.py",
+     "kind": "text",
+     "ext": "py"
+    },
+    {
+     "name": "2026-10-02_drop-column-chatbot-diagnosis.png",
+     "path": "evidence/2026-10-02_drop-column-chatbot-diagnosis.png",
+     "kind": "image",
+     "ext": "png"
+    },
+    {
+     "name": "2026-10-02_drop-column-chatbot-transcript.txt",
+     "path": "evidence/2026-10-02_drop-column-chatbot-transcript.txt",
+     "kind": "text",
+     "ext": "txt"
+    },
+    {
+     "name": "2026-10-02_drop-column-error-log-panel.png",
+     "path": "evidence/2026-10-02_drop-column-error-log-panel.png",
+     "kind": "image",
+     "ext": "png"
+    },
+    {
+     "name": "2026-10-02_drop-column-run-regenerating-code.png",
+     "path": "evidence/2026-10-02_drop-column-run-regenerating-code.png",
+     "kind": "image",
+     "ext": "png"
+    },
+    {
+     "name": "2026-10-02_s3-versions-drop-column-uploaded.png",
+     "path": "evidence/2026-10-02_s3-versions-drop-column-uploaded.png",
+     "kind": "image",
+     "ext": "png"
+    },
+    {
+     "name": "2026-10-02_schema-drop-column-error-log.json",
+     "path": "evidence/2026-10-02_schema-drop-column-error-log.json",
+     "kind": "text",
+     "ext": "json"
+    }
+   ],
+   "page_reports": [
+    {
+     "run": "drop-column-after-fix",
+     "path": "data-validation/reports/drop-column-after-fix.json",
+     "timestamp": "2026-10-02T05:35:41+00:00",
+     "verdict": "fail",
+     "summary": {
+      "pass": 10,
+      "fail": 4,
+      "warn": 4
+     },
+     "checks": [
+      {
+       "id": "input_schema",
+       "status": "warn",
+       "detail": "input drifted from contract: missing ['country']"
+      },
+      {
+       "id": "schema",
+       "status": "pass",
+       "detail": "columns and order match the contract"
+      },
+      {
+       "id": "row_reconciliation",
+       "status": "pass",
+       "detail": "390 rows, same order_ids as the oracle"
+      },
+      {
+       "id": "row_loss",
+       "status": "pass",
+       "detail": "98% of input orders reached the output"
+      },
+      {
+       "id": "rule_unique_order_id",
+       "status": "pass",
+       "detail": "order_id unique and present"
+      },
+      {
+       "id": "rule_customer_name",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_email",
+       "status": "fail",
+       "detail": "5 value(s) not lowercase valid-or-blank"
+      },
+      {
+       "id": "rule_order_date",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_amount_numeric",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_amount_non_negative",
+       "status": "warn",
+       "detail": "5 value(s) negative (passed through by design)"
+      },
+      {
+       "id": "rule_country",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_status_lowercase",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_status_allowed",
+       "status": "warn",
+       "detail": "7 value(s) outside ['cancelled', 'delivered', 'pending', 'shipped']"
+      },
+      {
+       "id": "rule_quantity",
+       "status": "warn",
+       "detail": "4 value(s) not a positive integer (not cleaned by design)"
+      },
+      {
+       "id": "null_inflation",
+       "status": "fail",
+       "detail": "5 cell(s) blank where the oracle has a value: {'quantity': 5}"
+      },
+      {
+       "id": "empty_columns",
+       "status": "fail",
+       "detail": "1 column(s) present but blank on every row: ['country']"
+      },
+      {
+       "id": "oracle_diff",
+       "status": "fail",
+       "detail": "10 cell(s) differ from the oracle: {'email': 5, 'quantity': 5}"
+      },
+      {
+       "id": "marker_row",
+       "status": "pass",
+       "detail": "output was built from 'schema-drop-column'"
+      }
+     ],
+     "output_rows": 390,
+     "input_rows": 425,
+     "listed": true
+    }
+   ],
    "matrix": {
     "run_ids": "drop-column-after-fix",
     "rhombus_status": "Failure",
@@ -153,7 +916,156 @@
    "rows": 425,
    "change": "amount_usd renamed to total_amount; values identical.",
    "status": "done",
+   "headline": "Rhombus stopped but gave no hint about the rename; the chatbot's fix shipped an empty file marked successful.",
    "observation": "observations/schema-rename-column.md",
+   "observation_md": "# Schema drift: rename a column (`amount_usd` \u2192 `total_amount`)\n\n| | |\n|---|---|\n| Case file | `datasets/schema-rename-column.csv` (uploaded as `input/orders.csv`) |\n| S3 version | `EfHU9zLaR5Ay1uqPvXotbtWFsiHolxaI`, uploaded 2026-10-02 15:22:07 AEST, 32.2 KB |\n| Pipeline | Original AI-built code (restored after case 1; same `code_sha=831d36d0703c` as before the chatbot patch) |\n| Run | Manual run (\u25b6) 15:23 AEST (scheduled runs don't execute on this account) |\n| Severity | **Critical** after the chatbot fix (empty file shipped as success). Before the fix: Medium (stopped, no rename hint) |\n| Pipeline stopped? | **Yes**, at `orders_cleaned` |\n| Chatbot fix worked? | **No.** Wrong theory (\"cached execution\"), guessed alias list missed `total_amount`, the blank fallback dropped every row and the run \"completed successfully\" with an empty file |\n\n## What I changed\nRenamed the header `amount_usd` to `total_amount`. Values in that column and every other cell are identical to the baseline. Marker row: \"Marker schema-rename-column\".\n\n## Expected\n`orders_cleaned` uses `amount_usd` twice (drop rows with a missing amount; strip `$`/`,` and convert to a number). A careful platform should stop with \"column `amount_usd` not found\", and ideally notice that `total_amount` is new, holds the same kind of values, and suggest it as a rename.\n\n## What happened\n- Pipeline **failed at `orders_cleaned`** at 15:23:08. Logs: 5 visible, 4 OK, 1 error.\n- **No output reached GCS** (newest object is from 15:18:11, before this upload).\n- Error, verbatim (full JSON: `evidence/2026-10-02_schema-rename-column-error-log.json`):\n  > Pipeline failed at orders_cleaned: LLM execution failed (code_sha=831d36d0703c): 'amount_usd' --- Generated code --- import pandas as pd ...\n- Same shape as the drop-column error: the cause is only the bare word `'amount_usd'` (a pandas KeyError). No mention that `total_amount` appeared, so no rename hint.\n- `code_sha` is identical to the drop-column failure, which independently confirms the restore put back the exact original code.\n\n## Logs\nClear? **Partially.** Names the failing step; doesn't say \"missing column\", doesn't notice the new column, and the \"LLM execution failed\" wording points at the AI rather than the data. Screenshot: `evidence/2026-10-02_rename-column-error-log-panel.png`.\n\n## Chatbot diagnosis\n- Prompt: **Ask Chatbot** on the 15:23 error, no text added. Transcript: `evidence/2026-10-02_rename-column-chatbot-transcript.txt`.\n- Diagnosis: **wrong.** It claimed the identical `code_sha` meant \"the runtime is still finding the old cached execution\" (false: I restored the original code on purpose) and guessed the header was a casing variant like \"Amount_USD\". It never read the input header, which shows `total_amount`.\n- It edited the pipeline without asking (cost 5 credits): normalise headers, a fixed alias list (\"amount, total, total_usd, price, etc.\"), and \"fallback column creation ... added as blank\".\n- Re-run (\u25b6 15:31:47): run status **\"Pipeline completed successfully\"** with a yellow warning, **\"No results found after applying this LLM transformation\"** (`empty_output_warning`). Custom step impact: \"401 row(s) affected\".\n- GCS received `orders_cleaned_1790919110808.csv`: **75 bytes, the header row only, zero orders.** The blank `amount_usd` made rule 1 (\"drop rows where amount is missing\") drop every row.\n- **Fix worked? No.** Worse than before: the platform reports success and the destination gets an empty file. A revenue report would read $0.\n- Validator: `row_loss` fails (\"only 0 of 397 input orders reached the output\"). My first version crashed on a header-only file and its oracle-based row check passed (the oracle, built from the drifted input, also expects 0 rows). Fixed both, with tests.\n\nCredit where due: Rhombus did raise a **warning** (\"No results found\") this time, which is better than case 1's silent green. But it's a warning on a run marked successful, and the empty file was still exported.\n\n## Schedule afterwards\nNot testable on this account (scheduled runs don't execute; reported to Rhombus 14:39).\n\n## Reproduce\n1. Upload `datasets/schema-rename-column.csv` to `s3://violet-rhombus-drift-in/input/orders.csv`\n2. Run the drift-qa pipeline with the original code\n3. Check Logs and GCS\n\n## Impact and suggestion\nSafe (nothing shipped), but a rename is the most common real-world schema drift and the easiest to auto-detect: same position, same value pattern, similar name. Suggest a rename hint (\"`amount_usd` missing; new column `total_amount` looks like it \u2014 map it?\").\n",
+   "extra_md": [],
+   "evidence": [
+    {
+     "name": "2026-10-02_rename-after-fix-empty-output-warning.png",
+     "path": "evidence/2026-10-02_rename-after-fix-empty-output-warning.png",
+     "kind": "image",
+     "ext": "png"
+    },
+    {
+     "name": "2026-10-02_rename-column-chatbot-diagnosis.png",
+     "path": "evidence/2026-10-02_rename-column-chatbot-diagnosis.png",
+     "kind": "image",
+     "ext": "png"
+    },
+    {
+     "name": "2026-10-02_rename-column-chatbot-transcript.txt",
+     "path": "evidence/2026-10-02_rename-column-chatbot-transcript.txt",
+     "kind": "text",
+     "ext": "txt"
+    },
+    {
+     "name": "2026-10-02_rename-column-error-log-panel.png",
+     "path": "evidence/2026-10-02_rename-column-error-log-panel.png",
+     "kind": "image",
+     "ext": "png"
+    },
+    {
+     "name": "2026-10-02_restore2-apply-runs-and-fails.png",
+     "path": "evidence/2026-10-02_restore2-apply-runs-and-fails.png",
+     "kind": "image",
+     "ext": "png"
+    },
+    {
+     "name": "2026-10-02_schema-rename-column-error-log.json",
+     "path": "evidence/2026-10-02_schema-rename-column-error-log.json",
+     "kind": "text",
+     "ext": "json"
+    }
+   ],
+   "page_reports": [
+    {
+     "run": "rename-after-fix",
+     "path": "data-validation/reports/rename-after-fix.json",
+     "timestamp": "2026-10-02T05:34:53+00:00",
+     "verdict": "fail",
+     "summary": {
+      "pass": 6,
+      "fail": 1,
+      "warn": 11
+     },
+     "checks": [
+      {
+       "id": "input_schema",
+       "status": "warn",
+       "detail": "input drifted from contract: missing ['amount_usd']; extra ['total_amount']; likely renamed amount_usd->total_amount"
+      },
+      {
+       "id": "schema",
+       "status": "pass",
+       "detail": "columns and order match the contract"
+      },
+      {
+       "id": "row_reconciliation",
+       "status": "pass",
+       "detail": "0 rows, same order_ids as the oracle"
+      },
+      {
+       "id": "row_loss",
+       "status": "fail",
+       "detail": "only 0 of 397 input orders reached the output (0%, threshold 90%)"
+      },
+      {
+       "id": "rule_unique_order_id",
+       "status": "pass",
+       "detail": "order_id unique and present"
+      },
+      {
+       "id": "rule_customer_name",
+       "status": "warn",
+       "detail": "no rows to check"
+      },
+      {
+       "id": "rule_email",
+       "status": "warn",
+       "detail": "no rows to check"
+      },
+      {
+       "id": "rule_order_date",
+       "status": "warn",
+       "detail": "no rows to check"
+      },
+      {
+       "id": "rule_amount_numeric",
+       "status": "warn",
+       "detail": "no rows to check"
+      },
+      {
+       "id": "rule_amount_non_negative",
+       "status": "warn",
+       "detail": "no rows to check"
+      },
+      {
+       "id": "rule_country",
+       "status": "warn",
+       "detail": "no rows to check"
+      },
+      {
+       "id": "rule_status_lowercase",
+       "status": "warn",
+       "detail": "no rows to check"
+      },
+      {
+       "id": "rule_status_allowed",
+       "status": "warn",
+       "detail": "no rows to check"
+      },
+      {
+       "id": "rule_quantity",
+       "status": "warn",
+       "detail": "no rows to check"
+      },
+      {
+       "id": "null_inflation",
+       "status": "pass",
+       "detail": "no unexpected blanks"
+      },
+      {
+       "id": "empty_columns",
+       "status": "pass",
+       "detail": "every contract column has data"
+      },
+      {
+       "id": "oracle_diff",
+       "status": "pass",
+       "detail": "0 rows x 7 columns identical to the oracle"
+      },
+      {
+       "id": "marker_row",
+       "status": "warn",
+       "detail": "marker order 99999 not in output"
+      }
+     ],
+     "output_rows": 0,
+     "input_rows": 425,
+     "listed": true
+    }
+   ],
    "matrix": {
     "run_ids": "rename-after-fix",
     "rhombus_status": "Failure",
@@ -191,7 +1103,143 @@
    "rows": 425,
    "change": "quantity int -> text ('3 units').",
    "status": "done",
+   "headline": "A green run delivered quantity as text ('6 units') with no warning, so there was nothing to ask the chatbot about.",
    "observation": "observations/schema-type-change.md",
+   "observation_md": "# Schema drift: change a column's type (`quantity`: number \u2192 text)\n\n| | |\n|---|---|\n| Case file | `datasets/schema-type-change.csv` (uploaded as `input/orders.csv`) |\n| S3 version | `fauwQIACXEVBbjZ_pxx.g7.c3cWIxUxj`, uploaded 2026-10-02 15:52:58 AEST, 34.6 KB |\n| Pipeline | Original AI-built code (restored and verified) |\n| Run | Manual run (\u25b6) ~15:55 AEST |\n| Severity | **High**: run green, a numeric column delivered as text, no warning |\n| Pipeline stopped? | **No.** Green, output written |\n| Chatbot fix worked? | Not applicable: there was no error to send to the chatbot. That's the problem. |\n\n## What I changed\nEvery numeric `quantity` became text with a unit: `6` \u2192 `6 units`. Blanks, `0` and the existing `three` values left as they were. Nothing else changed. Marker row: \"Marker schema-type-change\".\n\n## Expected\nRhombus's changelog (21 Jun 2026) mentions \"pre-execution validation for sorting and type-conversion operations\". A careful platform would notice the column it had always typed as Numeric is now text and warn before shipping.\n\n## What happened\n- Run **green**. GCS received `orders_cleaned_1790920473655.csv`: 390 rows, same orders as the baseline.\n- **`quantity` arrived as text**: `6 units`, `3 units`, `0 units`, \u2026 (384 of 390 non-numeric). No error, no warning in Logs.\n- Every other column cleaned exactly as in the baseline (only the known email bug remains).\n- Side effect in the other direction: in the baseline, Rhombus typed `quantity` as Numeric on load and silently blanked `three` (5 rows). Here, because most values are text, it typed the column as Text and **kept** `three`. Same value, different outcome, depending on the rest of the column. Data-dependent type inference, invisible to the user.\n\n## Who decided \"quantity is text\"? (checked)\nThe **Data Input** node's preview of this file labels `quantity` **Categorical** (raw values \"6 units\", \"3 units\", \u2026); on the baseline file the same preview labelled it **Numeric**. That label is set when the file is loaded, before any AI-built step runs, and the AI-generated code never touches `quantity`. So the type decision comes from Rhombus's **ingest type inference** (a rule-based loader), not from either AI layer. The same preview also shows `order_date` already parsed to DateTime on load. Screenshot: `evidence/2026-10-02_type-change-data-input-preview-quantity-categorical.png`.\n\n## Logs\nNothing to read: the run reports success. Screenshot: `evidence/2026-10-02_type-change-run-green.png`.\n\n## Chatbot diagnosis\nNone. With a green run there's no \"Ask Chatbot\" prompt. A user would have to know to ask.\n\n## What reaches the destination, and why it matters\nA warehouse table with `quantity INTEGER` would reject this file (a loud failure, but downstream, after Rhombus said \"success\"). A loosely typed destination (CSV consumers, spreadsheets, BI tools) would accept it and break every sum or average on quantity.\n\n## Validator\n- My first version **missed this too**: quantity is \"warnings only\" in the contract (bad quantities are passed through by design), so 384 text values were only a warning.\n- Added `column_types`: numeric contract columns must be \u226590% numeric in the output. Fails here (\"numeric column(s) arrived as text: ['quantity']\"), passes the baseline. Test added (75 pass).\n\n## Reproduce\n1. Upload `datasets/schema-type-change.csv` as `input/orders.csv`\n2. Run drift-qa with the original code\n3. Look at the `quantity` column in the GCS output\n\n## Impact and suggestion\nThe quietest of the schema cases so far: success status, plausible-looking output, wrong type. Suggest a per-column type contract on Data Input (types learned from the first good run), with a \"type changed\" warning or failure before executing, which is what the changelog's \"pre-execution validation\" implies.\n",
+   "extra_md": [],
+   "evidence": [
+    {
+     "name": "2026-10-02_type-change-data-input-preview-quantity-categorical.png",
+     "path": "evidence/2026-10-02_type-change-data-input-preview-quantity-categorical.png",
+     "kind": "image",
+     "ext": "png"
+    },
+    {
+     "name": "2026-10-02_type-change-node-preview-quantity-categorical.png",
+     "path": "evidence/2026-10-02_type-change-node-preview-quantity-categorical.png",
+     "kind": "image",
+     "ext": "png"
+    },
+    {
+     "name": "2026-10-02_type-change-run-green.png",
+     "path": "evidence/2026-10-02_type-change-run-green.png",
+     "kind": "image",
+     "ext": "png"
+    }
+   ],
+   "page_reports": [
+    {
+     "run": "type-change",
+     "path": "data-validation/reports/type-change.json",
+     "timestamp": "2026-10-02T05:56:13+00:00",
+     "verdict": "fail",
+     "summary": {
+      "pass": 13,
+      "fail": 3,
+      "warn": 3
+     },
+     "checks": [
+      {
+       "id": "input_schema",
+       "status": "pass",
+       "detail": "columns and order match the contract"
+      },
+      {
+       "id": "schema",
+       "status": "pass",
+       "detail": "columns and order match the contract"
+      },
+      {
+       "id": "row_reconciliation",
+       "status": "pass",
+       "detail": "390 rows, same order_ids as the oracle"
+      },
+      {
+       "id": "row_loss",
+       "status": "pass",
+       "detail": "98% of input orders reached the output"
+      },
+      {
+       "id": "rule_unique_order_id",
+       "status": "pass",
+       "detail": "order_id unique and present"
+      },
+      {
+       "id": "rule_customer_name",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_email",
+       "status": "fail",
+       "detail": "5 value(s) not lowercase valid-or-blank"
+      },
+      {
+       "id": "rule_order_date",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_amount_numeric",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_amount_non_negative",
+       "status": "warn",
+       "detail": "5 value(s) negative (passed through by design)"
+      },
+      {
+       "id": "rule_country",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_status_lowercase",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_status_allowed",
+       "status": "warn",
+       "detail": "7 value(s) outside ['cancelled', 'delivered', 'pending', 'shipped']"
+      },
+      {
+       "id": "rule_quantity",
+       "status": "warn",
+       "detail": "384 value(s) not a positive integer (not cleaned by design)"
+      },
+      {
+       "id": "null_inflation",
+       "status": "pass",
+       "detail": "no unexpected blanks"
+      },
+      {
+       "id": "empty_columns",
+       "status": "pass",
+       "detail": "every contract column has data"
+      },
+      {
+       "id": "column_types",
+       "status": "fail",
+       "detail": "numeric column(s) arrived as text: ['quantity']"
+      },
+      {
+       "id": "oracle_diff",
+       "status": "fail",
+       "detail": "5 cell(s) differ from the oracle: {'email': 5}"
+      },
+      {
+       "id": "marker_row",
+       "status": "pass",
+       "detail": "output was built from 'schema-type-change'"
+      }
+     ],
+     "output_rows": 390,
+     "input_rows": 425,
+     "listed": true
+    }
+   ],
    "matrix": {
     "run_ids": "type-change",
     "rhombus_status": "Success",
@@ -231,7 +1279,12 @@
    "rows": 425,
    "change": "New discount_code column appended.",
    "status": "pending",
+   "headline": "",
    "observation": "observations/schema-add-column.md",
+   "observation_md": null,
+   "extra_md": [],
+   "evidence": [],
+   "page_reports": [],
    "matrix": {
     "run_ids": [],
     "rhombus_status": null,
@@ -258,7 +1311,12 @@
    "rows": 425,
    "change": "All four schema changes at once.",
    "status": "pending",
+   "headline": "",
    "observation": "observations/schema-all-combined.md",
+   "observation_md": null,
+   "extra_md": [],
+   "evidence": [],
+   "page_reports": [],
    "matrix": {
     "run_ids": [],
     "rhombus_status": null,
@@ -285,7 +1343,12 @@
    "rows": 425,
    "change": "amount_usd values x100 (cents), header unchanged.",
    "status": "pending",
+   "headline": "",
    "observation": "observations/semantic-dollars-to-cents.md",
+   "observation_md": null,
+   "extra_md": [],
+   "evidence": [],
+   "page_reports": [],
    "matrix": {
     "run_ids": [],
     "rhombus_status": null,
@@ -312,7 +1375,12 @@
    "rows": 425,
    "change": "Slash dates switched from MM/DD/YYYY to DD/MM/YYYY.",
    "status": "pending",
+   "headline": "",
    "observation": "observations/semantic-date-mmdd-to-ddmm.md",
+   "observation_md": null,
+   "extra_md": [],
+   "evidence": [],
+   "page_reports": [],
    "matrix": {
     "run_ids": [],
     "rhombus_status": null,
@@ -339,7 +1407,12 @@
    "rows": 425,
    "change": "Bonus: Australia rows relabelled as Austria (AT).",
    "status": "pending",
+   "headline": "",
    "observation": "observations/semantic-country-code-swap.md",
+   "observation_md": null,
+   "extra_md": [],
+   "evidence": [],
+   "page_reports": [],
    "matrix": {
     "run_ids": [],
     "rhombus_status": null,
@@ -366,7 +1439,12 @@
    "rows": 425,
    "change": "Docs: Data Input converts '.' in headers to spaces.",
    "status": "pending",
+   "headline": "",
    "observation": "observations/edge-dotted-header.md",
+   "observation_md": null,
+   "extra_md": [],
+   "evidence": [],
+   "page_reports": [],
    "matrix": {
     "run_ids": [],
     "rhombus_status": null,
@@ -393,7 +1471,12 @@
    "rows": 0,
    "change": "Header row, zero data rows.",
    "status": "pending",
+   "headline": "",
    "observation": "observations/edge-header-only.md",
+   "observation_md": null,
+   "extra_md": [],
+   "evidence": [],
+   "page_reports": [],
    "matrix": {
     "run_ids": [],
     "rhombus_status": null,
@@ -420,7 +1503,12 @@
    "rows": 425,
    "change": "UTF-8 BOM prefix.",
    "status": "pending",
+   "headline": "",
    "observation": "observations/edge-bom-utf8.md",
+   "observation_md": null,
+   "extra_md": [],
+   "evidence": [],
+   "page_reports": [],
    "matrix": {
     "run_ids": [],
     "rhombus_status": null,
@@ -447,7 +1535,12 @@
    "rows": 425,
    "change": "Delimiter switched to ';'.",
    "status": "pending",
+   "headline": "",
    "observation": "observations/edge-semicolon.md",
+   "observation_md": null,
+   "extra_md": [],
+   "evidence": [],
+   "page_reports": [],
    "matrix": {
     "run_ids": [],
     "rhombus_status": null,

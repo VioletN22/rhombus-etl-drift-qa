@@ -8,6 +8,8 @@ Inputs:
   observations/matrix.yaml         hand-filled observations per case (pending until run)
   observations/runs.csv            ledger appended by scripts/run_scenario.py
   data-validation/reports/*.json   validator reports (or practice/*.json with --demo)
+  observations/<case>.md           per-case write-ups, copied into data.json for case.html
+  observations/evidence/*          screenshots and logs, copied to dashboard/evidence/
 
 Nothing is invented: a case with no observation stays "pending" and every number
 on the dashboard traces back to one of the files above.
@@ -18,6 +20,8 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import re
+import shutil
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -31,6 +35,12 @@ LEDGER = ROOT / "observations" / "runs.csv"
 REPORTS = ROOT / "data-validation" / "reports"
 PRACTICE = ROOT / "practice"
 OUT = ROOT / "dashboard" / "data.json"
+EVIDENCE = ROOT / "observations" / "evidence"
+EVIDENCE_OUT = ROOT / "dashboard" / "evidence"
+EVIDENCE_TYPES = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".txt", ".json", ".py", ".md"}
+SECRET_PATTERNS = re.compile(r"private_key|BEGIN [A-Z ]*PRIVATE KEY|aws_secret_access_key|"
+                             r"\"type\":\s*\"service_account\"", re.I)
+GROUP_PREFIXES = ("schema-", "semantic-", "edge-")
 
 ALLOWED = {
     "status": {"pending", "done"},
@@ -191,8 +201,76 @@ def capability(entry: dict, latest: dict | None) -> str:
     return "missed" if latest["verdict"] == "fail" else "handled"
 
 
+# --- case pages -----------------------------------------------------------------
+
+def is_publishable(path: Path) -> bool:
+    """Only plain evidence types, never anything that could hold a credential."""
+    if path.suffix.lower() not in EVIDENCE_TYPES or path.name.startswith("."):
+        return False
+    if "key" in path.name.lower() and path.suffix.lower() not in {".png", ".jpg", ".jpeg"}:
+        return False
+    if path.suffix.lower() in {".json", ".txt", ".py", ".md"}:
+        if SECRET_PATTERNS.search(path.read_text(errors="replace")):
+            warn(f"evidence {path.name}: looks like it holds a credential, not published")
+            return False
+    return True
+
+
+def publish_evidence() -> list[str]:
+    """Copy observations/evidence into dashboard/evidence (a clean copy each build)."""
+    if EVIDENCE_OUT.exists():
+        shutil.rmtree(EVIDENCE_OUT)
+    if not EVIDENCE.exists():
+        return []
+    EVIDENCE_OUT.mkdir(parents=True)
+    names = []
+    for path in sorted(EVIDENCE.iterdir()):
+        if path.is_file() and is_publishable(path):
+            shutil.copy2(path, EVIDENCE_OUT / path.name)
+            names.append(path.name)
+    return names
+
+
+def evidence_keywords(case: str, entry: dict) -> list[str]:
+    if entry.get("evidence_keywords"):
+        return [str(k).lower() for k in entry["evidence_keywords"]]
+    rest = case
+    for prefix in GROUP_PREFIXES:
+        rest = rest.removeprefix(prefix)
+    words = [rest]
+    first = rest.split("-", 1)[0]
+    if first != rest and len(first) >= 4:
+        words.append(first)
+    return words
+
+
+def evidence_for(case: str, entry: dict, published: list[str]) -> list[dict]:
+    pats = [re.compile(rf"(?<![a-z0-9]){re.escape(k)}(?![a-z0-9])")
+            for k in evidence_keywords(case, entry)]
+    out = []
+    for name in published:
+        if any(p.search(name.lower()) for p in pats):
+            ext = Path(name).suffix.lower().lstrip(".")
+            kind = "image" if ext in {"png", "jpg", "jpeg", "gif", "webp"} else "text"
+            out.append({"name": name, "path": f"evidence/{name}", "kind": kind, "ext": ext})
+    return out
+
+
+def read_md(rel: str | None) -> str | None:
+    if not rel:
+        return None
+    path = ROOT / rel
+    return path.read_text() if path.exists() else None
+
+
+def as_list(value) -> list:
+    if value is None or value == "":
+        return []
+    return value if isinstance(value, list) else [value]
+
+
 def build_cases(manifest: dict, matrix: dict, runs: list[dict],
-                reports: list[dict]) -> list[dict]:
+                reports: list[dict], published: list[str] | None = None) -> list[dict]:
     by_case = {e["case"]: e for e in matrix.get("cases", [])}
     out = []
     for case, meta in manifest["files"].items():
@@ -201,11 +279,27 @@ def build_cases(manifest: dict, matrix: dict, runs: list[dict],
                      and r["outcome"] in ("output", "no-output")]
         case_reports = [r for r in reports if r["case"] == case]
         latest = case_reports[-1] if case_reports else None
+        observation = entry.get("observation") or f"observations/{case}.md"
+        wanted = [str(r) for r in as_list(entry.get("run_ids"))]
+        by_run = {r["run"]: r for r in reports}
+        page_reports = [by_run[r] for r in wanted if r in by_run]
+        page_reports += [r for r in case_reports if r["run"] not in wanted]
         out.append({
             "case": case, "group": group_of(case), "file": meta["file"],
             "rows": meta["rows"], "change": entry.get("change") or meta["note"],
             "status": entry.get("status", "pending"),
-            "observation": entry.get("observation") or f"observations/{case}.md",
+            "headline": entry.get("headline") or "",
+            "observation": observation,
+            "observation_md": read_md(observation),
+            "extra_md": [{"path": rel, "md": read_md(rel)} for rel in as_list(entry.get("extra_md"))
+                         if read_md(rel)],
+            "evidence": evidence_for(case, entry, published or []),
+            "page_reports": [{
+                "run": r["run"], "path": r["path"], "timestamp": r["timestamp"],
+                "verdict": r["verdict"], "summary": r["summary"], "checks": r["checks"],
+                "output_rows": r["output_rows"], "input_rows": r["input_rows"],
+                "listed": r["run"] in wanted,
+            } for r in page_reports],
             "matrix": {k: entry.get(k) for k in (
                 "run_ids", "rhombus_status", "platform_behaviour", "gcs_output",
                 "logs_clear", "chatbot_diagnosis", "chatbot_fix_worked", "schedule_after",
@@ -298,6 +392,48 @@ def build_health(cases: list[dict]) -> list[dict]:
     return rows
 
 
+def build_summary(matrix: dict, cases: list[dict], consistency: list[dict],
+                  ai_builder: dict) -> dict:
+    s = matrix.get("summary") or {}
+    by_case = {c["case"]: c for c in cases}
+    required = [r for r in as_list(s.get("required")) if r in by_case]
+    if not required:
+        required = [c["case"] for c in cases if c["case"] != "baseline"]
+    unknown = [r for r in as_list(s.get("required")) if r not in by_case]
+    if unknown:
+        warn(f"summary.required: unknown case(s) {unknown}")
+    det = next((t for t in consistency if t["runs"]), None)
+    determinism = None
+    if det:
+        hashes = {r["output_sha256"] for r in det["runs"]}
+        same = max(sum(r["output_sha256"] == h for r in det["runs"]) for h in hashes)
+        determinism = {"identical": same, "runs": len(det["runs"]), "target": det["target_runs"],
+                       "case": det["case"]}
+    credits = s.get("credits_used")
+    if credits is None:
+        credits = sum(c["matrix"]["credits_used"] or 0 for c in cases) + sum(
+            a.get("credits_used") or 0 for a in ai_builder["attempts"])
+    learnings = []
+    for item in as_list(s.get("learnings")):
+        cs = [c for c in as_list(item.get("cases")) if c in by_case]
+        if len(cs) != len(as_list(item.get("cases"))):
+            warn(f"learning {item.get('title')!r}: unknown case in {item.get('cases')}")
+        learnings.append({"title": item.get("title", ""), "line": item.get("line", ""),
+                          "detail": item.get("detail", ""), "severity": item.get("severity"),
+                          "cases": cs})
+    return {
+        "verdict": s.get("verdict") or "",
+        "required": required,
+        "required_done": sum(by_case[r]["status"] == "done" for r in required),
+        "critical": sum(c["status"] == "done" and c["matrix"]["severity"] == "Critical"
+                        for c in cases),
+        "determinism": determinism,
+        "credits_used": credits,
+        "credits_note": s.get("credits_note") or "",
+        "learnings": learnings,
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--demo", action="store_true",
@@ -316,9 +452,16 @@ def main(argv: list[str] | None = None) -> int:
     runs += runs_from_reports(reports, {r["run"] for r in runs if r["run"]}, args.demo)
     runs.sort(key=lambda r: r["uploaded_at"] or r["output_updated"] or "")
 
-    cases = build_cases(manifest, matrix, runs, reports)
+    published = publish_evidence()
+    cases = build_cases(manifest, matrix, runs, reports, published)
+    consistency = build_consistency(matrix, reports, args.demo)
+    ai_builder = build_ai_builder(matrix)
+    summary = build_summary(matrix, cases, consistency, ai_builder)
     data = {
         "demo": args.demo,
+        "verdict": summary.pop("verdict"),
+        "learnings": summary.pop("learnings"),
+        "summary": summary,
         "built_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "sources": {
             "reports": str(folder.relative_to(ROOT)),
@@ -328,8 +471,8 @@ def main(argv: list[str] | None = None) -> int:
         },
         "health": build_health(cases),
         "cases": cases,
-        "consistency": build_consistency(matrix, reports, args.demo),
-        "ai_builder": build_ai_builder(matrix),
+        "consistency": consistency,
+        "ai_builder": ai_builder,
         "runs": runs,
         "reports": reports,
     }
@@ -337,7 +480,8 @@ def main(argv: list[str] | None = None) -> int:
     args.out.write_text(json.dumps(data, indent=1) + "\n")
     done = sum(c["status"] == "done" for c in cases)
     print(f"wrote {args.out.relative_to(ROOT)}: {'DEMO, ' if args.demo else ''}"
-          f"{len(reports)} report(s), {len(runs)} run(s), {done}/{len(cases)} cases observed")
+          f"{len(reports)} report(s), {len(runs)} run(s), {done}/{len(cases)} cases observed, "
+          f"{len(published)} evidence file(s) published")
     return 0
 
 

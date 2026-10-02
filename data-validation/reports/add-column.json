@@ -1,0 +1,512 @@
+{
+  "run": "add-column",
+  "timestamp": "2026-10-02T06:14:34+00:00",
+  "input": {
+    "uri": "datasets/schema-add-column.csv",
+    "sha256": "dcc2d0239db4bc77df26e2ea0f48c315a27906ba1a98bd6bbe0373b78fd983cb",
+    "rows": 425
+  },
+  "output": {
+    "uri": "runs/2026-10-02-drift/add-column.csv",
+    "object": "runs/2026-10-02-drift/add-column.csv",
+    "updated": null,
+    "rows": 390,
+    "sha256_canonical": "2a8323df2a74b8d163810c2fbe6bc7c55520ced0c3125b2d872cf86cfe899f4f"
+  },
+  "reference": {
+    "rows": 390,
+    "sha256_canonical": "b43fd3ec88191db0af9ec0f964913a0bff30f1707d5371094a43aeee1a714160",
+    "breakdown": {
+      "input_rows": 425,
+      "exact_duplicates": 20,
+      "duplicate_ids": 7,
+      "missing_key_or_amount": 8,
+      "output_rows": 390
+    }
+  },
+  "profile": {
+    "amount_median": 36.935,
+    "amount_max": 15052.5,
+    "amount_over_max_plausible": 1,
+    "month_distribution": {
+      "01": 0.119171,
+      "02": 0.106218,
+      "03": 0.103627,
+      "04": 0.11658,
+      "05": 0.098446,
+      "06": 0.119171,
+      "07": 0.134715,
+      "08": 0.093264,
+      "09": 0.108808
+    },
+    "country_distribution": {
+      "AU": 0.289744,
+      "GB": 0.246154,
+      "NZ": 0.223077,
+      "US": 0.241026
+    },
+    "input_slash_dates": {
+      "slash_dates": 363,
+      "first_gt12": 0,
+      "share": 0.0
+    },
+    "max_order_date": "2026-09-27"
+  },
+  "checks": [
+    {
+      "id": "input_schema",
+      "status": "warn",
+      "detail": "input drifted from contract: extra ['discount_code']",
+      "evidence": {
+        "expected": [
+          "order_id",
+          "customer_name",
+          "email",
+          "order_date",
+          "amount_usd",
+          "quantity",
+          "country",
+          "status"
+        ],
+        "actual": [
+          "order_id",
+          "customer_name",
+          "email",
+          "order_date",
+          "amount_usd",
+          "quantity",
+          "country",
+          "status",
+          "discount_code"
+        ],
+        "missing": [],
+        "extra": [
+          "discount_code"
+        ],
+        "order_ok": true,
+        "likely_renamed": []
+      }
+    },
+    {
+      "id": "schema",
+      "status": "pass",
+      "detail": "columns and order match the contract",
+      "evidence": {
+        "expected": [
+          "order_id",
+          "customer_name",
+          "email",
+          "order_date",
+          "amount_usd",
+          "quantity",
+          "country",
+          "status"
+        ],
+        "actual": [
+          "order_id",
+          "customer_name",
+          "email",
+          "order_date",
+          "amount_usd",
+          "quantity",
+          "country",
+          "status"
+        ],
+        "missing": [],
+        "extra": [],
+        "order_ok": true,
+        "likely_renamed": []
+      }
+    },
+    {
+      "id": "row_reconciliation",
+      "status": "pass",
+      "detail": "390 rows, same order_ids as the oracle",
+      "evidence": {
+        "expected_rows": 390,
+        "actual_rows": 390,
+        "breakdown": {
+          "input_rows": 425,
+          "exact_duplicates": 20,
+          "duplicate_ids": 7,
+          "missing_key_or_amount": 8,
+          "output_rows": 390
+        },
+        "missing_count": 0,
+        "unexpected_count": 0,
+        "missing_ids": [],
+        "unexpected_ids": []
+      }
+    },
+    {
+      "id": "row_loss",
+      "status": "pass",
+      "detail": "98% of input orders reached the output",
+      "evidence": {
+        "input_keys": 397,
+        "output_keys": 390,
+        "share_kept": 0.982
+      }
+    },
+    {
+      "id": "rule_unique_order_id",
+      "status": "pass",
+      "detail": "order_id unique and present",
+      "evidence": {
+        "duplicate_ids": [],
+        "duplicate_count": 0,
+        "blank_ids": 0
+      }
+    },
+    {
+      "id": "rule_customer_name",
+      "status": "pass",
+      "detail": "all 390 values ok",
+      "evidence": {
+        "violations": 0,
+        "rows": 390,
+        "examples": []
+      }
+    },
+    {
+      "id": "rule_email",
+      "status": "fail",
+      "detail": "5 value(s) not lowercase valid-or-blank",
+      "evidence": {
+        "violations": 5,
+        "rows": 390,
+        "examples": [
+          {
+            "order_id": "10012.0",
+            "email": "@example.com"
+          },
+          {
+            "order_id": "10144.0",
+            "email": "@example.com"
+          },
+          {
+            "order_id": "10157.0",
+            "email": "@example.com"
+          },
+          {
+            "order_id": "10185.0",
+            "email": "@example.com"
+          },
+          {
+            "order_id": "10337.0",
+            "email": "@example.com"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule_order_date",
+      "status": "pass",
+      "detail": "all 390 values ok",
+      "evidence": {
+        "violations": 0,
+        "rows": 390,
+        "examples": []
+      }
+    },
+    {
+      "id": "rule_amount_numeric",
+      "status": "pass",
+      "detail": "all 390 values ok",
+      "evidence": {
+        "violations": 0,
+        "rows": 390,
+        "examples": []
+      }
+    },
+    {
+      "id": "rule_amount_non_negative",
+      "status": "warn",
+      "detail": "5 value(s) negative (passed through by design)",
+      "evidence": {
+        "violations": 5,
+        "rows": 390,
+        "examples": [
+          {
+            "order_id": "10047.0",
+            "amount_usd": "-45.08"
+          },
+          {
+            "order_id": "10187.0",
+            "amount_usd": "-84.83"
+          },
+          {
+            "order_id": "10289.0",
+            "amount_usd": "-26.62"
+          },
+          {
+            "order_id": "10361.0",
+            "amount_usd": "-57.29"
+          },
+          {
+            "order_id": "10380.0",
+            "amount_usd": "-49.84"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule_country",
+      "status": "pass",
+      "detail": "all 390 values ok",
+      "evidence": {
+        "violations": 0,
+        "rows": 390,
+        "examples": []
+      }
+    },
+    {
+      "id": "rule_status_lowercase",
+      "status": "pass",
+      "detail": "all 390 values ok",
+      "evidence": {
+        "violations": 0,
+        "rows": 390,
+        "examples": []
+      }
+    },
+    {
+      "id": "rule_status_allowed",
+      "status": "warn",
+      "detail": "7 value(s) outside ['cancelled', 'delivered', 'pending', 'shipped']",
+      "evidence": {
+        "violations": 7,
+        "rows": 390,
+        "examples": [
+          {
+            "order_id": "10051.0",
+            "status": "shipd"
+          },
+          {
+            "order_id": "10059.0",
+            "status": "shipd"
+          },
+          {
+            "order_id": "10209.0",
+            "status": "shipd"
+          },
+          {
+            "order_id": "10233.0",
+            "status": "shipd"
+          },
+          {
+            "order_id": "10251.0",
+            "status": "shipd"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule_quantity",
+      "status": "warn",
+      "detail": "4 value(s) not a positive integer (not cleaned by design)",
+      "evidence": {
+        "violations": 4,
+        "rows": 390,
+        "examples": [
+          {
+            "order_id": "10010.0",
+            "quantity": "0.0"
+          },
+          {
+            "order_id": "10194.0",
+            "quantity": "0.0"
+          },
+          {
+            "order_id": "10252.0",
+            "quantity": "0.0"
+          },
+          {
+            "order_id": "10283.0",
+            "quantity": "0.0"
+          }
+        ]
+      }
+    },
+    {
+      "id": "null_inflation",
+      "status": "fail",
+      "detail": "5 cell(s) blank where the oracle has a value: {'quantity': 5}",
+      "evidence": {
+        "compared_rows": 390,
+        "columns": {
+          "customer_name": {
+            "output_blank": 17,
+            "expected_blank": 17,
+            "inflated": 0
+          },
+          "email": {
+            "output_blank": 26,
+            "expected_blank": 31,
+            "inflated": 0
+          },
+          "order_date": {
+            "output_blank": 4,
+            "expected_blank": 4,
+            "inflated": 0
+          },
+          "amount_usd": {
+            "output_blank": 0,
+            "expected_blank": 0,
+            "inflated": 0
+          },
+          "quantity": {
+            "output_blank": 11,
+            "expected_blank": 6,
+            "inflated": 5
+          },
+          "country": {
+            "output_blank": 0,
+            "expected_blank": 0,
+            "inflated": 0
+          },
+          "status": {
+            "output_blank": 0,
+            "expected_blank": 0,
+            "inflated": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "empty_columns",
+      "status": "pass",
+      "detail": "every contract column has data",
+      "evidence": {
+        "rows": 390,
+        "empty_columns": []
+      }
+    },
+    {
+      "id": "column_types",
+      "status": "pass",
+      "detail": "numeric columns are numeric",
+      "evidence": {}
+    },
+    {
+      "id": "oracle_diff",
+      "status": "fail",
+      "detail": "10 cell(s) differ from the oracle: {'email': 5, 'quantity': 5}",
+      "evidence": {
+        "compared_rows": 390,
+        "compared_columns": [
+          "customer_name",
+          "email",
+          "order_date",
+          "amount_usd",
+          "quantity",
+          "country",
+          "status"
+        ],
+        "mismatches": {
+          "customer_name": 0,
+          "email": 5,
+          "order_date": 0,
+          "amount_usd": 0,
+          "quantity": 5,
+          "country": 0,
+          "status": 0
+        },
+        "examples": [
+          {
+            "order_id": "10012",
+            "column": "email",
+            "expected": "",
+            "actual": "@example.com"
+          },
+          {
+            "order_id": "10144",
+            "column": "email",
+            "expected": "",
+            "actual": "@example.com"
+          },
+          {
+            "order_id": "10157",
+            "column": "email",
+            "expected": "",
+            "actual": "@example.com"
+          },
+          {
+            "order_id": "10185",
+            "column": "email",
+            "expected": "",
+            "actual": "@example.com"
+          },
+          {
+            "order_id": "10337",
+            "column": "email",
+            "expected": "",
+            "actual": "@example.com"
+          },
+          {
+            "order_id": "10085",
+            "column": "quantity",
+            "expected": "three",
+            "actual": ""
+          },
+          {
+            "order_id": "10133",
+            "column": "quantity",
+            "expected": "three",
+            "actual": ""
+          },
+          {
+            "order_id": "10158",
+            "column": "quantity",
+            "expected": "three",
+            "actual": ""
+          },
+          {
+            "order_id": "10328",
+            "column": "quantity",
+            "expected": "three",
+            "actual": ""
+          },
+          {
+            "order_id": "10395",
+            "column": "quantity",
+            "expected": "three",
+            "actual": ""
+          }
+        ]
+      }
+    },
+    {
+      "id": "marker_row",
+      "status": "pass",
+      "detail": "output was built from 'schema-add-column'",
+      "evidence": {
+        "expected_name": "Marker Schema-Add-Column",
+        "actual_name": "Marker Schema-Add-Column",
+        "variant_read": "schema-add-column",
+        "variant_expected": "schema-add-column"
+      }
+    },
+    {
+      "id": "determinism",
+      "status": "fail",
+      "detail": "canonical output differs from 1 earlier run(s): ['data-validation/reports/manual-1-baseline.json']",
+      "evidence": {
+        "sha256_canonical": "2a8323df2a74b8d163810c2fbe6bc7c55520ced0c3125b2d872cf86cfe899f4f",
+        "compared": [
+          {
+            "report": "data-validation/reports/manual-1-baseline.json",
+            "sha256_canonical": "cc359cbab7ed7feec74a7cc7fa8f81da171e02a64b4354fa32a8d6dbb25ed5fa",
+            "same": false
+          }
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "pass": 12,
+    "fail": 4,
+    "warn": 4
+  },
+  "verdict": "fail"
+}

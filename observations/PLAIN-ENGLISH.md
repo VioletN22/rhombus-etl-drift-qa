@@ -40,3 +40,7 @@ Testing Rhombus also found gaps in our checker. It missed an all-blank column an
 - **Odd detail:** the same word "three" was erased in the normal file but kept in this one. Rhombus decides a column's type by looking at the other rows, without telling you.
 - No error means no "Ask Chatbot" button, so a user wouldn't even know to ask.
 - **Checked who decides a column's type:** it's the step that **loads** the file, not the AI. On the normal file it labelled quantity "Numeric"; on this file, "Categorical". It's an automatic rule, not a judgement call, and it happens silently.
+
+## Case 4: a new column appears (discount_code)
+- **Handled well.** The 8 known columns came out exactly as before.
+- **The new column was quietly thrown away.** That's usually fine, but nobody is told, so if the business needed it, it's lost without anyone noticing.
