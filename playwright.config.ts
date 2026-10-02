@@ -30,6 +30,6 @@ export default defineConfig({
       dependencies: ['setup'],
       use: { storageState: STORAGE_STATE, viewport: { width: 1512, height: 900 } },
     },
-    { name: 'api', testDir: './api-tests/tests' },
+    { name: 'api', testDir: './api-tests/tests', dependencies: ['setup'] },
   ],
 });

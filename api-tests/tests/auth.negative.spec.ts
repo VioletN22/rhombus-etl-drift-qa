@@ -1,48 +1,43 @@
-import { test, expect } from '@playwright/test';
-import { apiClient, bearerFromState, tamper } from '../client';
-import { parse, requireAuth, requireEndpoint } from '../helpers';
-import { cfg } from '../../support/env';
+/**
+ * Negative cases: no token, a made-up token, and a project that doesn't exist. Each must
+ * be refused with the right status and a body that gives nothing away.
+ */
+import { test, expect } from '../fixtures';
+import { apiClient } from '../client';
+import { NotFound, Unauthorized } from '../schemas';
 
-/** A 401/403 body must not echo any tenant data. */
-function assertNoLeak(body: string): void {
-  if (cfg.projectName) expect(body).not.toContain(cfg.projectName);
-  if (cfg.email) expect(body).not.toContain(cfg.email);
-  if (cfg.gcsBucket) expect(body).not.toContain(cfg.gcsBucket);
-  if (cfg.s3Bucket) expect(body).not.toContain(cfg.s3Bucket);
-  expect(body).not.toMatch(/"(data|items|projects)"\s*:\s*\[\s*\{/); // no populated collection
-}
+const PROTECTED = [
+  '/api/dataset/projects/all',
+  '/api/dataset/analyzer/v2/pipeline/executions/all',
+  '/api/dataset/analyzer/v2/pipeline/schedules/all',
+];
 
-test.describe('auth (negative)', () => {
-  test('no credentials -> 401/403 and body leaks nothing', async () => {
-    requireEndpoint('listProjects');
-    const api = await apiClient('none');
-    const res = await api.get(parse('listProjects').path, { maxRedirects: 0 });
-    // A 3xx to a login page is also a correct refusal for a browser-oriented API; record it.
-    if (res.status() >= 300 && res.status() < 400) {
-      test.info().annotations.push({ type: 'note', description: `redirected to ${res.headers().location}` });
-      expect(res.headers().location ?? '').toMatch(/login|sign-?in|auth/i);
-      return;
-    }
-    expect([401, 403]).toContain(res.status());
-    assertNoLeak(await res.text());
-  });
+test.describe('access control', () => {
+  for (const path of PROTECTED) {
+    test(`no token: ${path} returns 401`, async ({ anon }) => {
+      const res = await anon.get(path);
+      expect(res.status()).toBe(401);
+      expect(Unauthorized.parse(await res.json())).toEqual({ detail: 'Unauthorized' });
+    });
+  }
 
-  test('tampered bearer token -> 401', async () => {
-    requireEndpoint('listProjects');
-    requireAuth();
-    const token = bearerFromState();
-    test.skip(!token, 'session is cookie-based (no bearer in storageState); tampered-cookie variant TODO');
-    const api = await apiClient({ bearer: tamper(token!) });
-    const res = await api.get(parse('listProjects').path, { maxRedirects: 0 });
+  test('a made-up token is rejected', async () => {
+    const forged = await apiClient('not-a-real-token');
+    const res = await forged.get('/api/dataset/projects/all');
     expect(res.status()).toBe(401);
-    assertNoLeak(await res.text());
+    Unauthorized.parse(await res.json());
+    await forged.dispose();
   });
 
-  test('garbage bearer token -> 401', async () => {
-    requireEndpoint('listProjects');
-    const api = await apiClient({ bearer: 'not-a-real-token' });
-    const res = await api.get(parse('listProjects').path, { maxRedirects: 0 });
-    expect([401, 403]).toContain(res.status());
-    assertNoLeak(await res.text());
+  test('no token: project nodes return 401, not the pipeline', async ({ anon, projectId }) => {
+    const res = await anon.get(`/api/dataset/analyzer/v2/projects/${projectId}/nodes`);
+    expect(res.status()).toBe(401);
+    expect(await res.text()).not.toContain('input_node');
+  });
+
+  test('signed in: a project id that does not exist returns 404', async ({ api }) => {
+    const res = await api.get('/api/dataset/analyzer/v2/projects/999999999/nodes');
+    expect(res.status()).toBe(404);
+    NotFound.parse(await res.json());
   });
 });

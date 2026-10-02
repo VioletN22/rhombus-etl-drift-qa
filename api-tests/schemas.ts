@@ -1,46 +1,52 @@
 /**
- * Response contracts. Field names are guesses until discovery day (marked TODO);
- * adjust them to the real payload captured in endpoints.md. Keep schemas permissive
- * about extra fields (zod objects strip unknown keys by default) and strict about the
- * ones the tests rely on.
+ * Response shapes for the endpoints under test, written from real responses captured in
+ * the browser's network tab. Only the fields the tests rely on are declared; extra fields
+ * are allowed so harmless additions on Rhombus's side don't break the suite.
  */
 import { z } from 'zod';
 
-export const Project = z.object({
-  id: z.union([z.string().min(1), z.number()]), // TODO: uuid? z.string().uuid()
-  name: z.string().min(1), // TODO: maybe `title`
-  createdAt: z.string().optional(), // TODO: ISO string? `created_at`?
+export const ProjectList = z.object({
+  total: z.number(),
+  items: z.array(z.object({ id: z.number(), name: z.string(), created: z.string() })),
 });
 
-/** TODO: bare array vs envelope ({ data: [...] } / { items: [...], total }). */
-export const ProjectList = z.union([
-  z.array(Project),
-  z.object({ data: z.array(Project) }).transform((o) => o.data),
-  z.object({ items: z.array(Project) }).transform((o) => o.items),
-]);
+const Edge = z.object({ source: z.string(), target: z.string() });
+export const ProjectNodes = z.array(
+  z.object({
+    name: z.string(),
+    outputs: z.array(z.string()),
+    metadata: z.object({ node: z.object({ id: z.string() }), edges: z.array(Edge) }),
+  }),
+);
 
-export const RunStatus = z.enum(['Success', 'Failure', 'In Progress']); // TODO: API may use SUCCESS/FAILED/RUNNING
-
-export const Run = z.object({
-  id: z.union([z.string(), z.number()]),
-  status: z.string(), // TODO: tighten to RunStatus once real values are known
-  startedAt: z.string().optional(), // TODO: started_at?
-  duration: z.number().nonnegative().nullable().optional(), // TODO: seconds? ms? durationMs?
+export const Executions = z.object({
+  total: z.number(),
+  executions: z.array(
+    z.object({
+      project_id: z.number(),
+      trigger: z.string(),
+      started_at: z.string(),
+      completed_at: z.string().nullable(),
+      success: z.boolean(),
+      failed_node: z.string().nullable(),
+      error_message: z.string().nullable(),
+    }),
+  ),
 });
 
-export const RunHistory = z.union([
-  z.array(Run),
-  z.object({ data: z.array(Run) }).transform((o) => o.data),
-  z.object({ runs: z.array(Run) }).transform((o) => o.runs),
-]);
+export const Schedules = z.object({
+  total: z.number(),
+  schedules: z.array(
+    z.object({
+      project_id: z.number(),
+      cron_expression: z.string(),
+      enabled: z.boolean(),
+      next_run_at: z.string().nullable(),
+      last_run_at: z.string().nullable(),
+      skipped_runs_count: z.number(),
+    }),
+  ),
+});
 
-export const ErrorBody = z
-  .object({
-    message: z.string().optional(), // TODO: `error`, `detail` (FastAPI), `errors[]`?
-    error: z.string().optional(),
-    detail: z.unknown().optional(),
-  })
-  .refine((b) => b.message || b.error || b.detail, 'error body should carry a message');
-
-export type TProject = z.infer<typeof Project>;
-export type TRun = z.infer<typeof Run>;
+export const Unauthorized = z.object({ detail: z.literal('Unauthorized') });
+export const NotFound = z.object({ detail: z.literal('Not Found') });

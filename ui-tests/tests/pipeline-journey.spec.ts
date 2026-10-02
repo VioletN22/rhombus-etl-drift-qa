@@ -6,23 +6,7 @@
  */
 import { test, expect } from '../fixtures';
 import { cfg } from '../../support/env';
-import type { Graph } from '../rhombus';
-
-/** Node ids reachable from `start` by following edges forward. */
-function reachable(graph: Graph, start: string): Set<string> {
-  const seen = new Set([start]);
-  const queue = [start];
-  while (queue.length) {
-    const from = queue.shift()!;
-    for (const [src, dst] of graph.edges) {
-      if (src === from && !seen.has(dst)) {
-        seen.add(dst);
-        queue.push(dst);
-      }
-    }
-  }
-  return seen;
-}
+import { reachable } from '../../support/graph';
 
 test.describe('S3 -> AI-built cleaning -> GCS', () => {
   test.beforeEach(async ({ rhombus }) => {
@@ -48,7 +32,7 @@ test.describe('S3 -> AI-built cleaning -> GCS', () => {
 
     // Every node must sit on the path from input to output. A missing edge into the output
     // is exactly how the chatbot broke the pipeline in the all-combined case.
-    const fromInput = reachable(graph, inputs[0].id);
+    const fromInput = reachable(graph.edges, inputs[0].id);
     expect(fromInput.has(outputs[0].id), 'output reachable from input').toBe(true);
     expect([...fromInput].sort(), 'nodes off the input-to-output path').toEqual(graph.nodes.map((n) => n.id).sort());
   });

@@ -5,10 +5,11 @@
  */
 import { expect, type Page } from '@playwright/test';
 import { sel } from './selectors';
+import type { Edge } from '../support/graph';
 
 export type NodeKind = 'input' | 'output' | 'llm' | 'remove_duplicate' | string;
 export interface GraphNode { id: string; kind: NodeKind }
-export interface Graph { nodes: GraphNode[]; edges: [string, string][] }
+export interface Graph { nodes: GraphNode[]; edges: Edge[] }
 export type RunOutcome = 'succeeded' | 'failed';
 
 export class Rhombus {
@@ -31,7 +32,7 @@ export class Rhombus {
     );
     const ids = nodes.map((n) => n.id);
     const edgeIds = await sel.edges(this.page).evaluateAll((els) => els.map((el) => el.getAttribute('data-testid')!));
-    const edges = edgeIds.map((testId): [string, string] => {
+    const edges = edgeIds.map((testId): Edge => {
       // Node ids contain underscores, so split on the known ids rather than on "-".
       const rest = testId.replace(/^rf__edge-(xy-)?/, '');
       const source = ids.find((id) => rest.startsWith(`${id}-`) && ids.includes(rest.slice(id.length + 1)));
