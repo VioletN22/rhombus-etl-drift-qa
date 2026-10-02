@@ -1,11 +1,11 @@
 {
  "demo": false,
- "built_at": "2026-10-01T12:06:19+00:00",
+ "built_at": "2026-10-02T06:09:30+00:00",
  "sources": {
   "reports": "data-validation/reports",
   "ledger": "observations/runs.csv",
   "matrix": "observations/matrix.yaml",
-  "report_count": 0,
+  "report_count": 7,
   "ledger_rows": 0
  },
  "health": [
@@ -13,21 +13,21 @@
    "group": "baseline",
    "label": "Baseline",
    "cases": 1,
-   "cases_run": 0,
-   "runs": 0,
-   "succeeded": 0,
+   "cases_run": 1,
+   "runs": 4,
+   "succeeded": 4,
    "failed": 0,
-   "success_rate": null
+   "success_rate": 1.0
   },
   {
    "group": "schema",
    "label": "Schema drift",
    "cases": 4,
-   "cases_run": 0,
-   "runs": 0,
-   "succeeded": 0,
+   "cases_run": 3,
+   "runs": 3,
+   "succeeded": 3,
    "failed": 0,
-   "success_rate": null
+   "success_rate": 1.0
   },
   {
    "group": "combined",
@@ -67,26 +67,43 @@
    "file": "baseline.csv",
    "rows": 425,
    "change": "Known-good input the pipeline is built against.",
-   "status": "pending",
+   "status": "done",
    "observation": "observations/baseline.md",
    "matrix": {
-    "run_ids": [],
-    "rhombus_status": null,
-    "platform_behaviour": null,
-    "gcs_output": null,
-    "logs_clear": null,
-    "chatbot_diagnosis": null,
-    "chatbot_fix_worked": null,
-    "schedule_after": "",
-    "severity": null,
+    "run_ids": [
+     "manual-1-baseline",
+     "manual-2-baseline",
+     "manual-3-baseline"
+    ],
+    "rhombus_status": "Success",
+    "platform_behaviour": "carried_on",
+    "gcs_output": "yes",
+    "logs_clear": "clear",
+    "chatbot_diagnosis": "na",
+    "chatbot_fix_worked": "na",
+    "schedule_after": "Scheduled runs never executed on this account (Free plan); manual runs used",
+    "severity": "Medium",
     "execution_seconds": null,
-    "credits_used": null
+    "credits_used": 0
    },
-   "runs_total": 0,
-   "runs_with_output": 0,
+   "runs_total": 4,
+   "runs_with_output": 4,
    "runs_without_output": 0,
-   "validator": null,
-   "capability": "pending"
+   "validator": {
+    "run": "manual-1-baseline",
+    "verdict": "fail",
+    "summary": {
+     "pass": 13,
+     "fail": 3,
+     "warn": 3
+    },
+    "failed": [
+     "rule_email",
+     "null_inflation",
+     "oracle_diff"
+    ]
+   },
+   "capability": "handled"
   },
   {
    "case": "schema-drop-column",
@@ -94,26 +111,40 @@
    "file": "schema-drop-column.csv",
    "rows": 425,
    "change": "country column removed.",
-   "status": "pending",
+   "status": "done",
    "observation": "observations/schema-drop-column.md",
    "matrix": {
-    "run_ids": [],
-    "rhombus_status": null,
-    "platform_behaviour": null,
-    "gcs_output": null,
-    "logs_clear": null,
-    "chatbot_diagnosis": null,
-    "chatbot_fix_worked": null,
-    "schedule_after": "",
-    "severity": null,
+    "run_ids": "drop-column-after-fix",
+    "rhombus_status": "Failure",
+    "platform_behaviour": "stopped",
+    "gcs_output": "no",
+    "logs_clear": "partial",
+    "chatbot_diagnosis": "wrong",
+    "chatbot_fix_worked": "no",
+    "schedule_after": "Not testable (scheduling not running)",
+    "severity": "Critical",
     "execution_seconds": null,
-    "credits_used": null
+    "credits_used": 5
    },
-   "runs_total": 0,
-   "runs_with_output": 0,
+   "runs_total": 1,
+   "runs_with_output": 1,
    "runs_without_output": 0,
-   "validator": null,
-   "capability": "pending"
+   "validator": {
+    "run": "drop-column-after-fix",
+    "verdict": "fail",
+    "summary": {
+     "pass": 10,
+     "fail": 4,
+     "warn": 4
+    },
+    "failed": [
+     "rule_email",
+     "null_inflation",
+     "empty_columns",
+     "oracle_diff"
+    ]
+   },
+   "capability": "broke"
   },
   {
    "case": "schema-rename-column",
@@ -121,26 +152,37 @@
    "file": "schema-rename-column.csv",
    "rows": 425,
    "change": "amount_usd renamed to total_amount; values identical.",
-   "status": "pending",
+   "status": "done",
    "observation": "observations/schema-rename-column.md",
    "matrix": {
-    "run_ids": [],
-    "rhombus_status": null,
-    "platform_behaviour": null,
-    "gcs_output": null,
-    "logs_clear": null,
-    "chatbot_diagnosis": null,
-    "chatbot_fix_worked": null,
-    "schedule_after": "",
-    "severity": null,
-    "execution_seconds": null,
-    "credits_used": null
+    "run_ids": "rename-after-fix",
+    "rhombus_status": "Failure",
+    "platform_behaviour": "stopped",
+    "gcs_output": "no",
+    "logs_clear": "partial",
+    "chatbot_diagnosis": "wrong",
+    "chatbot_fix_worked": "no",
+    "schedule_after": "Not testable (scheduling not running)",
+    "severity": "Critical",
+    "execution_seconds": 5,
+    "credits_used": 5
    },
-   "runs_total": 0,
-   "runs_with_output": 0,
+   "runs_total": 1,
+   "runs_with_output": 1,
    "runs_without_output": 0,
-   "validator": null,
-   "capability": "pending"
+   "validator": {
+    "run": "rename-after-fix",
+    "verdict": "fail",
+    "summary": {
+     "pass": 6,
+     "fail": 1,
+     "warn": 11
+    },
+    "failed": [
+     "row_loss"
+    ]
+   },
+   "capability": "broke"
   },
   {
    "case": "schema-type-change",
@@ -148,26 +190,39 @@
    "file": "schema-type-change.csv",
    "rows": 425,
    "change": "quantity int -> text ('3 units').",
-   "status": "pending",
+   "status": "done",
    "observation": "observations/schema-type-change.md",
    "matrix": {
-    "run_ids": [],
-    "rhombus_status": null,
-    "platform_behaviour": null,
-    "gcs_output": null,
-    "logs_clear": null,
-    "chatbot_diagnosis": null,
-    "chatbot_fix_worked": null,
-    "schedule_after": "",
-    "severity": null,
+    "run_ids": "type-change",
+    "rhombus_status": "Success",
+    "platform_behaviour": "carried_on",
+    "gcs_output": "yes",
+    "logs_clear": "misleading",
+    "chatbot_diagnosis": "na",
+    "chatbot_fix_worked": "na",
+    "schedule_after": "Not testable (scheduling not running)",
+    "severity": "High",
     "execution_seconds": null,
-    "credits_used": null
+    "credits_used": 0
    },
-   "runs_total": 0,
-   "runs_with_output": 0,
+   "runs_total": 1,
+   "runs_with_output": 1,
    "runs_without_output": 0,
-   "validator": null,
-   "capability": "pending"
+   "validator": {
+    "run": "type-change",
+    "verdict": "fail",
+    "summary": {
+     "pass": 13,
+     "fail": 3,
+     "warn": 3
+    },
+    "failed": [
+     "rule_email",
+     "column_types",
+     "oracle_diff"
+    ]
+   },
+   "capability": "missed"
   },
   {
    "case": "schema-add-column",
@@ -418,12 +473,368 @@
    "id": "baseline-x3",
    "case": "baseline",
    "pipeline": "v1, built from prompts/pipeline-prompt.md",
-   "status": "pending",
+   "status": "done",
    "target_runs": 3,
-   "runs": [],
+   "runs": [
+    {
+     "run": "manual-1-baseline",
+     "timestamp": "2026-10-02T05:56:24+00:00",
+     "output_rows": 390,
+     "output_sha256": "cc359cbab7ed7feec74a7cc7fa8f81da171e02a64b4354fa32a8d6dbb25ed5fa",
+     "verdict": "fail",
+     "summary": {
+      "pass": 13,
+      "fail": 3,
+      "warn": 3
+     },
+     "checks": [
+      {
+       "id": "input_schema",
+       "status": "pass",
+       "detail": "columns and order match the contract"
+      },
+      {
+       "id": "schema",
+       "status": "pass",
+       "detail": "columns and order match the contract"
+      },
+      {
+       "id": "row_reconciliation",
+       "status": "pass",
+       "detail": "390 rows, same order_ids as the oracle"
+      },
+      {
+       "id": "row_loss",
+       "status": "pass",
+       "detail": "98% of input orders reached the output"
+      },
+      {
+       "id": "rule_unique_order_id",
+       "status": "pass",
+       "detail": "order_id unique and present"
+      },
+      {
+       "id": "rule_customer_name",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_email",
+       "status": "fail",
+       "detail": "5 value(s) not lowercase valid-or-blank"
+      },
+      {
+       "id": "rule_order_date",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_amount_numeric",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_amount_non_negative",
+       "status": "warn",
+       "detail": "5 value(s) negative (passed through by design)"
+      },
+      {
+       "id": "rule_country",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_status_lowercase",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_status_allowed",
+       "status": "warn",
+       "detail": "7 value(s) outside ['cancelled', 'delivered', 'pending', 'shipped']"
+      },
+      {
+       "id": "rule_quantity",
+       "status": "warn",
+       "detail": "4 value(s) not a positive integer (not cleaned by design)"
+      },
+      {
+       "id": "null_inflation",
+       "status": "fail",
+       "detail": "5 cell(s) blank where the oracle has a value: {'quantity': 5}"
+      },
+      {
+       "id": "empty_columns",
+       "status": "pass",
+       "detail": "every contract column has data"
+      },
+      {
+       "id": "column_types",
+       "status": "pass",
+       "detail": "numeric columns are numeric"
+      },
+      {
+       "id": "oracle_diff",
+       "status": "fail",
+       "detail": "10 cell(s) differ from the oracle: {'email': 5, 'quantity': 5}"
+      },
+      {
+       "id": "marker_row",
+       "status": "pass",
+       "detail": "output was built from 'baseline'"
+      }
+     ],
+     "oracle_mismatches": {
+      "customer_name": 0,
+      "email": 5,
+      "order_date": 0,
+      "amount_usd": 0,
+      "quantity": 5,
+      "country": 0,
+      "status": 0
+     },
+     "matches_oracle": false
+    },
+    {
+     "run": "manual-2-baseline",
+     "timestamp": "2026-10-02T04:42:54+00:00",
+     "output_rows": 390,
+     "output_sha256": "cc359cbab7ed7feec74a7cc7fa8f81da171e02a64b4354fa32a8d6dbb25ed5fa",
+     "verdict": "fail",
+     "summary": {
+      "pass": 11,
+      "fail": 3,
+      "warn": 3
+     },
+     "checks": [
+      {
+       "id": "input_schema",
+       "status": "pass",
+       "detail": "columns and order match the contract"
+      },
+      {
+       "id": "schema",
+       "status": "pass",
+       "detail": "columns and order match the contract"
+      },
+      {
+       "id": "row_reconciliation",
+       "status": "pass",
+       "detail": "390 rows, same order_ids as the oracle"
+      },
+      {
+       "id": "rule_unique_order_id",
+       "status": "pass",
+       "detail": "order_id unique and present"
+      },
+      {
+       "id": "rule_customer_name",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_email",
+       "status": "fail",
+       "detail": "5 value(s) not lowercase valid-or-blank"
+      },
+      {
+       "id": "rule_order_date",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_amount_numeric",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_amount_non_negative",
+       "status": "warn",
+       "detail": "5 value(s) negative (passed through by design)"
+      },
+      {
+       "id": "rule_country",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_status_lowercase",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_status_allowed",
+       "status": "warn",
+       "detail": "7 value(s) outside ['cancelled', 'delivered', 'pending', 'shipped']"
+      },
+      {
+       "id": "rule_quantity",
+       "status": "warn",
+       "detail": "4 value(s) not a positive integer (not cleaned by design)"
+      },
+      {
+       "id": "null_inflation",
+       "status": "fail",
+       "detail": "5 cell(s) blank where the oracle has a value: {'quantity': 5}"
+      },
+      {
+       "id": "oracle_diff",
+       "status": "fail",
+       "detail": "10 cell(s) differ from the oracle: {'email': 5, 'quantity': 5}"
+      },
+      {
+       "id": "marker_row",
+       "status": "pass",
+       "detail": "output was built from 'baseline'"
+      },
+      {
+       "id": "determinism",
+       "status": "pass",
+       "detail": "canonical output identical to 1 earlier run(s)"
+      }
+     ],
+     "oracle_mismatches": {
+      "customer_name": 0,
+      "email": 5,
+      "order_date": 0,
+      "amount_usd": 0,
+      "quantity": 5,
+      "country": 0,
+      "status": 0
+     },
+     "matches_oracle": false
+    },
+    {
+     "run": "manual-3-baseline",
+     "timestamp": "2026-10-02T04:51:53+00:00",
+     "output_rows": 390,
+     "output_sha256": "cc359cbab7ed7feec74a7cc7fa8f81da171e02a64b4354fa32a8d6dbb25ed5fa",
+     "verdict": "fail",
+     "summary": {
+      "pass": 11,
+      "fail": 3,
+      "warn": 3
+     },
+     "checks": [
+      {
+       "id": "input_schema",
+       "status": "pass",
+       "detail": "columns and order match the contract"
+      },
+      {
+       "id": "schema",
+       "status": "pass",
+       "detail": "columns and order match the contract"
+      },
+      {
+       "id": "row_reconciliation",
+       "status": "pass",
+       "detail": "390 rows, same order_ids as the oracle"
+      },
+      {
+       "id": "rule_unique_order_id",
+       "status": "pass",
+       "detail": "order_id unique and present"
+      },
+      {
+       "id": "rule_customer_name",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_email",
+       "status": "fail",
+       "detail": "5 value(s) not lowercase valid-or-blank"
+      },
+      {
+       "id": "rule_order_date",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_amount_numeric",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_amount_non_negative",
+       "status": "warn",
+       "detail": "5 value(s) negative (passed through by design)"
+      },
+      {
+       "id": "rule_country",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_status_lowercase",
+       "status": "pass",
+       "detail": "all 390 values ok"
+      },
+      {
+       "id": "rule_status_allowed",
+       "status": "warn",
+       "detail": "7 value(s) outside ['cancelled', 'delivered', 'pending', 'shipped']"
+      },
+      {
+       "id": "rule_quantity",
+       "status": "warn",
+       "detail": "4 value(s) not a positive integer (not cleaned by design)"
+      },
+      {
+       "id": "null_inflation",
+       "status": "fail",
+       "detail": "5 cell(s) blank where the oracle has a value: {'quantity': 5}"
+      },
+      {
+       "id": "oracle_diff",
+       "status": "fail",
+       "detail": "10 cell(s) differ from the oracle: {'email': 5, 'quantity': 5}"
+      },
+      {
+       "id": "marker_row",
+       "status": "pass",
+       "detail": "output was built from 'baseline'"
+      },
+      {
+       "id": "determinism",
+       "status": "pass",
+       "detail": "canonical output identical to 2 earlier run(s)"
+      }
+     ],
+     "oracle_mismatches": {
+      "customer_name": 0,
+      "email": 5,
+      "order_date": 0,
+      "amount_usd": 0,
+      "quantity": 5,
+      "country": 0,
+      "status": 0
+     },
+     "matches_oracle": false
+    }
+   ],
    "missing_reports": [],
-   "notes": "",
-   "comparison": null
+   "notes": "3/3 byte-identical (sha256 df95576e...). Manual runs; scheduled runs don't execute on this account.",
+   "comparison": {
+    "all_match": true,
+    "distinct_hashes": 1,
+    "differing_checks": [
+     "row_loss",
+     "empty_columns",
+     "column_types",
+     "determinism"
+    ],
+    "mismatch_columns": [
+     "customer_name",
+     "email",
+     "order_date",
+     "amount_usd",
+     "quantity",
+     "country",
+     "status"
+    ]
+   }
   }
  ],
  "ai_builder": {
@@ -431,38 +842,1240 @@
    {
     "attempt": 1,
     "prompt_file": "prompts/pipeline-prompt.md",
-    "status": "pending",
-    "date": null,
-    "credits_used": null,
-    "nodes": [],
+    "status": "done",
+    "date": "2026-10-02",
+    "credits_used": 0,
+    "nodes": [
+     "orders_raw (Data Input)",
+     "dedup_exact (Remove Duplicates all cols)",
+     "dedup_order_id (Remove Duplicates order_id)",
+     "orders_cleaned (Custom: rules 2-8)",
+     "orders_cleaned_output (Data Output)"
+    ],
     "follow_up_prompts": 0,
-    "notes": ""
+    "notes": "Silently defaulted output to Download Locally. Node prompt dropped the non-empty local part of the email rule."
    },
    {
     "attempt": 2,
     "prompt_file": "prompts/pipeline-prompt.md",
-    "status": "pending",
-    "date": null,
+    "status": "done",
+    "date": "2026-10-02",
     "credits_used": null,
-    "nodes": [],
+    "nodes": [
+     "orders_raw (Data Input)",
+     "dedup_exact (Remove Duplicates all cols)",
+     "dedup_order_id (Remove Duplicates order_id)",
+     "orders_cleaned (Custom: rules 2-8)",
+     "orders_cleaned_output (Data Output)"
+    ],
     "follow_up_prompts": 0,
-    "notes": ""
+    "notes": "Same graph. Claimed GCS is not a supported destination (false)."
    },
    {
     "attempt": 3,
     "prompt_file": "prompts/pipeline-prompt.md",
-    "status": "pending",
-    "date": null,
+    "status": "done",
+    "date": "2026-10-02",
     "credits_used": null,
-    "nodes": [],
+    "nodes": [
+     "orders_raw (Data Input)",
+     "dedup_exact (Remove Duplicates all cols)",
+     "dedup_order_id (Remove Duplicates order_id)",
+     "orders_cleaned (Custom: rules 2-8)",
+     "orders_output (Data Output)"
+    ],
     "follow_up_prompts": 0,
-    "notes": ""
+    "notes": "Output node renamed. Correctly said GCS destination must be selected. Node prompt keeps the non-empty local part."
    }
   ],
-  "compared": 0,
+  "compared": 3,
   "identical": false,
-  "positions": []
+  "positions": [
+   {
+    "index": 1,
+    "same": true
+   },
+   {
+    "index": 2,
+    "same": true
+   },
+   {
+    "index": 3,
+    "same": true
+   },
+   {
+    "index": 4,
+    "same": true
+   },
+   {
+    "index": 5,
+    "same": false
+   }
+  ]
  },
- "runs": [],
- "reports": []
+ "runs": [
+  {
+   "run": "manual-2-baseline",
+   "case": "baseline",
+   "source": "report",
+   "uploaded_at": null,
+   "output_object": "runs/2026-10-02-manual/orders_cleaned_1790916116670.csv",
+   "output_updated": "2026-10-02T04:42:54+00:00",
+   "outcome": "output",
+   "verdict": "fail",
+   "report": "data-validation/reports/manual-2-baseline.json",
+   "notes": ""
+  },
+  {
+   "run": "manual-3-baseline",
+   "case": "baseline",
+   "source": "report",
+   "uploaded_at": null,
+   "output_object": "runs/2026-10-02-manual/orders_cleaned_1790916628145.csv",
+   "output_updated": "2026-10-02T04:51:53+00:00",
+   "outcome": "output",
+   "verdict": "fail",
+   "report": "data-validation/reports/manual-3-baseline.json",
+   "notes": ""
+  },
+  {
+   "run": "baseline-after-chatbot-patch",
+   "case": "baseline",
+   "source": "report",
+   "uploaded_at": null,
+   "output_object": "runs/2026-10-02-drift/baseline-after-chatbot-patch.csv",
+   "output_updated": "2026-10-02T05:12:15+00:00",
+   "outcome": "output",
+   "verdict": "fail",
+   "report": "data-validation/reports/baseline-after-chatbot-patch.json",
+   "notes": ""
+  },
+  {
+   "run": "rename-after-fix",
+   "case": "schema-rename-column",
+   "source": "report",
+   "uploaded_at": null,
+   "output_object": "runs/2026-10-02-drift/rename-after-chatbot-fix.csv",
+   "output_updated": "2026-10-02T05:34:53+00:00",
+   "outcome": "output",
+   "verdict": "fail",
+   "report": "data-validation/reports/rename-after-fix.json",
+   "notes": ""
+  },
+  {
+   "run": "drop-column-after-fix",
+   "case": "schema-drop-column",
+   "source": "report",
+   "uploaded_at": null,
+   "output_object": "runs/2026-10-02-drift/drop-column-after-chatbot-fix.csv",
+   "output_updated": "2026-10-02T05:35:41+00:00",
+   "outcome": "output",
+   "verdict": "fail",
+   "report": "data-validation/reports/drop-column-after-fix.json",
+   "notes": ""
+  },
+  {
+   "run": "type-change",
+   "case": "schema-type-change",
+   "source": "report",
+   "uploaded_at": null,
+   "output_object": "runs/2026-10-02-drift/type-change.csv",
+   "output_updated": "2026-10-02T05:56:13+00:00",
+   "outcome": "output",
+   "verdict": "fail",
+   "report": "data-validation/reports/type-change.json",
+   "notes": ""
+  },
+  {
+   "run": "manual-1-baseline",
+   "case": "baseline",
+   "source": "report",
+   "uploaded_at": null,
+   "output_object": "runs/2026-10-02-manual/orders_cleaned_1790911751099.csv",
+   "output_updated": "2026-10-02T05:56:24+00:00",
+   "outcome": "output",
+   "verdict": "fail",
+   "report": "data-validation/reports/manual-1-baseline.json",
+   "notes": ""
+  }
+ ],
+ "reports": [
+  {
+   "run": "manual-2-baseline",
+   "case": "baseline",
+   "path": "data-validation/reports/manual-2-baseline.json",
+   "timestamp": "2026-10-02T04:42:54+00:00",
+   "input_rows": 425,
+   "input_sha256": "f77c92ce8cc32195c150b055ab2dc3a27e1fea42793aebaae156b2b758a8a364",
+   "output_object": "runs/2026-10-02-manual/orders_cleaned_1790916116670.csv",
+   "output_updated": null,
+   "output_rows": 390,
+   "output_sha256": "cc359cbab7ed7feec74a7cc7fa8f81da171e02a64b4354fa32a8d6dbb25ed5fa",
+   "reference_rows": 390,
+   "reference_sha256": "6a0acb3e6a42cf9e571ff1b7aef60be4d80126b10c224c34c5de022e0a8de6e3",
+   "matches_oracle": false,
+   "verdict": "fail",
+   "summary": {
+    "pass": 11,
+    "fail": 3,
+    "warn": 3
+   },
+   "checks": [
+    {
+     "id": "input_schema",
+     "status": "pass",
+     "detail": "columns and order match the contract"
+    },
+    {
+     "id": "schema",
+     "status": "pass",
+     "detail": "columns and order match the contract"
+    },
+    {
+     "id": "row_reconciliation",
+     "status": "pass",
+     "detail": "390 rows, same order_ids as the oracle"
+    },
+    {
+     "id": "rule_unique_order_id",
+     "status": "pass",
+     "detail": "order_id unique and present"
+    },
+    {
+     "id": "rule_customer_name",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_email",
+     "status": "fail",
+     "detail": "5 value(s) not lowercase valid-or-blank"
+    },
+    {
+     "id": "rule_order_date",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_amount_numeric",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_amount_non_negative",
+     "status": "warn",
+     "detail": "5 value(s) negative (passed through by design)"
+    },
+    {
+     "id": "rule_country",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_status_lowercase",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_status_allowed",
+     "status": "warn",
+     "detail": "7 value(s) outside ['cancelled', 'delivered', 'pending', 'shipped']"
+    },
+    {
+     "id": "rule_quantity",
+     "status": "warn",
+     "detail": "4 value(s) not a positive integer (not cleaned by design)"
+    },
+    {
+     "id": "null_inflation",
+     "status": "fail",
+     "detail": "5 cell(s) blank where the oracle has a value: {'quantity': 5}"
+    },
+    {
+     "id": "oracle_diff",
+     "status": "fail",
+     "detail": "10 cell(s) differ from the oracle: {'email': 5, 'quantity': 5}"
+    },
+    {
+     "id": "marker_row",
+     "status": "pass",
+     "detail": "output was built from 'baseline'"
+    },
+    {
+     "id": "determinism",
+     "status": "pass",
+     "detail": "canonical output identical to 1 earlier run(s)"
+    }
+   ],
+   "oracle_mismatches": {
+    "customer_name": 0,
+    "email": 5,
+    "order_date": 0,
+    "amount_usd": 0,
+    "quantity": 5,
+    "country": 0,
+    "status": 0
+   },
+   "oracle_examples": [
+    {
+     "order_id": "10012",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10144",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10157",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10185",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10337",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10085",
+     "column": "quantity",
+     "expected": "three",
+     "actual": ""
+    }
+   ]
+  },
+  {
+   "run": "manual-3-baseline",
+   "case": "baseline",
+   "path": "data-validation/reports/manual-3-baseline.json",
+   "timestamp": "2026-10-02T04:51:53+00:00",
+   "input_rows": 425,
+   "input_sha256": "f77c92ce8cc32195c150b055ab2dc3a27e1fea42793aebaae156b2b758a8a364",
+   "output_object": "runs/2026-10-02-manual/orders_cleaned_1790916628145.csv",
+   "output_updated": null,
+   "output_rows": 390,
+   "output_sha256": "cc359cbab7ed7feec74a7cc7fa8f81da171e02a64b4354fa32a8d6dbb25ed5fa",
+   "reference_rows": 390,
+   "reference_sha256": "6a0acb3e6a42cf9e571ff1b7aef60be4d80126b10c224c34c5de022e0a8de6e3",
+   "matches_oracle": false,
+   "verdict": "fail",
+   "summary": {
+    "pass": 11,
+    "fail": 3,
+    "warn": 3
+   },
+   "checks": [
+    {
+     "id": "input_schema",
+     "status": "pass",
+     "detail": "columns and order match the contract"
+    },
+    {
+     "id": "schema",
+     "status": "pass",
+     "detail": "columns and order match the contract"
+    },
+    {
+     "id": "row_reconciliation",
+     "status": "pass",
+     "detail": "390 rows, same order_ids as the oracle"
+    },
+    {
+     "id": "rule_unique_order_id",
+     "status": "pass",
+     "detail": "order_id unique and present"
+    },
+    {
+     "id": "rule_customer_name",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_email",
+     "status": "fail",
+     "detail": "5 value(s) not lowercase valid-or-blank"
+    },
+    {
+     "id": "rule_order_date",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_amount_numeric",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_amount_non_negative",
+     "status": "warn",
+     "detail": "5 value(s) negative (passed through by design)"
+    },
+    {
+     "id": "rule_country",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_status_lowercase",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_status_allowed",
+     "status": "warn",
+     "detail": "7 value(s) outside ['cancelled', 'delivered', 'pending', 'shipped']"
+    },
+    {
+     "id": "rule_quantity",
+     "status": "warn",
+     "detail": "4 value(s) not a positive integer (not cleaned by design)"
+    },
+    {
+     "id": "null_inflation",
+     "status": "fail",
+     "detail": "5 cell(s) blank where the oracle has a value: {'quantity': 5}"
+    },
+    {
+     "id": "oracle_diff",
+     "status": "fail",
+     "detail": "10 cell(s) differ from the oracle: {'email': 5, 'quantity': 5}"
+    },
+    {
+     "id": "marker_row",
+     "status": "pass",
+     "detail": "output was built from 'baseline'"
+    },
+    {
+     "id": "determinism",
+     "status": "pass",
+     "detail": "canonical output identical to 2 earlier run(s)"
+    }
+   ],
+   "oracle_mismatches": {
+    "customer_name": 0,
+    "email": 5,
+    "order_date": 0,
+    "amount_usd": 0,
+    "quantity": 5,
+    "country": 0,
+    "status": 0
+   },
+   "oracle_examples": [
+    {
+     "order_id": "10012",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10144",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10157",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10185",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10337",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10085",
+     "column": "quantity",
+     "expected": "three",
+     "actual": ""
+    }
+   ]
+  },
+  {
+   "run": "baseline-after-chatbot-patch",
+   "case": "baseline",
+   "path": "data-validation/reports/baseline-after-chatbot-patch.json",
+   "timestamp": "2026-10-02T05:12:15+00:00",
+   "input_rows": 425,
+   "input_sha256": "f77c92ce8cc32195c150b055ab2dc3a27e1fea42793aebaae156b2b758a8a364",
+   "output_object": "runs/2026-10-02-drift/baseline-after-chatbot-patch.csv",
+   "output_updated": null,
+   "output_rows": 390,
+   "output_sha256": "cc359cbab7ed7feec74a7cc7fa8f81da171e02a64b4354fa32a8d6dbb25ed5fa",
+   "reference_rows": 390,
+   "reference_sha256": "6a0acb3e6a42cf9e571ff1b7aef60be4d80126b10c224c34c5de022e0a8de6e3",
+   "matches_oracle": false,
+   "verdict": "fail",
+   "summary": {
+    "pass": 12,
+    "fail": 3,
+    "warn": 3
+   },
+   "checks": [
+    {
+     "id": "input_schema",
+     "status": "pass",
+     "detail": "columns and order match the contract"
+    },
+    {
+     "id": "schema",
+     "status": "pass",
+     "detail": "columns and order match the contract"
+    },
+    {
+     "id": "row_reconciliation",
+     "status": "pass",
+     "detail": "390 rows, same order_ids as the oracle"
+    },
+    {
+     "id": "rule_unique_order_id",
+     "status": "pass",
+     "detail": "order_id unique and present"
+    },
+    {
+     "id": "rule_customer_name",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_email",
+     "status": "fail",
+     "detail": "5 value(s) not lowercase valid-or-blank"
+    },
+    {
+     "id": "rule_order_date",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_amount_numeric",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_amount_non_negative",
+     "status": "warn",
+     "detail": "5 value(s) negative (passed through by design)"
+    },
+    {
+     "id": "rule_country",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_status_lowercase",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_status_allowed",
+     "status": "warn",
+     "detail": "7 value(s) outside ['cancelled', 'delivered', 'pending', 'shipped']"
+    },
+    {
+     "id": "rule_quantity",
+     "status": "warn",
+     "detail": "4 value(s) not a positive integer (not cleaned by design)"
+    },
+    {
+     "id": "null_inflation",
+     "status": "fail",
+     "detail": "5 cell(s) blank where the oracle has a value: {'quantity': 5}"
+    },
+    {
+     "id": "empty_columns",
+     "status": "pass",
+     "detail": "every contract column has data"
+    },
+    {
+     "id": "oracle_diff",
+     "status": "fail",
+     "detail": "10 cell(s) differ from the oracle: {'email': 5, 'quantity': 5}"
+    },
+    {
+     "id": "marker_row",
+     "status": "pass",
+     "detail": "output was built from 'baseline'"
+    },
+    {
+     "id": "determinism",
+     "status": "pass",
+     "detail": "canonical output identical to 1 earlier run(s)"
+    }
+   ],
+   "oracle_mismatches": {
+    "customer_name": 0,
+    "email": 5,
+    "order_date": 0,
+    "amount_usd": 0,
+    "quantity": 5,
+    "country": 0,
+    "status": 0
+   },
+   "oracle_examples": [
+    {
+     "order_id": "10012",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10144",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10157",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10185",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10337",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10085",
+     "column": "quantity",
+     "expected": "three",
+     "actual": ""
+    }
+   ]
+  },
+  {
+   "run": "rename-after-fix",
+   "case": "schema-rename-column",
+   "path": "data-validation/reports/rename-after-fix.json",
+   "timestamp": "2026-10-02T05:34:53+00:00",
+   "input_rows": 425,
+   "input_sha256": "17fccfcc6ff14e27ff79384d92bb4bac6265bab84bff55525c13b1f5ffd46668",
+   "output_object": "runs/2026-10-02-drift/rename-after-chatbot-fix.csv",
+   "output_updated": null,
+   "output_rows": 0,
+   "output_sha256": "ae9e3195b04e3c61c140be017045b1e2b9dff362f19ae4ac7e98c74ed1a5d395",
+   "reference_rows": 0,
+   "reference_sha256": "ae9e3195b04e3c61c140be017045b1e2b9dff362f19ae4ac7e98c74ed1a5d395",
+   "matches_oracle": true,
+   "verdict": "fail",
+   "summary": {
+    "pass": 6,
+    "fail": 1,
+    "warn": 11
+   },
+   "checks": [
+    {
+     "id": "input_schema",
+     "status": "warn",
+     "detail": "input drifted from contract: missing ['amount_usd']; extra ['total_amount']; likely renamed amount_usd->total_amount"
+    },
+    {
+     "id": "schema",
+     "status": "pass",
+     "detail": "columns and order match the contract"
+    },
+    {
+     "id": "row_reconciliation",
+     "status": "pass",
+     "detail": "0 rows, same order_ids as the oracle"
+    },
+    {
+     "id": "row_loss",
+     "status": "fail",
+     "detail": "only 0 of 397 input orders reached the output (0%, threshold 90%)"
+    },
+    {
+     "id": "rule_unique_order_id",
+     "status": "pass",
+     "detail": "order_id unique and present"
+    },
+    {
+     "id": "rule_customer_name",
+     "status": "warn",
+     "detail": "no rows to check"
+    },
+    {
+     "id": "rule_email",
+     "status": "warn",
+     "detail": "no rows to check"
+    },
+    {
+     "id": "rule_order_date",
+     "status": "warn",
+     "detail": "no rows to check"
+    },
+    {
+     "id": "rule_amount_numeric",
+     "status": "warn",
+     "detail": "no rows to check"
+    },
+    {
+     "id": "rule_amount_non_negative",
+     "status": "warn",
+     "detail": "no rows to check"
+    },
+    {
+     "id": "rule_country",
+     "status": "warn",
+     "detail": "no rows to check"
+    },
+    {
+     "id": "rule_status_lowercase",
+     "status": "warn",
+     "detail": "no rows to check"
+    },
+    {
+     "id": "rule_status_allowed",
+     "status": "warn",
+     "detail": "no rows to check"
+    },
+    {
+     "id": "rule_quantity",
+     "status": "warn",
+     "detail": "no rows to check"
+    },
+    {
+     "id": "null_inflation",
+     "status": "pass",
+     "detail": "no unexpected blanks"
+    },
+    {
+     "id": "empty_columns",
+     "status": "pass",
+     "detail": "every contract column has data"
+    },
+    {
+     "id": "oracle_diff",
+     "status": "pass",
+     "detail": "0 rows x 7 columns identical to the oracle"
+    },
+    {
+     "id": "marker_row",
+     "status": "warn",
+     "detail": "marker order 99999 not in output"
+    }
+   ],
+   "oracle_mismatches": {
+    "customer_name": 0,
+    "email": 0,
+    "order_date": 0,
+    "amount_usd": 0,
+    "quantity": 0,
+    "country": 0,
+    "status": 0
+   },
+   "oracle_examples": []
+  },
+  {
+   "run": "drop-column-after-fix",
+   "case": "schema-drop-column",
+   "path": "data-validation/reports/drop-column-after-fix.json",
+   "timestamp": "2026-10-02T05:35:41+00:00",
+   "input_rows": 425,
+   "input_sha256": "293fe0fcf797edde8002ccee291d03df6891debee52a86b98181de11c68a86fd",
+   "output_object": "runs/2026-10-02-drift/drop-column-after-chatbot-fix.csv",
+   "output_updated": null,
+   "output_rows": 390,
+   "output_sha256": "8b009f5b39513be1b4d5e273551995810c9e2c148266d4e8e6d0895c0e681212",
+   "reference_rows": 390,
+   "reference_sha256": "c78b06be3aedd7dbcf96f30a97faf62bcacecf25c935749e20f9f9e11df15622",
+   "matches_oracle": false,
+   "verdict": "fail",
+   "summary": {
+    "pass": 10,
+    "fail": 4,
+    "warn": 4
+   },
+   "checks": [
+    {
+     "id": "input_schema",
+     "status": "warn",
+     "detail": "input drifted from contract: missing ['country']"
+    },
+    {
+     "id": "schema",
+     "status": "pass",
+     "detail": "columns and order match the contract"
+    },
+    {
+     "id": "row_reconciliation",
+     "status": "pass",
+     "detail": "390 rows, same order_ids as the oracle"
+    },
+    {
+     "id": "row_loss",
+     "status": "pass",
+     "detail": "98% of input orders reached the output"
+    },
+    {
+     "id": "rule_unique_order_id",
+     "status": "pass",
+     "detail": "order_id unique and present"
+    },
+    {
+     "id": "rule_customer_name",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_email",
+     "status": "fail",
+     "detail": "5 value(s) not lowercase valid-or-blank"
+    },
+    {
+     "id": "rule_order_date",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_amount_numeric",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_amount_non_negative",
+     "status": "warn",
+     "detail": "5 value(s) negative (passed through by design)"
+    },
+    {
+     "id": "rule_country",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_status_lowercase",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_status_allowed",
+     "status": "warn",
+     "detail": "7 value(s) outside ['cancelled', 'delivered', 'pending', 'shipped']"
+    },
+    {
+     "id": "rule_quantity",
+     "status": "warn",
+     "detail": "4 value(s) not a positive integer (not cleaned by design)"
+    },
+    {
+     "id": "null_inflation",
+     "status": "fail",
+     "detail": "5 cell(s) blank where the oracle has a value: {'quantity': 5}"
+    },
+    {
+     "id": "empty_columns",
+     "status": "fail",
+     "detail": "1 column(s) present but blank on every row: ['country']"
+    },
+    {
+     "id": "oracle_diff",
+     "status": "fail",
+     "detail": "10 cell(s) differ from the oracle: {'email': 5, 'quantity': 5}"
+    },
+    {
+     "id": "marker_row",
+     "status": "pass",
+     "detail": "output was built from 'schema-drop-column'"
+    }
+   ],
+   "oracle_mismatches": {
+    "customer_name": 0,
+    "email": 5,
+    "order_date": 0,
+    "amount_usd": 0,
+    "quantity": 5,
+    "country": 0,
+    "status": 0
+   },
+   "oracle_examples": [
+    {
+     "order_id": "10012",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10144",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10157",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10185",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10337",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10085",
+     "column": "quantity",
+     "expected": "three",
+     "actual": ""
+    }
+   ]
+  },
+  {
+   "run": "type-change",
+   "case": "schema-type-change",
+   "path": "data-validation/reports/type-change.json",
+   "timestamp": "2026-10-02T05:56:13+00:00",
+   "input_rows": 425,
+   "input_sha256": "86a6ce6936670eacccefd13ed35d1d73aff894d08f38d019142ff60153f5b9b0",
+   "output_object": "runs/2026-10-02-drift/type-change.csv",
+   "output_updated": null,
+   "output_rows": 390,
+   "output_sha256": "21a8285b25a54106a11ac0818ef674a03555baca4d08557c7093bbb9484971c8",
+   "reference_rows": 390,
+   "reference_sha256": "abe1a55ed3f296fa60de02593ec39c6083965142ca20332596c4c83960629d53",
+   "matches_oracle": false,
+   "verdict": "fail",
+   "summary": {
+    "pass": 13,
+    "fail": 3,
+    "warn": 3
+   },
+   "checks": [
+    {
+     "id": "input_schema",
+     "status": "pass",
+     "detail": "columns and order match the contract"
+    },
+    {
+     "id": "schema",
+     "status": "pass",
+     "detail": "columns and order match the contract"
+    },
+    {
+     "id": "row_reconciliation",
+     "status": "pass",
+     "detail": "390 rows, same order_ids as the oracle"
+    },
+    {
+     "id": "row_loss",
+     "status": "pass",
+     "detail": "98% of input orders reached the output"
+    },
+    {
+     "id": "rule_unique_order_id",
+     "status": "pass",
+     "detail": "order_id unique and present"
+    },
+    {
+     "id": "rule_customer_name",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_email",
+     "status": "fail",
+     "detail": "5 value(s) not lowercase valid-or-blank"
+    },
+    {
+     "id": "rule_order_date",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_amount_numeric",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_amount_non_negative",
+     "status": "warn",
+     "detail": "5 value(s) negative (passed through by design)"
+    },
+    {
+     "id": "rule_country",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_status_lowercase",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_status_allowed",
+     "status": "warn",
+     "detail": "7 value(s) outside ['cancelled', 'delivered', 'pending', 'shipped']"
+    },
+    {
+     "id": "rule_quantity",
+     "status": "warn",
+     "detail": "384 value(s) not a positive integer (not cleaned by design)"
+    },
+    {
+     "id": "null_inflation",
+     "status": "pass",
+     "detail": "no unexpected blanks"
+    },
+    {
+     "id": "empty_columns",
+     "status": "pass",
+     "detail": "every contract column has data"
+    },
+    {
+     "id": "column_types",
+     "status": "fail",
+     "detail": "numeric column(s) arrived as text: ['quantity']"
+    },
+    {
+     "id": "oracle_diff",
+     "status": "fail",
+     "detail": "5 cell(s) differ from the oracle: {'email': 5}"
+    },
+    {
+     "id": "marker_row",
+     "status": "pass",
+     "detail": "output was built from 'schema-type-change'"
+    }
+   ],
+   "oracle_mismatches": {
+    "customer_name": 0,
+    "email": 5,
+    "order_date": 0,
+    "amount_usd": 0,
+    "quantity": 0,
+    "country": 0,
+    "status": 0
+   },
+   "oracle_examples": [
+    {
+     "order_id": "10012",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10144",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10157",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10185",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10337",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    }
+   ]
+  },
+  {
+   "run": "manual-1-baseline",
+   "case": "baseline",
+   "path": "data-validation/reports/manual-1-baseline.json",
+   "timestamp": "2026-10-02T05:56:24+00:00",
+   "input_rows": 425,
+   "input_sha256": "f77c92ce8cc32195c150b055ab2dc3a27e1fea42793aebaae156b2b758a8a364",
+   "output_object": "runs/2026-10-02-manual/orders_cleaned_1790911751099.csv",
+   "output_updated": null,
+   "output_rows": 390,
+   "output_sha256": "cc359cbab7ed7feec74a7cc7fa8f81da171e02a64b4354fa32a8d6dbb25ed5fa",
+   "reference_rows": 390,
+   "reference_sha256": "6a0acb3e6a42cf9e571ff1b7aef60be4d80126b10c224c34c5de022e0a8de6e3",
+   "matches_oracle": false,
+   "verdict": "fail",
+   "summary": {
+    "pass": 13,
+    "fail": 3,
+    "warn": 3
+   },
+   "checks": [
+    {
+     "id": "input_schema",
+     "status": "pass",
+     "detail": "columns and order match the contract"
+    },
+    {
+     "id": "schema",
+     "status": "pass",
+     "detail": "columns and order match the contract"
+    },
+    {
+     "id": "row_reconciliation",
+     "status": "pass",
+     "detail": "390 rows, same order_ids as the oracle"
+    },
+    {
+     "id": "row_loss",
+     "status": "pass",
+     "detail": "98% of input orders reached the output"
+    },
+    {
+     "id": "rule_unique_order_id",
+     "status": "pass",
+     "detail": "order_id unique and present"
+    },
+    {
+     "id": "rule_customer_name",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_email",
+     "status": "fail",
+     "detail": "5 value(s) not lowercase valid-or-blank"
+    },
+    {
+     "id": "rule_order_date",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_amount_numeric",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_amount_non_negative",
+     "status": "warn",
+     "detail": "5 value(s) negative (passed through by design)"
+    },
+    {
+     "id": "rule_country",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_status_lowercase",
+     "status": "pass",
+     "detail": "all 390 values ok"
+    },
+    {
+     "id": "rule_status_allowed",
+     "status": "warn",
+     "detail": "7 value(s) outside ['cancelled', 'delivered', 'pending', 'shipped']"
+    },
+    {
+     "id": "rule_quantity",
+     "status": "warn",
+     "detail": "4 value(s) not a positive integer (not cleaned by design)"
+    },
+    {
+     "id": "null_inflation",
+     "status": "fail",
+     "detail": "5 cell(s) blank where the oracle has a value: {'quantity': 5}"
+    },
+    {
+     "id": "empty_columns",
+     "status": "pass",
+     "detail": "every contract column has data"
+    },
+    {
+     "id": "column_types",
+     "status": "pass",
+     "detail": "numeric columns are numeric"
+    },
+    {
+     "id": "oracle_diff",
+     "status": "fail",
+     "detail": "10 cell(s) differ from the oracle: {'email': 5, 'quantity': 5}"
+    },
+    {
+     "id": "marker_row",
+     "status": "pass",
+     "detail": "output was built from 'baseline'"
+    }
+   ],
+   "oracle_mismatches": {
+    "customer_name": 0,
+    "email": 5,
+    "order_date": 0,
+    "amount_usd": 0,
+    "quantity": 5,
+    "country": 0,
+    "status": 0
+   },
+   "oracle_examples": [
+    {
+     "order_id": "10012",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10144",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10157",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10185",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10337",
+     "column": "email",
+     "expected": "",
+     "actual": "@example.com"
+    },
+    {
+     "order_id": "10085",
+     "column": "quantity",
+     "expected": "three",
+     "actual": ""
+    }
+   ]
+  }
+ ]
 }
