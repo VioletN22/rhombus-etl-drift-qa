@@ -53,3 +53,4 @@ Testing Rhombus also found gaps in our checker. It missed an all-blank column an
 - **Why 10 columns?** The chatbot's instructions said 8, but the code writer re-read the file and a built-in Rhombus rule ("don't drop input columns") forced it to keep everything. You only see this if you open the node's Transcript.
 - **Some of it was actually smart:** it spotted the rename itself and stripped "units" from quantity. But it said "validation passed" with country empty on every row.
 - **Bottom line:** we started with a safe stop and, after 4 chatbot "fixes" (20 credits), ended with bad data marked as success.
+- **Why did the AI "adapt" only now?** It only writes new code when the box's instructions change. Before, the code was written once on the clean file and reused. This time the chatbot replaced the box with instructions only, so new code was written while the broken file was loaded.

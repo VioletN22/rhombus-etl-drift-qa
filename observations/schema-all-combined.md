@@ -54,6 +54,12 @@ Clear? **Partially / misleading**: one of four problems reported, and a success 
 - Green status, no warning. Downstream gets a blank country for every order and two columns nobody asked for.
 - Report: `data-validation/reports/all-combined-after-fix.json`.
 
+### Why the code "adapted" only in this case
+- Layer 2 (the code writer) always looks at the current input and test-runs its code in a sandbox, but **it only writes code when the node's instructions change**. A normal re-run reuses the saved code (verified earlier: identical code across runs).
+- Earlier cases: the code was written once on the clean baseline, and my restores pasted that code directly, so the writer never ran on a drifted file.
+- Here: the chatbot deleted the node and re-added it with **instructions only** (its words: "the patch is only persisting mode and prompt"), so the writer had to generate fresh code while the case-5 file was loaded.
+- Limitation: in cases 1-2 the chatbot's patches may also have triggered a rewrite. I didn't open the Transcript then and those versions are overwritten, so this is unverified.
+
 ### Score across 4 chatbot requests in this case
 3 wrong diagnoses ("cached code" x2 plus a fix built on it), 1 correct (rewiring its own break). Net result: from **safe stop** to **green run with silently wrong data**. 20 credits.
 
