@@ -463,7 +463,7 @@ const mdInline = (s) => (window.marked && window.DOMPurify
 const normKey = (s) => s.toLowerCase().replace(/[^a-z]+/g, " ").trim();
 
 // The write-ups open with a two-column `| | |` table of facts before the first H2.
-// Pull it out so it can sit in the "At a glance" card instead of the prose.
+// Pull it out so it can sit in the "TL;DR" card instead of the prose.
 function splitObservation(md) {
   const body = md.replace(/^#\s+.+\n+/, ""); // title is already the page heading
   const first = body.search(/^##\s/m);
