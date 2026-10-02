@@ -1,0 +1,22 @@
+WEBVTT
+
+00:00.000 --> 00:02.000
+Case 2: the amount column is renamed from amount_usd to total_amount. Same values. (Re-run recorded after the fact.)
+
+00:02.000 --> 00:11.000
+Step 1: upload the case 2 file to S3 as input/orders.csv.
+
+00:11.000 --> 00:15.000
+Step 2: run the same pipeline in Rhombus. (The red boxes are left over from the last case.)
+
+00:15.000 --> 00:22.000
+It fails at the cleaning step again: "Pipeline failed at orders_cleaned".
+
+00:22.000 --> 00:29.000
+The log just says 'amount_usd'. It doesn't say the column was renamed, or that total_amount looks like the same thing.
+
+00:29.000 --> 00:35.000
+And again there's a "Pipeline execution completed successfully" line right next to the failure.
+
+00:35.000 --> 00:40.000
+Step 3: Google Cloud Storage. No new file, so nothing bad got out. Safe stop, unhelpful message.
