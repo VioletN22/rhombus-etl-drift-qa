@@ -1,21 +1,21 @@
 {
-  "run": "manual-1-baseline",
-  "timestamp": "2026-10-02T05:07:40+00:00",
+  "run": "drop-column-after-fix",
+  "timestamp": "2026-10-02T05:07:39+00:00",
   "input": {
-    "uri": "datasets/baseline.csv",
-    "sha256": "f77c92ce8cc32195c150b055ab2dc3a27e1fea42793aebaae156b2b758a8a364",
+    "uri": "datasets/schema-drop-column.csv",
+    "sha256": "293fe0fcf797edde8002ccee291d03df6891debee52a86b98181de11c68a86fd",
     "rows": 425
   },
   "output": {
-    "uri": "runs/2026-10-02-manual/orders_cleaned_1790911751099.csv",
-    "object": "runs/2026-10-02-manual/orders_cleaned_1790911751099.csv",
+    "uri": "runs/2026-10-02-drift/drop-column-after-chatbot-fix.csv",
+    "object": "runs/2026-10-02-drift/drop-column-after-chatbot-fix.csv",
     "updated": null,
     "rows": 390,
-    "sha256_canonical": "cc359cbab7ed7feec74a7cc7fa8f81da171e02a64b4354fa32a8d6dbb25ed5fa"
+    "sha256_canonical": "8b009f5b39513be1b4d5e273551995810c9e2c148266d4e8e6d0895c0e681212"
   },
   "reference": {
     "rows": 390,
-    "sha256_canonical": "6a0acb3e6a42cf9e571ff1b7aef60be4d80126b10c224c34c5de022e0a8de6e3",
+    "sha256_canonical": "c78b06be3aedd7dbcf96f30a97faf62bcacecf25c935749e20f9f9e11df15622",
     "breakdown": {
       "input_rows": 425,
       "exact_duplicates": 20,
@@ -39,12 +39,7 @@
       "08": 0.093264,
       "09": 0.108808
     },
-    "country_distribution": {
-      "AU": 0.289744,
-      "GB": 0.246154,
-      "NZ": 0.223077,
-      "US": 0.241026
-    },
+    "country_distribution": {},
     "input_slash_dates": {
       "slash_dates": 363,
       "first_gt12": 0,
@@ -55,8 +50,8 @@
   "checks": [
     {
       "id": "input_schema",
-      "status": "pass",
-      "detail": "columns and order match the contract",
+      "status": "warn",
+      "detail": "input drifted from contract: missing ['country']",
       "evidence": {
         "expected": [
           "order_id",
@@ -75,10 +70,11 @@
           "order_date",
           "amount_usd",
           "quantity",
-          "country",
           "status"
         ],
-        "missing": [],
+        "missing": [
+          "country"
+        ],
         "extra": [],
         "order_ok": true,
         "likely_renamed": []
@@ -348,8 +344,8 @@
             "inflated": 5
           },
           "country": {
-            "output_blank": 0,
-            "expected_blank": 0,
+            "output_blank": 390,
+            "expected_blank": 390,
             "inflated": 0
           },
           "status": {
@@ -362,11 +358,13 @@
     },
     {
       "id": "empty_columns",
-      "status": "pass",
-      "detail": "every contract column has data",
+      "status": "fail",
+      "detail": "1 column(s) present but blank on every row: ['country']",
       "evidence": {
         "rows": 390,
-        "empty_columns": []
+        "empty_columns": [
+          "country"
+        ]
       }
     },
     {
@@ -460,19 +458,19 @@
     {
       "id": "marker_row",
       "status": "pass",
-      "detail": "output was built from 'baseline'",
+      "detail": "output was built from 'schema-drop-column'",
       "evidence": {
-        "expected_name": "Marker Baseline",
-        "actual_name": "Marker Baseline",
-        "variant_read": "baseline",
-        "variant_expected": "baseline"
+        "expected_name": "Marker Schema-Drop-Column",
+        "actual_name": "Marker Schema-Drop-Column",
+        "variant_read": "schema-drop-column",
+        "variant_expected": "schema-drop-column"
       }
     }
   ],
   "summary": {
-    "pass": 11,
-    "fail": 3,
-    "warn": 3
+    "pass": 9,
+    "fail": 4,
+    "warn": 4
   },
   "verdict": "fail"
 }

@@ -5,9 +5,9 @@
 | Case file | `datasets/schema-drop-column.csv` (uploaded as `input/orders.csv`) |
 | S3 version | `83k9nJAdqftt9BP6sG_CNbcfZGCwhEwG`, uploaded 2026-10-02 14:55:36 AEST, 29.5 KB |
 | Run | Manual run (▶) ~14:57 AEST. Scheduled runs don't execute on this account; see `FINDINGS.md` and the email to Rhombus |
-| Severity | Medium (stopped correctly, error hard to read) — draft |
+| Severity | **Critical** after the chatbot fix (silent blank column shipped). Before the fix: Medium (stopped, cryptic error) |
 | Pipeline stopped? | **Yes**, at `orders_cleaned` |
-| Chatbot fix worked? | _pending_ |
+| Chatbot fix worked? | **No.** Wrong diagnosis; the "fix" made the run green by shipping a blank `country` column |
 
 ## What I changed
 Removed the `country` column from the baseline. Every other column and row is identical; marker row reads "Marker schema-drop-column".
@@ -31,7 +31,15 @@ Clear? **Partially.** It names the failing step, which is useful, but the cause 
 Screenshots: `evidence/2026-10-02_drop-column-run-regenerating-code.png`, `evidence/2026-10-02_drop-column-error-log-panel.png`.
 
 ## Chatbot diagnosis
-_Pending: click "Ask Chatbot" on the error, record the diagnosis verbatim, rate correct / partial / wrong, apply the fix via `/pipeline`, re-run, re-validate, then re-run the baseline to check the fix didn't break it._
+- Prompt: clicked **Ask Chatbot** on the error; no text added. Transcript: `evidence/2026-10-02_drop-column-chatbot-transcript.txt`.
+- Diagnosis: **wrong.** "The column name in the source CSV likely differs in casing or has extra whitespace." It didn't inspect the input; the column is absent.
+- It **edited the pipeline without asking**: lowercased and trimmed headers, skipped rules whose column is missing, and "ensure[d] all 8 required columns are present before the final select". Cost 5 credits.
+- Re-run (▶, 15:05:56): **green**, wrote `orders_cleaned_1790917556079.csv` (29.1 KB) to GCS with **`country` blank on all 390 rows**. Marker row confirms it read the drop-column file.
+- Validator (`reports/drop-column-after-fix.json`): fails `empty_columns` (country blank on every row) plus the 3 known baseline bugs.
+- **Fix worked? No.** It converted a loud, safe failure into a silent success that ships wrong data. A downstream report grouped by country would quietly show everything as "unknown".
+- Regression on the baseline: _pending_.
+
+Validator note: the first version of my validator passed this output on `rule_country`, because blank is allowed and the oracle (built from an input with no country) is also blank. I added `empty_columns` (fail if a contract column is blank on every row) with a regression test. My own tooling had a blind spot that this case exposed.
 
 ## Schedule afterwards
 Not testable on this account (scheduled runs never execute; reported to Rhombus 14:39).

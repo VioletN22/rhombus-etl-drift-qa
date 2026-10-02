@@ -152,3 +152,18 @@ def test_encoding_and_delimiter_variants_parse_to_the_same_data(dataset, variant
     assert list(other.columns) == list(base.columns)
     pd.testing.assert_frame_equal(other.drop(columns="customer_name"),
                                   base.drop(columns="customer_name"))
+
+
+def test_empty_columns_flags_fully_blank_column():
+    """Regression for the drop-column chatbot fix: country present but all blank."""
+    import pandas as pd
+    import yaml
+    from pathlib import Path
+    from checks import check_empty_columns
+    contract = yaml.safe_load((Path(__file__).resolve().parents[1] / "contract.yaml").read_text())
+    cols = list(contract["columns"])
+    out = pd.DataFrame([{c: "x" for c in cols}, {c: "y" for c in cols}])
+    assert check_empty_columns(out, contract).status == "pass"
+    out["country"] = ""
+    res = check_empty_columns(out, contract)
+    assert res.status == "fail" and res.evidence["empty_columns"] == ["country"]

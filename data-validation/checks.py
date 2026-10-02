@@ -274,6 +274,23 @@ def check_null_inflation(output: pd.DataFrame, expected: pd.DataFrame,
     return Check("null_inflation", "pass", "no unexpected blanks", ev)
 
 
+def check_empty_columns(output: pd.DataFrame, contract: dict) -> Check:
+    """A contract column that arrives but is blank on every row is a failure.
+
+    The oracle can't catch this when the input lost the column: both sides are
+    blank and "agree". This check looks only at the output, so a pipeline that
+    papers over a dropped column with an empty one still fails.
+    """
+    rows = len(output)
+    empty = [c for c in contract_columns(contract)
+             if c in output.columns and rows and output[c].map(is_blank).all()]
+    ev = {"rows": rows, "empty_columns": empty}
+    if empty:
+        return Check("empty_columns", "fail",
+                     f"{len(empty)} column(s) present but blank on every row: {empty}", ev)
+    return Check("empty_columns", "pass", "every contract column has data", ev)
+
+
 def check_oracle_diff(output: pd.DataFrame, expected: pd.DataFrame,
                       contract: dict) -> Check:
     key = contract["key"]
