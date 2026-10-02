@@ -18,252 +18,257 @@
 #                       (otherwise derived, see dashboard/README.md)
 
 cases:
-  - case: baseline
-    change: "Known-good input the pipeline is built against."
-    status: pending
-    run_ids: []
-    rhombus_status: null
-    platform_behaviour: null
-    gcs_output: null
-    logs_clear: null
-    chatbot_diagnosis: null
-    chatbot_fix_worked: null
-    schedule_after: ""
-    severity: null
-    execution_seconds: null
-    credits_used: null
-    observation: observations/baseline.md
-
-  - case: schema-drop-column
-    change: "country column removed."
-    status: pending
-    run_ids: []
-    rhombus_status: null
-    platform_behaviour: null
-    gcs_output: null
-    logs_clear: null
-    chatbot_diagnosis: null
-    chatbot_fix_worked: null
-    schedule_after: ""
-    severity: null
-    execution_seconds: null
-    credits_used: null
-    observation: observations/schema-drop-column.md
-
-  - case: schema-rename-column
-    change: "amount_usd renamed to total_amount; values identical."
-    status: pending
-    run_ids: []
-    rhombus_status: null
-    platform_behaviour: null
-    gcs_output: null
-    logs_clear: null
-    chatbot_diagnosis: null
-    chatbot_fix_worked: null
-    schedule_after: ""
-    severity: null
-    execution_seconds: null
-    credits_used: null
-    observation: observations/schema-rename-column.md
-
-  - case: schema-type-change
-    change: "quantity int -> text ('3 units')."
-    status: pending
-    run_ids: []
-    rhombus_status: null
-    platform_behaviour: null
-    gcs_output: null
-    logs_clear: null
-    chatbot_diagnosis: null
-    chatbot_fix_worked: null
-    schedule_after: ""
-    severity: null
-    execution_seconds: null
-    credits_used: null
-    observation: observations/schema-type-change.md
-
-  - case: schema-add-column
-    change: "New discount_code column appended."
-    status: pending
-    run_ids: []
-    rhombus_status: null
-    platform_behaviour: null
-    gcs_output: null
-    logs_clear: null
-    chatbot_diagnosis: null
-    chatbot_fix_worked: null
-    schedule_after: ""
-    severity: null
-    execution_seconds: null
-    credits_used: null
-    observation: observations/schema-add-column.md
-
-  - case: schema-all-combined
-    change: "All four schema changes at once."
-    status: pending
-    run_ids: []
-    rhombus_status: null
-    platform_behaviour: null
-    gcs_output: null
-    logs_clear: null
-    chatbot_diagnosis: null
-    chatbot_fix_worked: null
-    schedule_after: ""
-    severity: null
-    execution_seconds: null
-    credits_used: null
-    observation: observations/schema-all-combined.md
-
-  - case: semantic-dollars-to-cents
-    change: "amount_usd values x100 (cents), header unchanged."
-    status: pending
-    run_ids: []
-    rhombus_status: null
-    platform_behaviour: null
-    gcs_output: null
-    logs_clear: null
-    chatbot_diagnosis: null
-    chatbot_fix_worked: null
-    schedule_after: ""
-    severity: null
-    execution_seconds: null
-    credits_used: null
-    observation: observations/semantic-dollars-to-cents.md
-
-  - case: semantic-date-mmdd-to-ddmm
-    change: "Slash dates switched from MM/DD/YYYY to DD/MM/YYYY."
-    status: pending
-    run_ids: []
-    rhombus_status: null
-    platform_behaviour: null
-    gcs_output: null
-    logs_clear: null
-    chatbot_diagnosis: null
-    chatbot_fix_worked: null
-    schedule_after: ""
-    severity: null
-    execution_seconds: null
-    credits_used: null
-    observation: observations/semantic-date-mmdd-to-ddmm.md
-
-  - case: semantic-country-code-swap
-    change: "Bonus: Australia rows relabelled as Austria (AT)."
-    status: pending
-    run_ids: []
-    rhombus_status: null
-    platform_behaviour: null
-    gcs_output: null
-    logs_clear: null
-    chatbot_diagnosis: null
-    chatbot_fix_worked: null
-    schedule_after: ""
-    severity: null
-    execution_seconds: null
-    credits_used: null
-    observation: observations/semantic-country-code-swap.md
-
-  - case: edge-dotted-header
-    change: "Docs: Data Input converts '.' in headers to spaces."
-    status: pending
-    run_ids: []
-    rhombus_status: null
-    platform_behaviour: null
-    gcs_output: null
-    logs_clear: null
-    chatbot_diagnosis: null
-    chatbot_fix_worked: null
-    schedule_after: ""
-    severity: null
-    execution_seconds: null
-    credits_used: null
-    observation: observations/edge-dotted-header.md
-
-  - case: edge-header-only
-    change: "Header row, zero data rows."
-    status: pending
-    run_ids: []
-    rhombus_status: null
-    platform_behaviour: null
-    gcs_output: null
-    logs_clear: null
-    chatbot_diagnosis: null
-    chatbot_fix_worked: null
-    schedule_after: ""
-    severity: null
-    execution_seconds: null
-    credits_used: null
-    observation: observations/edge-header-only.md
-
-  - case: edge-bom-utf8
-    change: "UTF-8 BOM prefix."
-    status: pending
-    run_ids: []
-    rhombus_status: null
-    platform_behaviour: null
-    gcs_output: null
-    logs_clear: null
-    chatbot_diagnosis: null
-    chatbot_fix_worked: null
-    schedule_after: ""
-    severity: null
-    execution_seconds: null
-    credits_used: null
-    observation: observations/edge-bom-utf8.md
-
-  - case: edge-semicolon
-    change: "Delimiter switched to ';'."
-    status: pending
-    run_ids: []
-    rhombus_status: null
-    platform_behaviour: null
-    gcs_output: null
-    logs_clear: null
-    chatbot_diagnosis: null
-    chatbot_fix_worked: null
-    schedule_after: ""
-    severity: null
-    execution_seconds: null
-    credits_used: null
-    observation: observations/edge-semicolon.md
-
-# Same input, same pipeline, three scheduled runs. run_ids are validator run
-# names (data-validation/reports/<run>.json); the dashboard compares their
-# canonical output hashes and shows the runs side by side if they differ.
+- case: baseline
+  change: Known-good input the pipeline is built against.
+  status: done
+  run_ids:
+  - manual-1-baseline
+  - manual-2-baseline
+  - manual-3-baseline
+  rhombus_status: Success
+  platform_behaviour: carried_on
+  gcs_output: 'yes'
+  logs_clear: clear
+  chatbot_diagnosis: na
+  chatbot_fix_worked: na
+  schedule_after: Scheduled runs never executed on this account (Free plan); manual runs used
+  severity: Medium
+  execution_seconds: null
+  credits_used: 0
+  observation: observations/baseline.md
+  capability: handled
+- case: schema-drop-column
+  change: country column removed.
+  status: done
+  run_ids: drop-column-after-fix
+  rhombus_status: Failure
+  platform_behaviour: stopped
+  gcs_output: 'no'
+  logs_clear: partial
+  chatbot_diagnosis: wrong
+  chatbot_fix_worked: 'no'
+  schedule_after: Not testable (scheduling not running)
+  severity: Critical
+  execution_seconds: null
+  credits_used: 5
+  observation: observations/schema-drop-column.md
+  capability: broke
+- case: schema-rename-column
+  change: amount_usd renamed to total_amount; values identical.
+  status: done
+  run_ids: rename-after-fix
+  rhombus_status: Failure
+  platform_behaviour: stopped
+  gcs_output: 'no'
+  logs_clear: partial
+  chatbot_diagnosis: wrong
+  chatbot_fix_worked: 'no'
+  schedule_after: Not testable (scheduling not running)
+  severity: Critical
+  execution_seconds: 5
+  credits_used: 5
+  observation: observations/schema-rename-column.md
+  capability: broke
+- case: schema-type-change
+  change: quantity int -> text ('3 units').
+  status: done
+  run_ids: type-change
+  rhombus_status: Success
+  platform_behaviour: carried_on
+  gcs_output: 'yes'
+  logs_clear: misleading
+  chatbot_diagnosis: na
+  chatbot_fix_worked: na
+  schedule_after: Not testable (scheduling not running)
+  severity: High
+  execution_seconds: null
+  credits_used: 0
+  observation: observations/schema-type-change.md
+  capability: missed
+- case: schema-add-column
+  change: New discount_code column appended.
+  status: pending
+  run_ids: []
+  rhombus_status: null
+  platform_behaviour: null
+  gcs_output: null
+  logs_clear: null
+  chatbot_diagnosis: null
+  chatbot_fix_worked: null
+  schedule_after: ''
+  severity: null
+  execution_seconds: null
+  credits_used: null
+  observation: observations/schema-add-column.md
+- case: schema-all-combined
+  change: All four schema changes at once.
+  status: pending
+  run_ids: []
+  rhombus_status: null
+  platform_behaviour: null
+  gcs_output: null
+  logs_clear: null
+  chatbot_diagnosis: null
+  chatbot_fix_worked: null
+  schedule_after: ''
+  severity: null
+  execution_seconds: null
+  credits_used: null
+  observation: observations/schema-all-combined.md
+- case: semantic-dollars-to-cents
+  change: amount_usd values x100 (cents), header unchanged.
+  status: pending
+  run_ids: []
+  rhombus_status: null
+  platform_behaviour: null
+  gcs_output: null
+  logs_clear: null
+  chatbot_diagnosis: null
+  chatbot_fix_worked: null
+  schedule_after: ''
+  severity: null
+  execution_seconds: null
+  credits_used: null
+  observation: observations/semantic-dollars-to-cents.md
+- case: semantic-date-mmdd-to-ddmm
+  change: Slash dates switched from MM/DD/YYYY to DD/MM/YYYY.
+  status: pending
+  run_ids: []
+  rhombus_status: null
+  platform_behaviour: null
+  gcs_output: null
+  logs_clear: null
+  chatbot_diagnosis: null
+  chatbot_fix_worked: null
+  schedule_after: ''
+  severity: null
+  execution_seconds: null
+  credits_used: null
+  observation: observations/semantic-date-mmdd-to-ddmm.md
+- case: semantic-country-code-swap
+  change: 'Bonus: Australia rows relabelled as Austria (AT).'
+  status: pending
+  run_ids: []
+  rhombus_status: null
+  platform_behaviour: null
+  gcs_output: null
+  logs_clear: null
+  chatbot_diagnosis: null
+  chatbot_fix_worked: null
+  schedule_after: ''
+  severity: null
+  execution_seconds: null
+  credits_used: null
+  observation: observations/semantic-country-code-swap.md
+- case: edge-dotted-header
+  change: 'Docs: Data Input converts ''.'' in headers to spaces.'
+  status: pending
+  run_ids: []
+  rhombus_status: null
+  platform_behaviour: null
+  gcs_output: null
+  logs_clear: null
+  chatbot_diagnosis: null
+  chatbot_fix_worked: null
+  schedule_after: ''
+  severity: null
+  execution_seconds: null
+  credits_used: null
+  observation: observations/edge-dotted-header.md
+- case: edge-header-only
+  change: Header row, zero data rows.
+  status: pending
+  run_ids: []
+  rhombus_status: null
+  platform_behaviour: null
+  gcs_output: null
+  logs_clear: null
+  chatbot_diagnosis: null
+  chatbot_fix_worked: null
+  schedule_after: ''
+  severity: null
+  execution_seconds: null
+  credits_used: null
+  observation: observations/edge-header-only.md
+- case: edge-bom-utf8
+  change: UTF-8 BOM prefix.
+  status: pending
+  run_ids: []
+  rhombus_status: null
+  platform_behaviour: null
+  gcs_output: null
+  logs_clear: null
+  chatbot_diagnosis: null
+  chatbot_fix_worked: null
+  schedule_after: ''
+  severity: null
+  execution_seconds: null
+  credits_used: null
+  observation: observations/edge-bom-utf8.md
+- case: edge-semicolon
+  change: Delimiter switched to ';'.
+  status: pending
+  run_ids: []
+  rhombus_status: null
+  platform_behaviour: null
+  gcs_output: null
+  logs_clear: null
+  chatbot_diagnosis: null
+  chatbot_fix_worked: null
+  schedule_after: ''
+  severity: null
+  execution_seconds: null
+  credits_used: null
+  observation: observations/edge-semicolon.md
 consistency_trials:
-  - id: baseline-x3
-    case: baseline
-    pipeline: "v1, built from prompts/pipeline-prompt.md"
-    status: pending
-    run_ids: []
-    notes: ""
-
-# The same /pipeline prompt sent three times to the AI builder in fresh
-# projects. nodes: the generated node list in canvas order, one string per
-# node, e.g. "Remove Duplicates (all columns)".
+- id: baseline-x3
+  case: baseline
+  pipeline: v1, built from prompts/pipeline-prompt.md
+  status: done
+  run_ids:
+  - manual-1-baseline
+  - manual-2-baseline
+  - manual-3-baseline
+  notes: 3/3 byte-identical (sha256 df95576e...). Manual runs; scheduled runs don't execute on this account.
 ai_builder_runs:
-  - attempt: 1
-    prompt_file: prompts/pipeline-prompt.md
-    status: pending
-    date: null
-    credits_used: null
-    nodes: []
-    follow_up_prompts: 0
-    notes: ""
-
-  - attempt: 2
-    prompt_file: prompts/pipeline-prompt.md
-    status: pending
-    date: null
-    credits_used: null
-    nodes: []
-    follow_up_prompts: 0
-    notes: ""
-
-  - attempt: 3
-    prompt_file: prompts/pipeline-prompt.md
-    status: pending
-    date: null
-    credits_used: null
-    nodes: []
-    follow_up_prompts: 0
-    notes: ""
+- attempt: 1
+  prompt_file: prompts/pipeline-prompt.md
+  status: done
+  date: '2026-10-02'
+  credits_used: 0
+  nodes:
+  - orders_raw (Data Input)
+  - dedup_exact (Remove Duplicates all cols)
+  - dedup_order_id (Remove Duplicates order_id)
+  - 'orders_cleaned (Custom: rules 2-8)'
+  - orders_cleaned_output (Data Output)
+  follow_up_prompts: 0
+  notes: Silently defaulted output to Download Locally. Node prompt dropped the non-empty local part of
+    the email rule.
+- attempt: 2
+  prompt_file: prompts/pipeline-prompt.md
+  status: done
+  date: '2026-10-02'
+  credits_used: null
+  nodes:
+  - orders_raw (Data Input)
+  - dedup_exact (Remove Duplicates all cols)
+  - dedup_order_id (Remove Duplicates order_id)
+  - 'orders_cleaned (Custom: rules 2-8)'
+  - orders_cleaned_output (Data Output)
+  follow_up_prompts: 0
+  notes: Same graph. Claimed GCS is not a supported destination (false).
+- attempt: 3
+  prompt_file: prompts/pipeline-prompt.md
+  status: done
+  date: '2026-10-02'
+  credits_used: null
+  nodes:
+  - orders_raw (Data Input)
+  - dedup_exact (Remove Duplicates all cols)
+  - dedup_order_id (Remove Duplicates order_id)
+  - 'orders_cleaned (Custom: rules 2-8)'
+  - orders_output (Data Output)
+  follow_up_prompts: 0
+  notes: Output node renamed. Correctly said GCS destination must be selected. Node prompt keeps the non-empty
+    local part.
