@@ -50,7 +50,7 @@ Clear? **Partially / misleading**: one of four problems reported, and a success 
 | `quantity` as text ("6 units") | parsed to numbers (6.0). Better than case 3, where text shipped |
 | new `discount_code` | **shipped** as an extra column (case 4's code dropped it) |
 
-- Output has **10 columns, not the contract's 8**. The code shown in the node ends with `output_df = _df[[...8 columns...]]`, and its alias list has no `total_amount`. So **what ran does not match the code the node shows**: either the displayed code isn't what executes, or another node or step changed the result. A user reading the node can't explain this output. (Observability gap.)
+- Output has **10 columns, not the contract's 8**. Why, from the node's Edit Code → Transcript: the chatbot wrote a prompt that selects 8 columns, but layer 2 **regenerated the code against this file**, and Rhombus's own sandbox rule ("Table-preserving transformation dropped input columns") rejected the 8-column version twice. The final code keeps every input column and copies `total_amount` into a new `amount_usd`. The canvas card and run log show none of this; it's only in the transcript. Full write-up: `evidence/2026-10-02_all-combined-codegen-transcript.md`; final code: `evidence/2026-10-02_all-combined-chatbot-final-code.py`.
 - Green status, no warning. Downstream gets a blank country for every order and two columns nobody asked for.
 - Report: `data-validation/reports/all-combined-after-fix.json`.
 
