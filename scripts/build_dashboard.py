@@ -294,6 +294,9 @@ def build_cases(manifest: dict, matrix: dict, runs: list[dict],
             "extra_md": [{"path": rel, "md": read_md(rel)} for rel in as_list(entry.get("extra_md"))
                          if read_md(rel)],
             "evidence": evidence_for(case, entry, published or []),
+            "video": ({"src": f"videos/{case}.mp4",
+                       "captions": f"videos/{case}.vtt" if (ROOT / "dashboard" / "videos" / f"{case}.vtt").exists() else None}
+                      if (ROOT / "dashboard" / "videos" / f"{case}.mp4").exists() else None),
             "page_reports": [{
                 "run": r["run"], "path": r["path"], "timestamp": r["timestamp"],
                 "verdict": r["verdict"], "summary": r["summary"], "checks": r["checks"],

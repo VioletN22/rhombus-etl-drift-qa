@@ -593,3 +593,6 @@ section[id], .block[id], details.metrics, .report { scroll-margin-top: 56px; }
 .tabs { view-transition-name: tabs; }
 ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 120ms; }
 @media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
+
+.replay video { display: block; width: 100%; height: auto; margin-top: 12px; border-radius: var(--radius-sm); background: #000; border: 1px solid var(--line); }
+.replay video::cue { font-family: var(--sans); font-size: 15px; line-height: 1.4; background: rgba(0,0,0,.78); color: #fff; }
