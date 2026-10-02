@@ -53,11 +53,10 @@ test.describe('S3 -> AI-built cleaning -> GCS', () => {
     expect([...fromInput].sort(), 'nodes off the input-to-output path').toEqual(graph.nodes.map((n) => n.id).sort());
   });
 
-  // Written by Violet.
-  test.fixme('Data Output writes CSV to the GCS bucket', async ({ rhombus }) => {
-    // TODO(Violet): use rhombus.outputSettings(cfg.gcsBucket) and check the bucket is
-    // selected and the export format is csv.
-    void rhombus;
+  test('Data Output writes CSV to the GCS bucket', async ({ rhombus }) => {
+    const output = await rhombus.outputSettings(cfg.gcsBucket);
+    expect(output.selected, `${cfg.gcsBucket} selected as destination`).toBe(true);
+    expect(output.format).toBe('csv');
   });
 
   test('a manual run of the baseline file succeeds and is logged', async ({ rhombus }) => {

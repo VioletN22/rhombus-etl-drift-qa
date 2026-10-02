@@ -27,9 +27,11 @@ export const sel = {
   thirdPartyButton: (p: Page) => sel.sidebar(p).getByRole('button', { name: 'Third Party Sources', exact: true }),
   dialog: (p: Page) => p.getByRole('dialog'),
 
-  // Data Output panel. Each destination is a button; the selected one contains a filled
-  // dot. No aria-checked or test id, so this relies on Rhombus's class names.
-  destination: (p: Page, name: string) => sel.sidebar(p).getByRole('button', { name }),
+  // Data Output panel. Each destination is a button named "<provider> <bucket>", next to a
+  // "Delete <bucket> destination" button. The selected one contains a filled dot; there is
+  // no aria-checked or test id, so that check relies on Rhombus's class names.
+  destination: (p: Page, bucket: string) =>
+    sel.sidebar(p).getByRole('button', { name: new RegExp(`^Google Cloud Storage ${bucket}$`) }),
   selectedDot: '.rounded-full.bg-primary',
   exportFormat: (p: Page) => sel.sidebar(p).locator('select'),
 
