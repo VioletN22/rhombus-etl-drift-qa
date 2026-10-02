@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 1l7 7-7 7-7-7z' fill='%2320a4b2'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="styles.css?v=1790948099">
+<link rel="stylesheet" href="styles.css?v=1790948370">
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
 </head>
@@ -56,6 +56,12 @@
       <div id="suite-tests"></div>
     </section>
 
+    <section class="card" id="suite-responses-card" aria-labelledby="resp-h" hidden>
+      <div class="card-head"><svg class="glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5"/></svg><h2 id="resp-h">What the API returned</h2></div>
+      <p class="card-sub">Saved by the tests during the latest run, exactly as Rhombus's backend answered.</p>
+      <div id="suite-responses"></div>
+    </section>
+
     <div class="row2">
       <section class="card" aria-labelledby="how-h">
         <div class="card-head"><svg class="glyph" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><h2 id="how-h">How it works</h2></div>
@@ -77,7 +83,7 @@
     </section>
   </div>
 </div>
-<script src="data.js?v=1790948099"></script>
-<script src="app.js?v=1790948099"></script>
+<script src="data.js?v=1790948370"></script>
+<script src="app.js?v=1790948370"></script>
 </body>
 </html>
