@@ -365,13 +365,106 @@ function renderStats(d) {
   ].join("");
 }
 
+const suiteResult = (t) => {
+  const bits = [`${t.counts.pass} pass`];
+  if (t.counts["expected-fail"]) bits.push(`${t.counts["expected-fail"]} expected fail`);
+  if (t.counts.fail) bits.push(`${t.counts.fail} fail`);
+  if (t.counts.skip) bits.push(`${t.counts.skip} skipped`);
+  return bits.join(", ");
+};
+const suiteChip = (t) => (t.total ? chip(t.ok ? "s-ok" : "s-bad", `${t.total - t.counts.fail} / ${t.total}`) : pendingChip("Not run"));
+
 function renderSuites(d) {
-  const suites = d.summary.suites || [];
-  $("#suites").innerHTML = suites.map((t) => `<div class="suite">
-      <div class="suite-top"><h3>${esc(t.name)}</h3>${chip(t.state === "ok" ? "s-ok" : "s-none", t.result)}</div>
+  const suites = d.suites || [];
+  $("#suites").innerHTML = suites.map((t) => `<a class="suite" href="suite.html?id=${encodeURIComponent(t.id)}">
+      <div class="suite-top"><h3>${esc(t.name)}</h3>${suiteChip(t)}</div>
       <p class="suite-tool"><code>${esc(t.path)}</code> · ${esc(t.tool)}</p>
-      <p>${esc(t.note)}</p></div>`).join("");
+      <p>${esc(t.summary)}</p>
+      <span class="suite-more">See the tests →</span></a>`).join("");
   $("#suites-block").hidden = !suites.length;
+}
+
+const TEST_STATUS = {
+  pass: ["s-ok", "Pass"],
+  "expected-fail": ["s-warn", "Expected fail"],
+  fail: ["s-bad", "Fail"],
+  skip: ["s-none", "Skipped"],
+};
+
+function renderSuitePage(d) {
+  const id = new URLSearchParams(location.search).get("id");
+  const t = (d.suites || []).find((x) => x.id === id);
+  renderTabs(d, null);
+  if (!t) {
+    $("#suite-title").textContent = "Suite not found";
+    $("#suite-missing").hidden = false;
+    $("#suite-missing").innerHTML = `No suite called <code>${esc(id || "")}</code>. <a href="./">Back to the overview</a>.`;
+    return;
+  }
+  document.title = `${t.name} · Rhombus Drift QA`;
+  $("#suite-title").textContent = t.name;
+  $("#suite-summary").textContent = t.summary;
+  $("#suite-chips").innerHTML = suiteChip(t);
+  $("#suite-result").textContent = t.total ? `${suiteResult(t)}. Ran ${t.run_at ? when(t.run_at) : "never"}.` : "Not run yet.";
+  $("#suite-outcome").classList.add(t.total ? (t.ok ? "s-ok" : "s-bad") : "s-none");
+
+  const fact = (k, v) => `<div class="fact"><dt>${esc(k)}</dt><dd>${v}</dd></div>`;
+  const secs = t.tests.reduce((n, x) => n + x.duration_ms, 0) / 1000;
+  $("#suite-facts").innerHTML = [
+    fact("Folder", `<code>${esc(t.path)}</code>`),
+    fact("Tool", esc(t.tool)),
+    fact("Result", `${suiteChip(t)}<span class="note">${esc(suiteResult(t))}</span>`),
+    fact("Last run", t.run_at ? `${esc(when(t.run_at))}, ${secs.toFixed(1)} s of test time` : "not run yet"),
+    fact("Run it", `<code>${esc(t.run)}</code><span class="note">${mdInline(t.needs || "")}</span>`),
+  ].join("");
+
+  $("#suite-tests").innerHTML = t.id === "data" ? dataTests(t) : `<div class="scroll-x"><table class="suite-table">
+      <thead><tr><th>Result</th><th>Test</th><th>What it checks</th><th>Recording</th></tr></thead>
+      <tbody>${t.tests.map((x) => {
+        const [cls, label] = TEST_STATUS[x.status];
+        const rec = x.video ? `<button type="button" class="link-btn" data-video="${esc(x.video)}">Watch</button>` : `<span class="quiet">none</span>`;
+        const err = x.error && x.status !== "pass" ? `<span class="note mono">${esc(x.error)}</span>` : "";
+        return `<tr><td>${chip(cls, label)}</td><td class="t-name">${esc(x.title)}<span class="note">${(x.duration_ms / 1000).toFixed(1)} s</span></td>
+          <td>${esc(x.explain)}${err}</td><td>${rec}</td></tr>`;
+      }).join("")}</tbody></table></div>`;
+
+  $("#suite-how").innerHTML = (t.how || []).map((h) => `<li>${mdInline(h)}</li>`).join("");
+  $("#suite-limits").innerHTML = (t.limits || []).map((h) => `<li>${mdInline(h)}</li>`).join("");
+  renderSuiteVideos(t);
+  $("#suite-body").hidden = false;
+}
+
+function dataTests(t) {
+  const files = new Map();
+  t.tests.forEach((x) => files.set(x.file, [...(files.get(x.file) || []), x]));
+  return [...files].map(([file, list]) => {
+    const failed = list.filter((x) => x.status === "fail").length;
+    return `<details class="test-file"><summary><code>${esc(file)}</code>
+        ${chip(failed ? "s-bad" : "s-ok", `${list.length - failed} / ${list.length}`)}</summary>
+      <ul class="plain-list">${list.map((x) => `<li>${esc(x.title.replace(/_/g, " "))}</li>`).join("")}</ul></details>`;
+  }).join("");
+}
+
+function renderSuiteVideos(t) {
+  const withVideo = t.tests.filter((x) => x.video);
+  if (!withVideo.length) return;
+  const v = $("#suite-video");
+  const picks = $("#suite-picks");
+  picks.innerHTML = withVideo.map((x, i) => `<button type="button" role="tab" class="pick" data-i="${i}" aria-selected="false">${esc(x.title)}</button>`).join("");
+  const show = (i, play) => {
+    v.src = withVideo[i].video;
+    picks.querySelectorAll(".pick").forEach((b) => b.setAttribute("aria-selected", String(Number(b.dataset.i) === i)));
+    if (play) v.play().catch(() => {});
+  };
+  picks.addEventListener("click", (e) => { const b = e.target.closest(".pick"); if (b) show(Number(b.dataset.i), true); });
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-video]");
+    if (!b) return;
+    show(withVideo.findIndex((x) => x.video === b.dataset.video), true);
+    $("#suite-evidence-card").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+  show(0, false);
+  $("#suite-evidence-card").hidden = false;
 }
 
 function renderLearnings(d) {
@@ -870,6 +963,10 @@ async function main() {
   }
   if (page === "case") {
     renderCase(d);
+    return;
+  }
+  if (page === "suite") {
+    renderSuitePage(d);
     return;
   }
   renderMeta(d);
