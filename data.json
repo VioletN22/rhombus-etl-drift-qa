@@ -96,6 +96,7 @@
   "2026-10-02_ai-builder-attempt3-custom-node-prompt.txt",
   "2026-10-02_ai-builder-attempt3-custom-node.png",
   "2026-10-02_ai-builder-summary-attempt1.png",
+  "2026-10-02_all-combined-error-log-panel.png",
   "2026-10-02_attempt1-code-after-drop-column-run.py",
   "2026-10-02_attempt1-custom-node-generated-code.png",
   "2026-10-02_attempt1-custom-node-prompt.txt",
@@ -125,7 +126,7 @@
   "2026-10-02_type-change-run-green.png",
   "s3-bucket-policy-generated-by-rhombus.json"
  ],
- "built_at": "2026-10-02T06:38:34+00:00",
+ "built_at": "2026-10-02T06:48:44+00:00",
  "sources": {
   "reports": "data-validation/reports",
   "ledger": "observations/runs.csv",
@@ -1495,9 +1496,16 @@
    "status": "pending",
    "headline": "",
    "observation": "observations/schema-all-combined.md",
-   "observation_md": null,
+   "observation_md": "# Schema drift: all four changes at once\n\n| | |\n|---|---|\n| Case file | `datasets/schema-all-combined.csv` (uploaded as `input/orders.csv`) |\n| S3 version | `FwxOAybxjU7_Vb.sebyVXKw9SVr_0SBx`, uploaded 2026-10-02 16:36:53 AEST, 33.9 KB |\n| Pipeline | Original AI-built code |\n| Run | Manual run (\u25b6) 16:37:40 AEST |\n| Severity | Medium (stopped safely; error reports 1 of 4 problems; logs contradict themselves) \u2014 draft |\n| Pipeline stopped? | **Yes**, at `orders_cleaned` |\n| Chatbot fix worked? | _pending_ |\n\n## What I changed\nAll four schema changes in one file: `country` removed, `amount_usd` renamed to `total_amount`, `quantity` values turned into text (\"6 units\"), and a new `discount_code` column. Marker row: \"Marker schema-all-combined\".\n\n## Expected\nBest: stop before running, listing all four problems. OK: stop on the first problem. Worst: run green and ship partly broken data.\n\n## What happened\n- Pipeline **failed at `orders_cleaned`** at 16:37:45; nothing reached GCS.\n- The error names **one** problem: `'amount_usd'` (the rename). Nothing about the missing `country`, the text `quantity` or the new column. A user would fix the rename, re-run, hit `'country'`, fix that, re-run, and never be told quantity became text (case 3 showed that one doesn't error at all).\n- **Contradictory logs:** the same second (16:37:45) shows both \"Pipeline failed at orders_cleaned \u2026\" (error) and \"Pipeline execution completed successfully.\" (success). The run-level summary contradicts the node failure.\n\n## Logs\n> Pipeline failed at orders_cleaned: LLM execution failed (code_sha=831d36d0703c): 'amount_usd' --- Generated code --- \u2026\n\nfollowed immediately by\n> Pipeline execution completed successfully.\n\nClear? **Partially / misleading**: one of four problems reported, and a success message for a failed run. Screenshot: `evidence/2026-10-02_all-combined-error-log-panel.png`. Full JSON: `evidence/2026-10-02_schema-all-combined-error-log.json`.\n\n## Chatbot diagnosis\n_pending_\n\n## Reproduce\n1. Upload `datasets/schema-all-combined.csv` as `input/orders.csv`\n2. Run drift-qa with the original code\n3. Read the Logs panel (error plus success line at the same timestamp)\n\n## Impact and suggestion\nSafe, but slow to diagnose: problems surface one at a time. Suggest validating the input schema against the pipeline's expected columns before execution and listing every mismatch in one message. The \"completed successfully\" line on a failed run should be fixed: monitoring keyed on that line would record a failure as a success.\n",
    "extra_md": [],
-   "evidence": [],
+   "evidence": [
+    {
+     "name": "2026-10-02_all-combined-error-log-panel.png",
+     "path": "evidence/2026-10-02_all-combined-error-log-panel.png",
+     "kind": "image",
+     "ext": "png"
+    }
+   ],
    "page_reports": [],
    "matrix": {
     "run_ids": [],

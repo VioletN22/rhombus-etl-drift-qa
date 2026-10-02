@@ -386,47 +386,6 @@ details.metrics > summary:hover { border-color: var(--accent); }
 #case-headline:empty { display: none; }
 #case-missing { margin-top: 24px; }
 
-.summary-box h2 { margin-bottom: 14px; font-size: 16px; }
-.facts { margin: 0; display: grid; gap: 0 24px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.fact { display: grid; grid-template-columns: 170px 1fr; gap: 12px; align-items: baseline; padding: 9px 0; border-top: 1px solid var(--line); min-width: 0; }
-.fact:nth-child(-n+2) { border-top: 0; }
-.fact dt { color: var(--muted); font-size: 13.5px; }
-.fact dd { margin: 0; min-width: 0; font-size: 14px; }
-.fact .plain { color: var(--text); }
-.fact .note { display: block; color: var(--muted); font-size: 12.5px; }
-@media (max-width: 760px) {
-  .facts { grid-template-columns: 1fr; }
-  .fact:nth-child(2) { border-top: 1px solid var(--line); }
-  .fact { grid-template-columns: 140px 1fr; }
-}
-@media (max-width: 400px) { .fact { grid-template-columns: 118px 1fr; gap: 10px; } .fact dt { font-size: 13px; } }
-
-.prose { max-width: 76ch; font-size: 15px; overflow-wrap: anywhere; }
-.prose > :first-child { margin-top: 0; }
-.prose > .scroll-x:first-child { margin-top: -6px; }
-.prose h2 { font-size: 18px; margin: 28px 0 8px; }
-.prose h3 { font-size: 15.5px; margin: 22px 0 6px; }
-.prose p, .prose ul, .prose ol { margin: 8px 0; }
-.prose ul, .prose ol { padding-left: 22px; }
-.prose li { margin: 4px 0; }
-.prose blockquote {
-  margin: 10px 0; padding: 8px 14px; border-left: 3px solid var(--line);
-  background: var(--panel-2); color: var(--muted); font-family: var(--mono); font-size: 13px;
-}
-.prose blockquote p { margin: 0; }
-.prose code { overflow-wrap: anywhere; }
-.prose a code { color: var(--accent); }
-.prose .scroll-x { margin: 12px 0; }
-.prose table.kv td:first-child { color: var(--muted); white-space: nowrap; width: 1%; }
-.prose pre.raw { white-space: pre-wrap; font-family: var(--mono); font-size: 13px; }
-.prose table.kv td:first-child { overflow-wrap: normal; }
-@media (max-width: 520px) {
-  .prose table.kv, .prose table.kv tbody, .prose table.kv tr, .prose table.kv td { display: block; width: auto; }
-  .prose table.kv tr { padding: 8px 0; border-bottom: 1px solid var(--line); }
-  .prose table.kv tr:last-child { border-bottom: 0; }
-  .prose table.kv td { padding: 0; border: 0; }
-  .prose table.kv td:first-child { white-space: normal; width: auto; font-size: 13px; margin-bottom: 2px; }
-}
 .source-link { margin: 20px 0 0; font-size: 13px; color: var(--muted); }
 .source-link a { font-family: var(--mono); font-size: 12.5px; overflow-wrap: anywhere; }
 .extra-md { margin-top: 20px; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0 16px; background: var(--panel-2); }
@@ -516,3 +475,104 @@ details.metrics > summary:hover { border-color: var(--accent); }
 .tab .tab-dot.s-none::before { width: 7px; height: 7px; background: transparent; }
 .tab-sep { flex: none; width: 1px; margin: 10px 3px; background: var(--line); }
 section[id], .block[id], details.metrics, .report { scroll-margin-top: 56px; }
+
+/* ==== case page: one card per write-up section ============================= */
+[hidden] { display: none !important; }
+.case-body { display: grid; gap: 16px; margin: 24px 0 0; }
+.case-cards { display: grid; gap: 16px; min-width: 0; }
+.case-body section, .case-cards section { margin: 0; }
+.card {
+  min-width: 0; padding: 20px 20px 22px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+}
+@media (min-width: 720px) { .card { padding: 22px 28px 24px; } }
+.card-head { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; }
+.card-head h2 { font-size: 16.5px; line-height: 1.3; margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.card-head h2 code { font-size: 0.82em; }
+.glyph {
+  width: 18px; height: 18px; flex: none;
+  fill: none; stroke: var(--accent); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round;
+}
+.card-sub { margin: -4px 0 16px; color: var(--muted); font-size: 14px; max-width: 70ch; }
+
+/* takeaway */
+.card.k-impact { border-left: 4px solid var(--accent); }
+
+/* two short cards share a row; Expected and What happened share one card */
+.row2 { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.pair { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 0; padding: 0; }
+.pair .half { padding: 20px 20px 22px; min-width: 0; margin: 0; border: 0; border-radius: 0; background: none; }
+@media (min-width: 720px) { .pair .half { padding: 22px 28px 24px; } }
+.pair .half + .half { border-left: 1px solid var(--line); }
+.pair .k-expected { background: var(--panel-2); border-radius: var(--radius) 0 0 var(--radius); }
+@media (max-width: 800px) {
+  .row2, .pair { grid-template-columns: minmax(0, 1fr); }
+  .pair .half + .half { border-left: 0; border-top: 1px solid var(--line); }
+  .pair .k-expected { border-radius: var(--radius) var(--radius) 0 0; }
+}
+
+/* prose inside cards */
+.prose { font-size: 15px; line-height: 1.65; overflow-wrap: anywhere; }
+.prose > :first-child { margin-top: 0; }
+.prose > :last-child { margin-bottom: 0; }
+.prose p, .prose ul, .prose ol { margin: 10px 0; max-width: 70ch; }
+.prose ul, .prose ol { padding-left: 20px; }
+.prose li { margin: 6px 0; padding-left: 2px; }
+.prose li::marker { color: var(--faint); }
+.prose strong { font-weight: 600; }
+.prose h2 { font-size: 16px; margin: 24px 0 8px; }
+.prose h3 { font-size: 15px; margin: 20px 0 6px; }
+.prose code { overflow-wrap: anywhere; }
+.prose a code { color: var(--accent); }
+.prose .scroll-x { margin: 12px 0; }
+.prose pre { overflow-x: auto; background: var(--panel-2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 13px; }
+.prose pre code { border: 0; padding: 0; background: none; }
+.prose pre.raw { white-space: pre-wrap; font-family: var(--mono); font-size: 13px; }
+.prose table.kv td:first-child { color: var(--muted); white-space: nowrap; width: 1%; overflow-wrap: normal; }
+
+.callout {
+  margin: 12px 0; padding: 10px 14px; max-width: 80ch;
+  border: 1px solid var(--line); border-left: 3px solid var(--faint);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0; background: var(--panel-2);
+}
+.callout p { margin: 0; max-width: none; }
+.callout p + p { margin-top: 6px; }
+.callout-error {
+  border-left-color: var(--bad);
+  font-family: var(--mono); font-size: 12.5px; line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+.callout-error code { border: 0; background: none; padding: 0; font-size: 1em; }
+.callout-quote { color: var(--muted); font-style: italic; }
+
+.thumbs { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.thumb {
+  display: block; width: 132px; aspect-ratio: 16 / 10; overflow: hidden;
+  border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel-2);
+}
+.thumb:hover { border-color: var(--accent); }
+.thumb img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top left; }
+
+/* At a glance: label column fixed, values in one column */
+.facts { margin: 0; display: grid; }
+.fact {
+  display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 16px; align-items: baseline;
+  padding: 9px 0; border-top: 1px solid var(--line); min-width: 0;
+}
+.fact:first-child { border-top: 0; padding-top: 2px; }
+.fact dt { color: var(--muted); font-size: 13.5px; }
+.fact dd { margin: 0; min-width: 0; font-size: 14.5px; line-height: 1.55; overflow-wrap: anywhere; max-width: 78ch; }
+.fact .plain { color: var(--text); }
+.fact .note { display: block; margin-top: 4px; color: var(--muted); font-size: 13.5px; }
+.fact .note strong { color: var(--text); font-weight: 600; }
+.facts-sub {
+  margin: 14px 0 0; padding-top: 14px; border-top: 1px solid var(--line);
+  font-size: 12.5px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em;
+}
+.facts.details .fact:first-child { padding-top: 6px; }
+@media (max-width: 560px) {
+  .fact { grid-template-columns: minmax(0, 1fr); gap: 3px; padding: 10px 0; }
+  .fact dt { font-size: 12.5px; }
+}
+.case-body .source-link { margin: 0 0 4px; }
+.extra-md:first-child { margin-top: 0; }
