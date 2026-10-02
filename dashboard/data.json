@@ -165,7 +165,7 @@
   "2026-10-02_type-change-run-green.png",
   "s3-bucket-policy-generated-by-rhombus.json"
  ],
- "built_at": "2026-10-02T12:19:35+00:00",
+ "built_at": "2026-10-02T12:24:18+00:00",
  "sources": {
   "reports": "data-validation/reports",
   "ledger": "observations/runs.csv",
@@ -874,7 +874,10 @@
      "ext": "json"
     }
    ],
-   "video": null,
+   "video": {
+    "src": "videos/schema-drop-column.mp4",
+    "captions": "videos/schema-drop-column.vtt"
+   },
    "page_reports": [
     {
      "run": "drop-column-after-fix",
