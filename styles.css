@@ -608,8 +608,7 @@ section[id], .block[id], details.metrics, .report { scroll-margin-top: 56px; }
 }
 .replay-toggle:hover { background: var(--accent-soft); }
 .replay-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-.replay-icon { flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--accent); }
-.replay-icon svg { width: 16px; height: 16px; fill: var(--panel); margin-left: 2px; }
+.replay-emoji { flex: none; font-size: 26px; line-height: 1; letter-spacing: 2px; }
 .replay-label { font-weight: 600; font-size: 14.5px; line-height: 1.35; }
 .replay-arrow svg, .replay-close svg { width: 18px; height: 18px; fill: none; stroke: var(--muted); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .replay-arrow { margin-left: auto; }
@@ -626,13 +625,15 @@ section[id], .block[id], details.metrics, .report { scroll-margin-top: 56px; }
 .replay-open .replay-arrow svg { transform: rotate(180deg); }
 
 @media (min-width: 900px) {
-  .glance-row.has-replay { grid-template-columns: minmax(0, 1fr) 76px; transition: grid-template-columns .3s ease; }
+  .glance-row.has-replay { grid-template-columns: minmax(0, 1fr) 168px; transition: grid-template-columns .3s ease; }
   .glance-row.has-replay.replay-open { grid-template-columns: minmax(0, .85fr) minmax(0, 1.4fr); }
   /* Closed on wide screens: a slim vertical tab, only as tall as its label. */
   .glance-row.has-replay:not(.replay-open) .replay { position: sticky; top: 64px; }
-  .glance-row.has-replay:not(.replay-open) .replay-toggle { flex-direction: column; padding: 16px 0 14px; gap: 14px; }
-  .glance-row.has-replay:not(.replay-open) .replay-label { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 14px; letter-spacing: .01em; }
-  .glance-row.has-replay:not(.replay-open) .replay-arrow { margin: 0; }
+  .glance-row.has-replay:not(.replay-open) .replay-toggle { flex-direction: column; text-align: center; padding: 20px 16px 16px; gap: 12px; }
+  .glance-row.has-replay:not(.replay-open) .replay-emoji { font-size: 34px; }
+  .glance-row.has-replay:not(.replay-open) .replay-label { font-size: 15px; line-height: 1.4; }
+  .glance-row.has-replay:not(.replay-open) .replay-arrow { margin: 0; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--accent-soft); }
+  .glance-row.has-replay:not(.replay-open) .replay-arrow svg { stroke: var(--accent); }
   .replay-open .replay { position: sticky; top: 64px; }
 }
 @media (prefers-reduced-motion: reduce) { .glance-row.has-replay { transition: none; } }
