@@ -1,0 +1,10 @@
+AI Builder reply, project ai-builder-attempt-2, 2026-10-02 (same prompt and same orders.csv as attempt 1)
+
+Pipeline is built and saved on the canvas. Here's a summary of what was added:
+Added  orders_raw             Loads orders.csv as the source input.
+Added  dedup_exact            Removes fully identical duplicate rows (keep first).
+Added  dedup_order_id         Keeps only the first row per order_id.
+Added  orders_cleaned         Applies all 8 cleaning rules: drops rows missing order_id/amount_usd, trims & title-cases customer_name, lowercases & validates email, normalises order_date to YYYY-MM-DD, strips $/, and converts amount_usd to decimal, maps country to ISO-2 codes, lowercases status, and reorders to the 8 final columns.
+Added  orders_cleaned_output  Writes the result as orders_cleaned.csv.
+
+"Note on the GCS destination: Rhombus currently supports Amazon S3 and PostgreSQL as pipeline output destinations — Google Cloud Storage is not available as a pipeline write destination at this time. The output node has been configured to produce a downloadable CSV from Rhombus-managed storage instead. If you'd like to push to GCS, the typical workaround is to download the output CSV and upload it to your GCS bucket manually, or contact Rhombus support about GCS destination support."
