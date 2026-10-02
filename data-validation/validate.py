@@ -76,6 +76,7 @@ def run_checks(raw_input, output, contract, args) -> tuple[list[Check], dict, di
         *checks.check_rules(output, contract),
         checks.check_null_inflation(output, expected, contract),
         checks.check_empty_columns(output, contract),
+        checks.check_column_types(output, contract),
         checks.check_oracle_diff(output, expected, contract),
         checks.check_marker(output, expected, contract),
     ]

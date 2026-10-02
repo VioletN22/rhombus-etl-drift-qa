@@ -183,3 +183,16 @@ def test_empty_output_reports_instead_of_crashing(tmp_path):
     rep = json.loads((tmp_path / "t-empty.json").read_text())
     rows = next(c for c in rep["checks"] if c["id"] == "row_reconciliation")
     assert rows["status"] == "fail"
+
+
+def test_column_types_flags_text_quantity():
+    """Regression for the type-change case: quantity shipped as '6 units'."""
+    import pandas as pd, yaml
+    from pathlib import Path
+    from checks import check_column_types
+    contract = yaml.safe_load((Path(__file__).resolve().parents[1] / "contract.yaml").read_text())
+    ok = pd.DataFrame({"order_id": ["1", "2"], "amount_usd": ["1.5", "2"], "quantity": ["6", ""]})
+    assert check_column_types(ok, contract).status == "pass"
+    bad = ok.assign(quantity=["6 units", "3 units"])
+    res = check_column_types(bad, contract)
+    assert res.status == "fail" and "quantity" in res.evidence

@@ -33,3 +33,9 @@ Rhombus itself fails safely. The **chatbot's fixes** turn those safe failures in
 
 ## Our own checker
 Testing Rhombus also found gaps in our checker. It missed an all-blank column and crashed on an empty file. Both are fixed and tested.
+
+## Case 3: a number column turns into text (quantity "6" → "6 units")
+- **Rhombus didn't notice at all.** Green run, file delivered.
+- **The quantity column arrived as text** ("6 units"). Any total or average of quantities would break, and nothing warned.
+- **Odd detail:** the same word "three" was erased in the normal file but kept in this one. Rhombus decides a column's type by looking at the other rows, without telling you.
+- No error means no "Ask Chatbot" button, so a user wouldn't even know to ask.

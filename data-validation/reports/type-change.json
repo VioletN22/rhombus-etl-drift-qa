@@ -1,21 +1,21 @@
 {
-  "run": "manual-1-baseline",
-  "timestamp": "2026-10-02T05:56:24+00:00",
+  "run": "type-change",
+  "timestamp": "2026-10-02T05:56:13+00:00",
   "input": {
-    "uri": "datasets/baseline.csv",
-    "sha256": "f77c92ce8cc32195c150b055ab2dc3a27e1fea42793aebaae156b2b758a8a364",
+    "uri": "datasets/schema-type-change.csv",
+    "sha256": "86a6ce6936670eacccefd13ed35d1d73aff894d08f38d019142ff60153f5b9b0",
     "rows": 425
   },
   "output": {
-    "uri": "runs/2026-10-02-manual/orders_cleaned_1790911751099.csv",
-    "object": "runs/2026-10-02-manual/orders_cleaned_1790911751099.csv",
+    "uri": "runs/2026-10-02-drift/type-change.csv",
+    "object": "runs/2026-10-02-drift/type-change.csv",
     "updated": null,
     "rows": 390,
-    "sha256_canonical": "cc359cbab7ed7feec74a7cc7fa8f81da171e02a64b4354fa32a8d6dbb25ed5fa"
+    "sha256_canonical": "21a8285b25a54106a11ac0818ef674a03555baca4d08557c7093bbb9484971c8"
   },
   "reference": {
     "rows": 390,
-    "sha256_canonical": "6a0acb3e6a42cf9e571ff1b7aef60be4d80126b10c224c34c5de022e0a8de6e3",
+    "sha256_canonical": "abe1a55ed3f296fa60de02593ec39c6083965142ca20332596c4c83960629d53",
     "breakdown": {
       "input_rows": 425,
       "exact_duplicates": 20,
@@ -301,34 +301,38 @@
     {
       "id": "rule_quantity",
       "status": "warn",
-      "detail": "4 value(s) not a positive integer (not cleaned by design)",
+      "detail": "384 value(s) not a positive integer (not cleaned by design)",
       "evidence": {
-        "violations": 4,
+        "violations": 384,
         "rows": 390,
         "examples": [
           {
-            "order_id": "10010.0",
-            "quantity": "0.0"
+            "order_id": "10001.0",
+            "quantity": "6 units"
           },
           {
-            "order_id": "10194.0",
-            "quantity": "0.0"
+            "order_id": "10002.0",
+            "quantity": "3 units"
           },
           {
-            "order_id": "10252.0",
-            "quantity": "0.0"
+            "order_id": "10003.0",
+            "quantity": "1 units"
           },
           {
-            "order_id": "10283.0",
-            "quantity": "0.0"
+            "order_id": "10004.0",
+            "quantity": "6 units"
+          },
+          {
+            "order_id": "10005.0",
+            "quantity": "5 units"
           }
         ]
       }
     },
     {
       "id": "null_inflation",
-      "status": "fail",
-      "detail": "5 cell(s) blank where the oracle has a value: {'quantity': 5}",
+      "status": "pass",
+      "detail": "no unexpected blanks",
       "evidence": {
         "compared_rows": 390,
         "columns": {
@@ -353,9 +357,9 @@
             "inflated": 0
           },
           "quantity": {
-            "output_blank": 11,
+            "output_blank": 6,
             "expected_blank": 6,
-            "inflated": 5
+            "inflated": 0
           },
           "country": {
             "output_blank": 0,
@@ -381,14 +385,25 @@
     },
     {
       "id": "column_types",
-      "status": "pass",
-      "detail": "numeric columns are numeric",
-      "evidence": {}
+      "status": "fail",
+      "detail": "numeric column(s) arrived as text: ['quantity']",
+      "evidence": {
+        "quantity": {
+          "numeric_share": 0.0,
+          "examples": [
+            "6 units",
+            "3 units",
+            "1 units",
+            "6 units",
+            "5 units"
+          ]
+        }
+      }
     },
     {
       "id": "oracle_diff",
       "status": "fail",
-      "detail": "10 cell(s) differ from the oracle: {'email': 5, 'quantity': 5}",
+      "detail": "5 cell(s) differ from the oracle: {'email': 5}",
       "evidence": {
         "compared_rows": 390,
         "compared_columns": [
@@ -405,7 +420,7 @@
           "email": 5,
           "order_date": 0,
           "amount_usd": 0,
-          "quantity": 5,
+          "quantity": 0,
           "country": 0,
           "status": 0
         },
@@ -439,36 +454,6 @@
             "column": "email",
             "expected": "",
             "actual": "@example.com"
-          },
-          {
-            "order_id": "10085",
-            "column": "quantity",
-            "expected": "three",
-            "actual": ""
-          },
-          {
-            "order_id": "10133",
-            "column": "quantity",
-            "expected": "three",
-            "actual": ""
-          },
-          {
-            "order_id": "10158",
-            "column": "quantity",
-            "expected": "three",
-            "actual": ""
-          },
-          {
-            "order_id": "10328",
-            "column": "quantity",
-            "expected": "three",
-            "actual": ""
-          },
-          {
-            "order_id": "10395",
-            "column": "quantity",
-            "expected": "three",
-            "actual": ""
           }
         ]
       }
@@ -476,12 +461,12 @@
     {
       "id": "marker_row",
       "status": "pass",
-      "detail": "output was built from 'baseline'",
+      "detail": "output was built from 'schema-type-change'",
       "evidence": {
-        "expected_name": "Marker Baseline",
-        "actual_name": "Marker Baseline",
-        "variant_read": "baseline",
-        "variant_expected": "baseline"
+        "expected_name": "Marker Schema-Type-Change",
+        "actual_name": "Marker Schema-Type-Change",
+        "variant_read": "schema-type-change",
+        "variant_expected": "schema-type-change"
       }
     }
   ],

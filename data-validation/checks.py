@@ -315,6 +315,30 @@ def check_row_loss(output: pd.DataFrame, raw_input: pd.DataFrame, contract: dict
     return Check("row_loss", "pass", f"{share:.0%} of input orders reached the output", ev)
 
 
+def check_column_types(output: pd.DataFrame, contract: dict, min_share: float = 0.9) -> Check:
+    """Numeric contract columns must still be numeric in the output.
+
+    Catches a silent type change: values like "6 units" pass every per-row rule that
+    tolerates bad quantities, but the column as a whole is no longer a number.
+    """
+    bad = {}
+    for col, spec in contract["columns"].items():
+        if spec["type"] not in ("int", "float") or col not in output.columns:
+            continue
+        filled = [v for v in output[col] if not is_blank(v)]
+        if not filled:
+            continue
+        numeric = sum(1 for v in filled if _as_number(str(v)) is not None)
+        share = numeric / len(filled)
+        if share < min_share:
+            bad[col] = {"numeric_share": round(share, 3),
+                        "examples": [str(v) for v in filled if _as_number(str(v)) is None][:5]}
+    if bad:
+        return Check("column_types", "fail",
+                     f"numeric column(s) arrived as text: {sorted(bad)}", bad)
+    return Check("column_types", "pass", "numeric columns are numeric", {})
+
+
 def check_oracle_diff(output: pd.DataFrame, expected: pd.DataFrame,
                       contract: dict) -> Check:
     key = contract["key"]
