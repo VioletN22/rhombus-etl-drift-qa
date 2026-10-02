@@ -37,7 +37,7 @@ Screenshots: `evidence/2026-10-02_drop-column-run-regenerating-code.png`, `evide
 - Re-run (▶, 15:05:56): **green**, wrote `orders_cleaned_1790917556079.csv` (29.1 KB) to GCS with **`country` blank on all 390 rows**. Marker row confirms it read the drop-column file.
 - Validator (`reports/drop-column-after-fix.json`): fails `empty_columns` (country blank on every row) plus the 3 known baseline bugs.
 - **Fix worked? No.** It converted a loud, safe failure into a silent success that ships wrong data. A downstream report grouped by country would quietly show everything as "unknown".
-- Regression on the baseline: _pending_.
+- Regression on the baseline: re-uploaded the baseline (S3 version `9OU4TBDc...`, 15:09:56) and re-ran at 15:11. Output is **byte-identical** to the pre-patch baseline runs (sha256 df95576e...). The patch didn't change how normal data is cleaned; it only changes behaviour when a column is missing.
 
 Validator note: the first version of my validator passed this output on `rule_country`, because blank is allowed and the oracle (built from an input with no country) is also blank. I added `empty_columns` (fail if a contract column is blank on every row) with a regression test. My own tooling had a blind spot that this case exposed.
 
