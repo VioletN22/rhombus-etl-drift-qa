@@ -1,25 +1,31 @@
+/**
+ * Saves a signed-in session to .auth/user.json (gitignored) for the UI and API suites.
+ *
+ * The account uses two-step sign-in, so the suite never handles the password. The first
+ * run opens a browser window and waits for a person to sign in; later runs reuse the
+ * saved session and stay headless until it expires.
+ */
 import fs from 'node:fs';
 import path from 'node:path';
 import { test as setup, expect } from '@playwright/test';
-import { STORAGE_STATE, cfg, hasCreds } from '../support/env';
+import { STORAGE_STATE, hasAuthState } from '../support/env';
 import { sel } from './selectors';
 
-setup('authenticate with email/password and save storageState', async ({ page }) => {
-  fs.mkdirSync(path.dirname(STORAGE_STATE), { recursive: true });
-  if (!hasCreds()) {
-    // Write an empty state so the `ui` project can still start; its specs skip themselves.
-    fs.writeFileSync(STORAGE_STATE, JSON.stringify({ cookies: [], origins: [] }));
-    setup.skip(true, 'RHOMBUS_EMAIL / RHOMBUS_PASSWORD not set (copy .env.example to .env). UI specs will skip.');
+const saved = hasAuthState();
+setup.use({ storageState: saved ? STORAGE_STATE : undefined, headless: saved });
+
+setup('signed-in session', async ({ page }) => {
+  setup.setTimeout(6 * 60_000);
+  await page.goto(sel.dashboardPath);
+
+  const projects = sel.projectCard(page).first();
+  const alreadyIn = await projects.waitFor({ timeout: 15_000 }).then(() => true, () => false);
+  if (!alreadyIn) {
+    setup.skip(!!process.env.CI, 'No saved session. Run `npm run login` locally first.');
+    console.log('Sign in to Rhombus in the browser window that just opened. Waiting up to 5 minutes.');
+    await expect(projects).toBeVisible({ timeout: 5 * 60_000 });
   }
 
-  await page.goto(sel.loginPath);
-  await sel.loginEmail(page).fill(cfg.email!);
-  await sel.loginPassword(page).fill(cfg.password!);
-  await sel.loginSubmit(page).click();
-
-  // Real assertion: an element only a signed-in user sees, not just "page loaded".
-  await expect(sel.signedInMarker(page)).toBeVisible({ timeout: 30_000 });
-  await expect(page).not.toHaveURL(/login|sign-?in/i);
-
+  fs.mkdirSync(path.dirname(STORAGE_STATE), { recursive: true });
   await page.context().storageState({ path: STORAGE_STATE });
 });

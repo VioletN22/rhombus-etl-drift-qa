@@ -14,19 +14,16 @@ export function env(name: string): string | undefined {
 
 export const cfg = {
   email: env('RHOMBUS_EMAIL'),
-  password: env('RHOMBUS_PASSWORD'),
   baseURL: env('RHOMBUS_BASE_URL') ?? 'https://rhombusai.com',
   apiURL: env('RHOMBUS_API_URL'),
-  projectName: env('RHOMBUS_PROJECT_NAME'),
-  s3Bucket: env('S3_BUCKET'),
+  projectName: env('RHOMBUS_PROJECT_NAME') ?? 'drift-qa',
+  s3Connection: env('S3_CONNECTION') ?? 'orders-input',
+  s3Bucket: env('S3_BUCKET') ?? 'violet-rhombus-drift-in',
+  s3Prefix: env('S3_PREFIX') ?? 'input/',
   s3Key: env('S3_KEY') ?? 'input/orders.csv',
-  gcsBucket: env('GCS_BUCKET'),
+  gcsBucket: env('GCS_BUCKET') ?? 'violet-rhombus-drift-out',
   gcsPrefix: env('GCS_PREFIX') ?? '',
-  scheduleCron: env('SCHEDULE_CRON'),
-  scheduleTz: env('SCHEDULE_TZ') ?? 'Australia/Sydney',
 };
-
-export const hasCreds = (): boolean => !!(cfg.email && cfg.password);
 
 /** True when auth.setup.ts produced a real (non-empty) storage state. */
 export function hasAuthState(): boolean {
