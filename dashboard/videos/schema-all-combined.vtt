@@ -1,0 +1,16 @@
+WEBVTT
+
+00:00.000 --> 00:09.000
+Case 5: all four changes in one file. country removed, amount_usd renamed, quantity as text, and a new column. (Re-run recorded after the fact.)
+
+00:09.000 --> 00:16.000
+Step 2: run the same pipeline.
+
+00:16.000 --> 00:20.000
+It stops at the cleaning step again. Safe, nothing goes out.
+
+00:20.000 --> 00:28.000
+But the log only names 'amount_usd'. That's 1 of the 4 problems. You'd fix it, re-run, hit 'country', and never hear about quantity.
+
+00:28.000 --> 00:33.000
+Google Cloud Storage: no new file. (When I asked the chatbot to fix this one earlier, it deleted a step and broke the pipeline. That part is in the screenshots below.)
