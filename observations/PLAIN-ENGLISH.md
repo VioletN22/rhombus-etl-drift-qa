@@ -54,3 +54,10 @@ Testing Rhombus also found gaps in our checker. It missed an all-blank column an
 - **Some of it was actually smart:** it spotted the rename itself and stripped "units" from quantity. But it said "validation passed" with country empty on every row.
 - **Bottom line:** we started with a safe stop and, after 4 chatbot "fixes" (20 credits), ended with bad data marked as success.
 - **Why did the AI "adapt" only now?** It only writes new code when the box's instructions change. Before, the code was written once on the clean file and reused. This time the chatbot replaced the box with instructions only, so new code was written while the broken file was loaded.
+
+## Case 6: amounts sent in cents instead of dollars ($30.83 → 3083)
+- **Rhombus didn't notice.** Green run, file delivered, no warning.
+- **Every order is now 100× too expensive.** Total revenue went from about $41 thousand to about $4.1 million.
+- **Why it slipped through:** the column name and type were fine, so to the pipeline it looked like normal numbers. Only the *meaning* changed.
+- **Our checker caught it in one line:** "median amount is 100× the baseline". It just compares with the last good run.
+- **Suggestion for Rhombus:** remember a few simple numbers from the last good run (like the typical amount) and warn when a new run is wildly different.
