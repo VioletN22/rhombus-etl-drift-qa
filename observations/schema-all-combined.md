@@ -70,3 +70,6 @@ Clear? **Partially / misleading**: one of four problems reported, and a success 
 
 ## Impact and suggestion
 Safe, but slow to diagnose: problems surface one at a time. Suggest validating the input schema against the pipeline's expected columns before execution and listing every mismatch in one message. The "completed successfully" line on a failed run should be fixed: monitoring keyed on that line would record a failure as a success.
+
+## Restore (17:09)
+Pasted the original code (`evidence/2026-10-02_attempt1-orders_cleaned-generated-code.py`) into the chatbot's replacement node and clicked Apply. Run on the case-5 file failed with the same fingerprint as the original: `code_sha=831d36d0703c`, `'amount_usd'`. So the code is identical. The node's prompt text is still the chatbot's "v4" version; that only matters if someone clicks Regenerate Code (we don't). Screenshot: `evidence/2026-10-02_all-combined-restore-sha-match.png`.
