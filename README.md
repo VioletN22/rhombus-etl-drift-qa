@@ -1,6 +1,6 @@
 # Rhombus AI take-home: schema and semantic drift
 
-I built a cleaning pipeline in Rhombus AI that reads a messy orders file from S3 and writes the cleaned file to Google Cloud Storage. Then I changed the file in different ways and watched what Rhombus did each time.
+I built a cleaning pipeline in Rhombus AI that reads a messy orders file from S3 and writes the cleaned file to Google Cloud Storage as per requested from the very cool and chill Rhombus team😎. Then I changed the file in different ways and watched what Rhombus did each time.
 
 The short version: Rhombus stops safely when columns go missing, but its chatbot turns those safe stops into bad data. When the columns stay the same and only the meaning changes, Rhombus doesn't notice at all.
 
@@ -16,7 +16,7 @@ The short version: Rhombus stops safely when columns go missing, but its chatbot
 | **One write-up per case** | [observations/](observations/) |
 | **Brief** | [docs/BRIEF.md](docs/BRIEF.md) |
 
-The dashboard is the easiest way in. It has a page for every case with what changed, what happened, screenshots, the validator's checks, and a screen recording of me running it. It also has a page for each test suite with the latest results.
+The dashboard is just a vibecoded frontend format I wanted to make, sorta like a organised hub for all the links, reports, info and learning I want to note down along the way. It has a page for every case with what changed, what happened, screenshots, the validator's checks, and a screen recording of me running it. It also has a page for each test suite with the latest results.
 
 <br>
 
@@ -33,19 +33,19 @@ The dashboard is the easiest way in. It has a page for every case with what chan
 | 6 | Amounts in cents instead of dollars | No, ran green | No error to fix | High | [semantic-dollars-to-cents.md](observations/semantic-dollars-to-cents.md) |
 | 7 | Dates switched to DD/MM | No, ran green | No error to fix | High | [semantic-date-mmdd-to-ddmm.md](observations/semantic-date-mmdd-to-ddmm.md) |
 
-Scheduled runs never ran on my account, even after Rhombus turned scheduling on for me, so every run above was started by hand. Rhombus confirmed it's a bug. Details are in [baseline.md](observations/baseline.md#schedule).
+Unfortunately, Scheduled runs never ran on my account, even after Rhombus turned scheduling on for me and the team and I were in quite some back and forth so every run above was started by hand. Rhombus confirmed it's a bug. Details are in [baseline.md](observations/baseline.md#schedule).
 
 <br>
 
 ## Top 3 findings
 
-**1. The chatbot makes things worse.**
+**1. The chatbot makes things worse.**🥲
 When a run failed, I clicked "Ask Chatbot" like a normal user would. Every time, it guessed the cause without looking at the file, changed the pipeline without asking, and said it was fixed. Case 1 then shipped a blank country column. Case 2 shipped an empty file marked as a success. In case 5 it deleted a step and left the pipeline unable to run. A safe stop became bad data each time.
 
-**2. Changes in meaning go straight through.**
+**2. Changes in meaning go straight through.**🤔
 When amounts arrived in cents, every order came out 100 times too big (about $41k of revenue became $4.1M). When dates switched to day-first, 116 orders got the wrong date and 33 ended up in the future. Both runs were green with no warning. My validator caught both just by comparing with the last good run.
 
-**3. Scheduling looks active but never runs.**
+**3. Scheduling looks active but never runs.**🫠
 The schedule says "Active" with a countdown, then nothing happens and nobody is told. Rhombus's own API shows the schedule is switched on, but its next run time is stuck in the past, it has never run, and it doesn't count the misses. All 34 runs on the account were started by hand.
 
 <br>
