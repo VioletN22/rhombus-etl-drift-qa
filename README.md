@@ -97,7 +97,9 @@ The chatbot parts aren't in the recordings, because redoing them would have brok
 
 <br>
 
-## Running it
+## Running it yourself
+
+You don't need any of this to see the results. The [dashboard](https://violetn22.github.io/rhombus-etl-drift-qa/) is live. This is for rerunning the tests on your own machine.
 
 You'll need Node 20+, Python 3.11+ and your own Rhombus, AWS and Google Cloud setup ([docs/SETUP.md](docs/SETUP.md)).
 
@@ -123,7 +125,7 @@ npm run test:data
   --input datasets/baseline.csv --output path/to/rhombus_output.csv
 ```
 
-**Dashboard.** Rebuild it from the latest results and open it locally:
+**Dashboard (local copy).** Only needed after new runs. Rebuild it from the latest results and open it:
 
 ```bash
 .venv/bin/python scripts/build_dashboard.py
