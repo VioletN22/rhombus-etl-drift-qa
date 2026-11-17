@@ -1,6 +1,6 @@
 # Rhombus AI take-home: schema and semantic drift
 
-I built a cleaning pipeline in Rhombus AI that reads a messy orders file from S3 and writes the cleaned file to Google Cloud Storage as per requested from the very cool and chill Rhombus team😎. Then I changed the file in different ways and watched what Rhombus did each time.
+I built a cleaning pipeline in Rhombus AI that reads a messy orders file from S3 and writes the cleaned file to Google Cloud Storage, as the Rhombus team's brief asked. Then I changed the file in different ways and watched what Rhombus did each time.
 
 The short version: Rhombus stops safely when columns go missing, but its chatbot turns those safe stops into bad data. When the columns stay the same and only the meaning changes, Rhombus doesn't notice at all.
 
